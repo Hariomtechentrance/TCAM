@@ -178,6 +178,22 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (id INTEGER PRIMARY KEY AUT
         /* ── PHOTO ──────────────────────────── */
         .photo-thumb { width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid var(--border); }
 
+        /* ── CHARTS ROW ─────────────────────── */
+        .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        @media(max-width:768px) { .charts-row { grid-template-columns:1fr; } }
+
+        /* ── HAMBURGER ──────────────────────── */
+        .hamburger {
+            display:none; position:fixed; top:14px; left:14px; z-index:200;
+            width:40px; height:40px; background:rgba(255,107,53,0.9); border:none; border-radius:10px;
+            color:#fff; font-size:1.1rem; cursor:pointer; align-items:center; justify-content:center;
+            backdrop-filter:blur(8px);
+        }
+        .sidebar-overlay {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99; backdrop-filter:blur(2px);
+        }
+        .sidebar-overlay.active { display:block; }
+
         /* ── RESPONSIVE ─────────────────────── */
         @media(max-width:1024px) {
             .sidebar { width:70px; } .sidebar-brand h2, .sidebar-brand p, .sidebar-nav a span, .sidebar-footer span { display:none; }
@@ -185,8 +201,36 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (id INTEGER PRIMARY KEY AUT
             .main { margin-left:70px; padding:16px; }
         }
         @media(max-width:768px) {
-            .sidebar { display:none; } .main { margin-left:0; }
+            .hamburger { display:flex; }
+            .sidebar {
+                width:260px; transform:translateX(-100%); transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+                z-index:150;
+            }
+            .sidebar.mobile-open { transform:translateX(0); }
+            .sidebar-brand h2, .sidebar-brand p, .sidebar-nav a span, .sidebar-footer span { display:block; }
+            .sidebar-nav a { justify-content:flex-start; padding:12px 24px; }
+            .sidebar-nav a i { width:20px; font-size:1rem; }
+            .main { margin-left:0; padding:12px; padding-top:64px; }
+            .topbar { flex-direction:column; align-items:flex-start; gap:6px; }
+            .topbar h1 { font-size:1.3rem; }
+            .stats-row { grid-template-columns:repeat(2,1fr); gap:12px; }
             .modal .form-row { grid-template-columns:1fr; }
+            #tab-dashboard > div[style*="grid-template-columns:1fr 1fr"] {
+                display:block !important;
+            }
+            #tab-dashboard > div[style*="grid-template-columns:1fr 1fr"] > .card {
+                margin-bottom:16px;
+            }
+            .filters { grid-template-columns:1fr 1fr; }
+            table { min-width:600px; }
+            .card { padding:14px; }
+        }
+        @media(max-width:480px) {
+            .stats-row { grid-template-columns:1fr 1fr; gap:8px; }
+            .stat-card { padding:14px; }
+            .stat-card .number { font-size:1.4rem; }
+            .filters { grid-template-columns:1fr; }
+            .main { padding:8px; padding-top:60px; }
         }
 
         /* ── TOAST ──────────────────────────── */
@@ -212,8 +256,11 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (id INTEGER PRIMARY KEY AUT
 </head>
 <body>
 
+<button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="mainSidebar">
     <div class="sidebar-brand">
         <div class="icon">🏏</div>
         <h2>TCAM Admin</h2>
@@ -257,7 +304,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (id INTEGER PRIMARY KEY AUT
             <div class="stat-card"><div class="icon" style="background:rgba(39,174,96,0.2);color:var(--success)"><i class="fas fa-user-tie"></i></div><div class="number" id="statCoaches">-</div><div class="label">Total Coaches</div></div>
             <div class="stat-card"><div class="icon" style="background:rgba(255,179,71,0.2);color:var(--warning)"><i class="fas fa-file-alt"></i></div><div class="number" id="statReports">-</div><div class="label">Coach Reports</div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="charts-row">
             <div class="card"><div class="card-title"><i class="fas fa-chart-bar"></i> Registration Overview</div><canvas id="regChart" height="200"></canvas></div>
             <div class="card"><div class="card-title"><i class="fas fa-chart-pie"></i> Tournament Status</div><canvas id="tournChart" height="200"></canvas></div>
         </div>
@@ -622,10 +669,21 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (id INTEGER PRIMARY KEY AUT
 const API = 'admin-api.php';
 let searchTimer;
 
+// ── MOBILE SIDEBAR ──────────────────────────
+function toggleSidebar() {
+    document.getElementById('mainSidebar').classList.toggle('mobile-open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('mainSidebar').classList.remove('mobile-open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
 // ── TAB NAVIGATION ─────────────────────────
 document.querySelectorAll('.sidebar-nav a').forEach(a => {
     a.addEventListener('click', e => {
         e.preventDefault();
+        closeSidebar();
         document.querySelectorAll('.sidebar-nav a').forEach(x => x.classList.remove('active'));
         a.classList.add('active');
         const tab = a.dataset.tab;

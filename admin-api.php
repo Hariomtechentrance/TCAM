@@ -88,6 +88,33 @@ $db->exec("CREATE TABLE IF NOT EXISTS contact_messages (
     message TEXT NOT NULL, is_read INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )");
+$db->exec("CREATE TABLE IF NOT EXISTS media_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    filepath TEXT NOT NULL,
+    section TEXT DEFAULT 'gallery',
+    alt_text TEXT DEFAULT '',
+    enabled INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+$db->exec("CREATE TABLE IF NOT EXISTS hero_banners (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT DEFAULT '',
+    subtitle TEXT DEFAULT '',
+    image_id INTEGER DEFAULT NULL,
+    image_path TEXT DEFAULT '',
+    link TEXT DEFAULT '',
+    enabled INTEGER DEFAULT 1,
+    position INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+$db->exec("CREATE TABLE IF NOT EXISTS districts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+)");
+$districtList = ['Ahmednagar','Akola','Amravati','Aurangabad','Beed','Bhandara','Buldhana','Chandrapur','Dhule','Gadchiroli','Gondia','Hingoli','Jalgaon','Jalna','Kolhapur','Latur','Mumbai City','Mumbai Suburban','Nagpur','Nanded','Nandurbar','Nashik','Osmanabad','Palghar','Parbhani','Pune','Raigad','Ratnagiri','Sangli','Satara','Sindhudurg','Solapur','Thane','Wardha','Washim','Yavatmal'];
+$distStmt = $db->prepare("INSERT OR IGNORE INTO districts (name) VALUES (?)");
+foreach ($districtList as $d) { $distStmt->execute([$d]); }
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
