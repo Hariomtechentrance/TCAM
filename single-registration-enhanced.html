@@ -261,22 +261,27 @@
     }
 
     function parseAadharName(text) {
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        // Name always appears before DOB on Aadhar — search only above that line
+        const dobIdx = lines.findIndex(l => /DOB|Date of Birth|Year of Birth/i.test(l));
+        const searchLines = dobIdx > 1 ? lines.slice(0, dobIdx) : lines;
         const skip = ['government','india','unique','identification','authority','male','female',
                       'dob','year','birth','address','village','post','dist','state','pin',
                       'help','toll','free','aadhar','uidai','माझे','माझी'];
-        return lines.find(l => {
-            if (!/^[A-Za-z][A-Za-z\s\.]{4,50}$/.test(l)) return false;
+        const candidates = searchLines.filter(l => {
+            if (!/^[A-Za-z][A-Za-z\s\.]{5,50}$/.test(l)) return false;
             const words = l.split(/\s+/).filter(w => w.length > 0);
             if (words.length < 2 || words.length > 5) return false;
-            // Title Case: every word starts uppercase — filters OCR noise like "On id TEN py"
+            // Title Case: every word starts uppercase
             if (!words.every(w => /^[A-Z]/.test(w))) return false;
-            // Every word at least 2 chars
-            if (words.some(w => w.length < 2)) return false;
+            // Every word must be at least 3 chars — rejects "On", "id", "py" noise
+            if (words.some(w => w.length < 3)) return false;
             const lower = l.toLowerCase();
             if (skip.some(w => lower.includes(w))) return false;
             return true;
-        }) || null;
+        });
+        // Return last match (line closest to DOB = most likely the actual name)
+        return candidates.length > 0 ? candidates[candidates.length - 1] : null;
     }
 
     document.getElementById('aadhar_upload').addEventListener('change', async function() {
