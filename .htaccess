@@ -108,6 +108,7 @@ LimitRequestBody 10485760
     RewriteRule .* - [F,L]
     
     # Custom routing for secure pages
+    RewriteRule ^admin-login/?$ admin-login.php [L]
     RewriteRule ^secure-admin/?$ admin-panel-secure.php [L]
     RewriteRule ^secure-login/?$ login-secure.php [L]
     RewriteRule ^logout/?$ logout.php [L]
