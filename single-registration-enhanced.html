@@ -198,7 +198,7 @@
     <script>
     // ── Aadhar OCR for Enhanced form ─────────────────────────────
 
-    // Preprocess image: grayscale + contrast boost for better OCR on photos
+    // Full image: grayscale + contrast for name/DOB
     function preprocessAadharImage(file) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -228,6 +228,37 @@
         });
     }
 
+    // Bottom 38% crop, upscaled 2x — focused on Aadhar number strip
+    function preprocessAadharBottom(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const cropY = Math.round(img.height * 0.62);
+                const cropH = img.height - cropY;
+                const scale = Math.min(3, 2400 / img.width);
+                const w = Math.round(img.width * scale);
+                const h = Math.round(cropH * scale);
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, cropY, img.width, cropH, 0, 0, w, h);
+                const imgData = ctx.getImageData(0, 0, w, h);
+                const d = imgData.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    let g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+                    g = Math.min(255, Math.max(0, (g - 128) * 1.5 + 128));
+                    d[i] = d[i+1] = d[i+2] = g;
+                }
+                ctx.putImageData(imgData, 0, 0);
+                URL.revokeObjectURL(url);
+                canvas.toBlob(resolve, 'image/png');
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
     function fixOcrDigits(str) {
         return str.replace(/O/g,'0').replace(/[lI]/g,'1').replace(/S/g,'5')
                   .replace(/B/g,'8').replace(/Z/g,'2').replace(/G/g,'6');
@@ -235,24 +266,18 @@
 
     function parseAadharNum(text) {
         const fixed = text.replace(/[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}/g, m => fixOcrDigits(m));
-        // 1. XXXX XXXX XXXX with flexible spacing (most reliable)
         const sp = fixed.match(/\d{4}\s+\d{4}\s+\d{4}/);
         if (sp) return sp[0].replace(/\s/g,'');
-        // 2. XXXX-XXXX-XXXX dash format
         const dash = fixed.match(/\d{4}-\d{4}-\d{4}/);
         if (dash) return dash[0].replace(/-/g,'');
-        // 3. Isolated whitespace-separated 12-digit token only
         const twelve = text.split(/\s+/).find(s => /^\d{12}$/.test(s));
-        if (twelve) return twelve;
-        return null; // Do NOT concatenate all digits — causes false positives
+        return twelve || null;
     }
 
     // Returns YYYY-MM-DD for HTML date input
     function parseAadharDOB(text) {
-        // Pattern: DOB: DD/MM/YYYY or DD-MM-YYYY
         const m = text.match(/DOB\s*[:\.]?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/i);
         if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-        // Pattern: Year of Birth: YYYY
         const yob = text.match(/Year\s+of\s+Birth\s*[:\.]?\s*(\d{4})/i);
         if (yob) return `${yob[1]}-01-01`;
         return null;
@@ -260,25 +285,23 @@
 
     function parseAadharName(text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        // Name always appears before DOB on Aadhar — search only above that line
         const dobIdx = lines.findIndex(l => /DOB|Date of Birth|Year of Birth/i.test(l));
         const searchLines = dobIdx > 1 ? lines.slice(0, dobIdx) : lines;
         const skip = ['government','india','unique','identification','authority','male','female',
                       'dob','year','birth','address','village','post','dist','state','pin',
                       'help','toll','free','aadhar','uidai','माझे','माझी'];
-        const candidates = searchLines.filter(l => {
-            if (!/^[A-Za-z][A-Za-z\s\.]{5,50}$/.test(l)) return false;
-            const words = l.split(/\s+/).filter(w => w.length > 0);
-            if (words.length < 2 || words.length > 5) return false;
-            // Title Case: every word starts uppercase
-            if (!words.every(w => /^[A-Z]/.test(w))) return false;
-            // Every word must be at least 3 chars — rejects "On", "id", "py" noise
-            if (words.some(w => w.length < 3)) return false;
-            const lower = l.toLowerCase();
-            if (skip.some(w => lower.includes(w))) return false;
-            return true;
-        });
-        // Return last match (line closest to DOB = most likely the actual name)
+        // Search for runs of 2-5 Title Case words (3+ lowercase chars) WITHIN each line
+        const nameRe = /(?:[A-Z][a-z]{2,}\s+){1,4}[A-Z][a-z]{2,}/g;
+        const candidates = [];
+        for (const line of searchLines) {
+            const lo = line.toLowerCase();
+            if (skip.some(w => lo.includes(w))) continue;
+            const matches = line.match(nameRe) || [];
+            for (const m of matches) {
+                const words = m.trim().split(/\s+/);
+                if (words.length >= 2) candidates.push(m.trim());
+            }
+        }
         return candidates.length > 0 ? candidates[candidates.length - 1] : null;
     }
 
@@ -289,15 +312,23 @@
         st.innerHTML = '🔄 Processing image… please wait';
         try {
             const blob = await preprocessAadharImage(file);
-            st.innerHTML = '🔄 Scanning Aadhar card… please wait';
+            st.innerHTML = '🔄 Scanning card for name & DOB…';
             const { data: { text } } = await Tesseract.recognize(blob, 'eng', { logger: () => {} });
-            console.log('=== RAW OCR TEXT ===\n', text, '\n===================');
+            console.log('=== FULL OCR ===\n', text, '\n===============');
 
-            const num  = parseAadharNum(text);
+            let num  = parseAadharNum(text);
             const dob  = parseAadharDOB(text);
             const name = parseAadharName(text);
 
-            // Auto-fill fields
+            // Second focused pass on bottom strip if number not found
+            if (!num) {
+                st.innerHTML = '🔄 Scanning Aadhar number area…';
+                const bottomBlob = await preprocessAadharBottom(file);
+                const { data: { text: bText } } = await Tesseract.recognize(bottomBlob, 'eng', { logger: () => {} });
+                console.log('=== BOTTOM OCR ===\n', bText, '\n=================');
+                num = parseAadharNum(bText);
+            }
+
             if (num)  document.getElementById('document_number').value = num;
             if (dob)  document.getElementById('dob').value = dob;
             if (name) document.getElementById('name').value = name;
