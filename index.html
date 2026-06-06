@@ -981,20 +981,19 @@ function fixDigits(s) {
 }
 
 function extractAadharNumber(text) {
-    // Fix common OCR digit errors first on likely digit regions
+    // Apply digit-error correction only on 4-4-4 patterns (avoids corrupting other text)
     const fixed = text.replace(/[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}/g, m => fixDigits(m));
-    // Match XXXX XXXX XXXX with flexible spacing
+    // 1. XXXX XXXX XXXX with flexible spacing (most reliable)
     const sp = fixed.match(/\d{4}\s+\d{4}\s+\d{4}/);
     if (sp) return sp[0].replace(/\s/g,'');
+    // 2. XXXX-XXXX-XXXX dash format
     const dash = fixed.match(/\d{4}-\d{4}-\d{4}/);
     if (dash) return dash[0].replace(/-/g,'');
-    // Try finding an isolated 12-digit token
-    const tokens = fixDigits(text).replace(/[^\d\s]/g,' ').split(/\s+/);
-    const twelve = tokens.find(s => s.length === 12 && /^\d+$/.test(s));
+    // 3. Isolated whitespace-separated 12-digit token only (no concatenation of other digits)
+    const tokens = text.split(/\s+/);
+    const twelve = tokens.find(s => /^\d{12}$/.test(s));
     if (twelve) return twelve;
-    // Last resort: any 12 consecutive digits in the whole text
-    const m = fixDigits(text).replace(/\D/g,'').match(/\d{12}/);
-    return m ? m[0] : null;
+    return null; // Do NOT concatenate all digits — causes false positives from DOB/QR noise
 }
 
 function extractAadharDOB(text) {
@@ -1036,6 +1035,7 @@ document.getElementById('proof_file').addEventListener('change', async function(
         const blob = await preprocessForOcr(file);
         statusEl.innerHTML = '🔄 Scanning Aadhar card… please wait';
         const { data: { text } } = await Tesseract.recognize(blob, 'eng', { logger: () => {} });
+        console.log('=== RAW OCR TEXT ===\n', text, '\n===================');
 
         const num  = extractAadharNumber(text);
         const dob  = extractAadharDOB(text);

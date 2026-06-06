@@ -235,18 +235,16 @@
 
     function parseAadharNum(text) {
         const fixed = text.replace(/[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}/g, m => fixOcrDigits(m));
-        // Match XXXX XXXX XXXX with flexible spacing
+        // 1. XXXX XXXX XXXX with flexible spacing (most reliable)
         const sp = fixed.match(/\d{4}\s+\d{4}\s+\d{4}/);
         if (sp) return sp[0].replace(/\s/g,'');
+        // 2. XXXX-XXXX-XXXX dash format
         const dash = fixed.match(/\d{4}-\d{4}-\d{4}/);
         if (dash) return dash[0].replace(/-/g,'');
-        // Try isolated 12-digit token
-        const tokens = fixOcrDigits(text).replace(/[^\d\s]/g,' ').split(/\s+/);
-        const twelve = tokens.find(s => s.length === 12 && /^\d+$/.test(s));
+        // 3. Isolated whitespace-separated 12-digit token only
+        const twelve = text.split(/\s+/).find(s => /^\d{12}$/.test(s));
         if (twelve) return twelve;
-        // Last resort: any 12 consecutive digits
-        const m = fixOcrDigits(text).replace(/\D/g,'').match(/\d{12}/);
-        return m ? m[0] : null;
+        return null; // Do NOT concatenate all digits — causes false positives
     }
 
     // Returns YYYY-MM-DD for HTML date input
@@ -293,6 +291,7 @@
             const blob = await preprocessAadharImage(file);
             st.innerHTML = '🔄 Scanning Aadhar card… please wait';
             const { data: { text } } = await Tesseract.recognize(blob, 'eng', { logger: () => {} });
+            console.log('=== RAW OCR TEXT ===\n', text, '\n===================');
 
             const num  = parseAadharNum(text);
             const dob  = parseAadharDOB(text);
