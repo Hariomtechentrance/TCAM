@@ -54,6 +54,18 @@ $db->exec("CREATE TABLE IF NOT EXISTS registrations (
 try { $db->exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'active'"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN date_of_birth TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN district TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN dob TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN aadhar_number TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN proof TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN proof_file TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN photo TEXT DEFAULT ''"); } catch (PDOException $e) {}
+// Ensure bookings table has aadhar_number column (may be missing on old schema)
+try { $db->exec("ALTER TABLE bookings ADD COLUMN aadhar_number TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE bookings ADD COLUMN dob TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE bookings ADD COLUMN district TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE bookings ADD COLUMN photo TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE bookings ADD COLUMN proof TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE bookings ADD COLUMN proof_file TEXT DEFAULT ''"); } catch (PDOException $e) {}
 $db->exec("CREATE TABLE IF NOT EXISTS coach_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -123,26 +135,13 @@ switch ($action) {
 
     // ── DASHBOARD STATS ─────────────────────
     case 'stats':
-        $useBookings = false;
-        try {
-            $bookingCount = (int)$db->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
-            if ($bookingCount > 0) $useBookings = true;
-        } catch (Exception $e) {
-            $useBookings = false;
-        }
-        if ($useBookings) {
-            $total = $bookingCount;
-            $today = (int)$db->query("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = DATE('now')")->fetchColumn();
-            $active = $total; // no status field in bookings, show all as active
-        } else {
-            try {
-                $total = $db->query("SELECT COUNT(*) FROM registrations")->fetchColumn();
-                $today = $db->query("SELECT COUNT(*) FROM registrations WHERE DATE(created_at) = DATE('now')")->fetchColumn();
-                $active = $db->query("SELECT COUNT(*) FROM registrations WHERE status = 'active' OR status IS NULL OR status = ''")->fetchColumn();
-            } catch (Exception $e) {
-                $total = 0; $today = 0; $active = 0;
-            }
-        }
+        $total = 0; $today = 0; $active = 0;
+        try { $total += (int)$db->query("SELECT COUNT(*) FROM bookings")->fetchColumn(); } catch (\Exception $e) {}
+        try { $today += (int)$db->query("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = DATE('now')")->fetchColumn(); } catch (\Exception $e) {}
+        try { $active += (int)$db->query("SELECT COUNT(*) FROM bookings")->fetchColumn(); } catch (\Exception $e) {}
+        try { $total += (int)$db->query("SELECT COUNT(*) FROM registrations")->fetchColumn(); } catch (\Exception $e) {}
+        try { $today += (int)$db->query("SELECT COUNT(*) FROM registrations WHERE DATE(created_at) = DATE('now')")->fetchColumn(); } catch (\Exception $e) {}
+        try { $active += (int)$db->query("SELECT COUNT(*) FROM registrations WHERE status = 'active' OR status IS NULL OR status = ''")->fetchColumn(); } catch (\Exception $e) {}
         $tournaments = $db->query("SELECT COUNT(*) FROM tournaments")->fetchColumn();
         $gallery = $db->query("SELECT COUNT(*) FROM gallery_images")->fetchColumn();
         $upcoming = $db->query("SELECT COUNT(*) FROM tournaments WHERE status = 'upcoming'")->fetchColumn();
@@ -161,103 +160,92 @@ switch ($action) {
     // ── REGISTRATIONS ────────────────────────
     case 'registrations':
         if ($method === 'GET') {
-            // If legacy/bookings table exists and has rows, prefer it as the source of registrations
-            $useBookings = false;
-            try {
-                $cnt = (int)$db->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
-                if ($cnt > 0) $useBookings = true;
-            } catch (Exception $e) { $useBookings = false; }
-
             $results = [];
-            if ($useBookings) {
-                // Build filters mapped to bookings columns
-                $where = [];
-                $params = [];
-                if (!empty($_GET['name'])) { $where[] = "name LIKE ?"; $params[] = '%' . $_GET['name'] . '%'; }
-                if (!empty($_GET['mobile'])) { $where[] = "phone LIKE ?"; $params[] = '%' . $_GET['mobile'] . '%'; }
-                if (!empty($_GET['reg_id'])) { $where[] = "bookingId = ?"; $params[] = $_GET['reg_id']; }
-                if (!empty($_GET['email'])) { $where[] = "email LIKE ?"; $params[] = '%'.$_GET['email'].'%'; }
-                if (!empty($_GET['document_type'])) { $where[] = "proof LIKE ?"; $params[] = '%'.$_GET['document_type'].'%'; }
-                if (!empty($_GET['document_number'])) { $where[] = "proof_file LIKE ?"; $params[] = '%'.$_GET['document_number'].'%'; }
+
+            // ── Query bookings table ──────────────
+            try {
+                $where = []; $params = [];
+                if (!empty($_GET['name']))    { $where[] = "name LIKE ?";            $params[] = '%'.$_GET['name'].'%'; }
+                if (!empty($_GET['mobile']))  { $where[] = "phone LIKE ?";           $params[] = '%'.$_GET['mobile'].'%'; }
+                if (!empty($_GET['reg_id']))  { $where[] = "bookingId = ?";          $params[] = $_GET['reg_id']; }
+                if (!empty($_GET['email']))   { $where[] = "email LIKE ?";           $params[] = '%'.$_GET['email'].'%'; }
+                if (!empty($_GET['city']))    { $where[] = "district LIKE ?";        $params[] = '%'.$_GET['city'].'%'; }
+                if (!empty($_GET['dob']))     { $where[] = "dob = ?";               $params[] = $_GET['dob']; }
                 if (!empty($_GET['date_from'])) { $where[] = "DATE(created_at) >= ?"; $params[] = $_GET['date_from']; }
-                if (!empty($_GET['date_to'])) { $where[] = "DATE(created_at) <= ?"; $params[] = $_GET['date_to']; }
-                if (!empty($_GET['dob'])) { $where[] = "dob = ?"; $params[] = $_GET['dob']; }
-                if (!empty($_GET['city'])) { $where[] = "district LIKE ?"; $params[] = '%'.$_GET['city'].'%'; }
+                if (!empty($_GET['date_to']))   { $where[] = "DATE(created_at) <= ?"; $params[] = $_GET['date_to']; }
+                if (!empty($_GET['document_number'])) {
+                    $where[] = "(aadhar_number LIKE ? OR proof_file LIKE ?)";
+                    $params[] = '%'.$_GET['document_number'].'%';
+                    $params[] = '%'.$_GET['document_number'].'%';
+                }
+                if (!empty($_GET['document_type'])) { $where[] = "proof LIKE ?"; $params[] = '%'.$_GET['document_type'].'%'; }
 
                 $sql = "SELECT * FROM bookings";
-                if (!empty($where)) $sql .= " WHERE " . implode(" AND ", $where);
+                if ($where) $sql .= " WHERE ".implode(" AND ", $where);
                 $sql .= " ORDER BY created_at DESC";
-
-                $stmt = $db->prepare($sql);
-                $stmt->execute($params);
-                $rows = $stmt->fetchAll();
-                foreach ($rows as $r) {
+                $stmt = $db->prepare($sql); $stmt->execute($params);
+                foreach ($stmt->fetchAll() as $r) {
                     $results[] = [
-                        'id' => $r['id'],
-                        'reg_id' => $r['bookingId'] ?? null,
-                        'name' => $r['name'] ?? '',
-                        'mobile' => $r['phone'] ?? '',
-                        'city' => $r['district'] ?? '',
+                        'id'            => 'b_'.$r['id'],
+                        'reg_id'        => $r['bookingId'] ?? '',
+                        'name'          => $r['name'] ?? '',
+                        'mobile'        => $r['phone'] ?? '',
+                        'email'         => $r['email'] ?? '',
+                        'city'          => $r['district'] ?? '',
                         'date_of_birth' => $r['dob'] ?? '',
-                        'document_type' => $r['proof'] ?? '',
-                        'document_number' => $r['proof_file'] ?? '',
-                        'photo' => $r['photo'] ?? '',
-                        'events' => [],
-                        'created_at' => $r['created_at'] ?? ''
+                        'document_type' => $r['proof'] ?? 'aadhar',
+                        'document_number'=> $r['aadhar_number'] ?? '',
+                        'photo'         => $r['photo'] ?? '',
+                        'proof_file'    => $r['proof_file'] ?? '',
+                        'status'        => 'active',
+                        'events'        => [],
+                        'created_at'    => $r['created_at'] ?? '',
+                        '_source'       => 'bookings'
                     ];
                 }
-                echo json_encode(['status' => 'success', 'data' => $results, 'count' => count($results)]);
-                break;
-            }
+            } catch (\Exception $e) {}
 
-            // Fallback: original registrations table
-            $where = [];
-            $params = [];
+            // ── Query registrations table ─────────
+            try {
+                $where = []; $params = [];
+                if (!empty($_GET['name']))    { $where[] = "name LIKE ?";            $params[] = '%'.$_GET['name'].'%'; }
+                if (!empty($_GET['mobile']))  { $where[] = "mobile LIKE ?";          $params[] = '%'.$_GET['mobile'].'%'; }
+                if (!empty($_GET['reg_id']))  { $where[] = "reg_id = ?";             $params[] = $_GET['reg_id']; }
+                if (!empty($_GET['email']))   { $where[] = "email LIKE ?";           $params[] = '%'.$_GET['email'].'%'; }
+                if (!empty($_GET['city']))    { $where[] = "district LIKE ?";        $params[] = '%'.$_GET['city'].'%'; }
+                if (!empty($_GET['dob']))     { $where[] = "dob = ?";               $params[] = $_GET['dob']; }
+                if (!empty($_GET['date_from'])) { $where[] = "DATE(created_at) >= ?"; $params[] = $_GET['date_from']; }
+                if (!empty($_GET['date_to']))   { $where[] = "DATE(created_at) <= ?"; $params[] = $_GET['date_to']; }
+                if (!empty($_GET['document_number'])) { $where[] = "aadhar_number LIKE ?"; $params[] = '%'.$_GET['document_number'].'%'; }
+                if (!empty($_GET['document_type']))   { $where[] = "proof LIKE ?"; $params[] = '%'.$_GET['document_type'].'%'; }
 
-            if (!empty($_GET['name'])) { $where[] = "r.name LIKE ?"; $params[] = '%' . $_GET['name'] . '%'; }
-            if (!empty($_GET['mobile'])) { $where[] = "r.mobile LIKE ?"; $params[] = '%' . $_GET['mobile'] . '%'; }
-            if (!empty($_GET['email'])) { $where[] = "r.email LIKE ?"; $params[] = '%' . $_GET['email'] . '%'; }
-            if (!empty($_GET['reg_id'])) { $where[] = "r.reg_id = ?"; $params[] = $_GET['reg_id']; }
-            if (!empty($_GET['document_number'])) { $where[] = "(r.document_number LIKE ? OR r.document_number_normalized LIKE ?)"; $params[] = '%'.$_GET['document_number'].'%'; $params[] = '%'.$_GET['document_number'].'%'; }
-            if (!empty($_GET['document_type'])) { $where[] = "r.document_type = ?"; $params[] = $_GET['document_type']; }
-            if (!empty($_GET['city'])) { $where[] = "r.city LIKE ?"; $params[] = '%'.$_GET['city'].'%'; }
-            if (!empty($_GET['tournament'])) {
-                // filter registrations that have an event registration matching tournament name
-                $sql = "SELECT r.* FROM registrations r WHERE r.id IN (SELECT registration_id FROM event_registrations WHERE event_name LIKE ?)";
-                $params = ['%'.$_GET['tournament'].'%'];
-                if (!empty($_GET['date_from'])) { $sql .= " AND DATE(r.created_at) >= ?"; $params[] = $_GET['date_from']; }
-                if (!empty($_GET['date_to'])) { $sql .= " AND DATE(r.created_at) <= ?"; $params[] = $_GET['date_to']; }
-                $sql .= " ORDER BY r.created_at DESC";
-                $stmt = $db->prepare($sql);
-                $stmt->execute($params);
-                $results = $stmt->fetchAll();
-                foreach ($results as &$row) {
-                    $evStmt = $db->prepare("SELECT event_name, created_at FROM event_registrations WHERE registration_id = ? ORDER BY created_at DESC");
-                    $evStmt->execute([$row['id']]);
-                    $row['events'] = $evStmt->fetchAll();
+                $sql = "SELECT * FROM registrations";
+                if ($where) $sql .= " WHERE ".implode(" AND ", $where);
+                $sql .= " ORDER BY created_at DESC";
+                $stmt = $db->prepare($sql); $stmt->execute($params);
+                foreach ($stmt->fetchAll() as $r) {
+                    $results[] = [
+                        'id'            => 'r_'.$r['id'],
+                        'reg_id'        => $r['reg_id'] ?? '',
+                        'name'          => $r['name'] ?? '',
+                        'mobile'        => $r['mobile'] ?? '',
+                        'email'         => $r['email'] ?? '',
+                        'city'          => $r['district'] ?? '',
+                        'date_of_birth' => $r['dob'] ?? '',
+                        'document_type' => $r['proof'] ?? 'aadhar',
+                        'document_number'=> $r['aadhar_number'] ?? '',
+                        'photo'         => $r['photo'] ?? '',
+                        'proof_file'    => $r['proof_file'] ?? '',
+                        'status'        => $r['status'] ?? 'active',
+                        'events'        => [],
+                        'created_at'    => $r['created_at'] ?? '',
+                        '_source'       => 'registrations'
+                    ];
                 }
-                echo json_encode(['status' => 'success', 'data' => $results, 'count' => count($results)]);
-                break;
-            }
-            if (!empty($_GET['status'])) { $where[] = "(r.status = ? " . ($_GET['status'] === 'active' ? "OR r.status IS NULL OR r.status = ''" : '') . ")"; $params[] = $_GET['status']; }
-            if (!empty($_GET['date_from'])) { $where[] = "DATE(r.created_at) >= ?"; $params[] = $_GET['date_from']; }
-            if (!empty($_GET['date_to'])) { $where[] = "DATE(r.created_at) <= ?"; $params[] = $_GET['date_to']; }
-            if (!empty($_GET['dob'])) { $where[] = "r.date_of_birth = ?"; $params[] = $_GET['dob']; }
+            } catch (\Exception $e) {}
 
-            $sql = "SELECT r.* FROM registrations r";
-            if (!empty($where)) $sql .= " WHERE " . implode(" AND ", $where);
-            $sql .= " ORDER BY r.created_at DESC";
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute($params);
-            $results = $stmt->fetchAll();
-
-            // Attach events for each
-            foreach ($results as &$row) {
-                $evStmt = $db->prepare("SELECT event_name, created_at FROM event_registrations WHERE registration_id = ? ORDER BY created_at DESC");
-                $evStmt->execute([$row['id']]);
-                $row['events'] = $evStmt->fetchAll();
-            }
+            // Sort combined results newest first
+            usort($results, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
 
             echo json_encode(['status' => 'success', 'data' => $results, 'count' => count($results)]);
         }
@@ -351,63 +339,82 @@ switch ($action) {
         break;
 
     case 'registration_detail':
-        $id = (int)($_GET['id'] ?? 0);
-        // try registrations first
-        $stmt = $db->prepare("SELECT * FROM registrations WHERE id = ?");
-        $stmt->execute([$id]);
-        $reg = $stmt->fetch();
-        if ($reg) {
-            $evStmt = $db->prepare("SELECT * FROM event_registrations WHERE registration_id = ? ORDER BY created_at DESC");
-            $evStmt->execute([$id]);
-            $reg['events'] = $evStmt->fetchAll();
-            echo json_encode(['status'=>'success','data'=>$reg]);
-            break;
+        $rawId = $_GET['id'] ?? '';
+        // ID format: 'b_123' = bookings table, 'r_123' = registrations table
+        if (strpos($rawId, 'b_') === 0) {
+            $id = (int)substr($rawId, 2);
+            try {
+                $stmt = $db->prepare("SELECT * FROM bookings WHERE id = ?");
+                $stmt->execute([$id]);
+                $b = $stmt->fetch();
+                if (!$b) { echo json_encode(['status'=>'error','message'=>'Not found']); break; }
+                echo json_encode(['status'=>'success','data'=>[
+                    'id'            => $rawId,
+                    'reg_id'        => $b['bookingId'] ?? '',
+                    'name'          => $b['name'] ?? '',
+                    'mobile'        => $b['phone'] ?? '',
+                    'email'         => $b['email'] ?? '',
+                    'city'          => $b['district'] ?? '',
+                    'date_of_birth' => $b['dob'] ?? '',
+                    'document_type' => $b['proof'] ?? 'aadhar',
+                    'document_number'=> $b['aadhar_number'] ?? '',
+                    'photo'         => $b['photo'] ?? '',
+                    'proof_file'    => $b['proof_file'] ?? '',
+                    'address'       => $b['message'] ?? '',
+                    'status'        => 'active',
+                    'created_at'    => $b['created_at'] ?? '',
+                    'events'        => []
+                ]]);
+            } catch (\Exception $e) { echo json_encode(['status'=>'error','message'=>'Not found']); }
+        } else {
+            $id = (int)(strpos($rawId, 'r_') === 0 ? substr($rawId, 2) : $rawId);
+            try {
+                $stmt = $db->prepare("SELECT * FROM registrations WHERE id = ?");
+                $stmt->execute([$id]);
+                $reg = $stmt->fetch();
+                if (!$reg) { echo json_encode(['status'=>'error','message'=>'Not found']); break; }
+                $evStmt = $db->prepare("SELECT * FROM event_registrations WHERE registration_id = ? ORDER BY created_at DESC");
+                $evStmt->execute([$id]);
+                $reg['events'] = $evStmt->fetchAll();
+                $reg['id'] = $rawId;
+                echo json_encode(['status'=>'success','data'=>$reg]);
+            } catch (\Exception $e) { echo json_encode(['status'=>'error','message'=>'Not found']); }
         }
-        // fallback to bookings
-        try {
-            $bStmt = $db->prepare("SELECT * FROM bookings WHERE id = ?");
-            $bStmt->execute([$id]);
-            $b = $bStmt->fetch();
-            if (!$b) { echo json_encode(['status'=>'error','message'=>'Not found']); break; }
-            $out = [
-                'id' => $b['id'],
-                'reg_id' => $b['bookingId'] ?? null,
-                'name' => $b['name'] ?? '',
-                'mobile' => $b['phone'] ?? '',
-                'city' => $b['district'] ?? '',
-                'date_of_birth' => $b['dob'] ?? '',
-                'document_type' => $b['proof'] ?? '',
-                'document_number' => $b['proof_file'] ?? '',
-                'photo' => $b['photo'] ?? '',
-                'email' => $b['email'] ?? '',
-                'address' => $b['message'] ?? '',
-                'created_at' => $b['created_at'] ?? '',
-                'events' => []
-            ];
-            echo json_encode(['status'=>'success','data'=>$out]);
-        } catch (Exception $e) { echo json_encode(['status'=>'error','message'=>'Not found']); }
         break;
 
     case 'update_registration':
         if ($method === 'POST') {
-            $id = (int)($_POST['id'] ?? 0);
-            $fields = ['name','mobile','email','city','state','document_type','document_number','address','parent_name','emergency_contact','blood_group','status','date_of_birth'];
-            $set = []; $params = [];
-            foreach ($fields as $f) {
-                if (isset($_POST[$f])) { $set[] = "$f = ?"; $params[] = $_POST[$f]; }
+            $rawId = $_POST['id'] ?? '';
+            if (strpos($rawId, 'b_') === 0) {
+                $id = (int)substr($rawId, 2);
+                $map = ['name'=>'name','mobile'=>'phone','email'=>'email','city'=>'district','date_of_birth'=>'dob'];
+                $set=[]; $params=[];
+                foreach ($map as $postKey => $col) {
+                    if (isset($_POST[$postKey])) { $set[]="$col = ?"; $params[]=$_POST[$postKey]; }
+                }
+                if ($set) { $params[]=$id; $db->prepare("UPDATE bookings SET ".implode(',',$set)." WHERE id=?")->execute($params); }
+            } else {
+                $id = (int)(strpos($rawId,'r_')===0 ? substr($rawId,2) : $rawId);
+                $fields = ['name','mobile','email','city','district','document_type','document_number','address','status','date_of_birth','dob'];
+                $set=[]; $params=[];
+                foreach ($fields as $f) { if (isset($_POST[$f])) { $set[]="$f = ?"; $params[]=$_POST[$f]; } }
+                if ($set) { $params[]=$id; $db->prepare("UPDATE registrations SET ".implode(',',$set)." WHERE id=?")->execute($params); }
             }
-            if (empty($set)) { echo json_encode(['status'=>'error','message'=>'No data']); break; }
-            $params[] = $id;
-            $db->prepare("UPDATE registrations SET " . implode(', ', $set) . " WHERE id = ?")->execute($params);
             echo json_encode(['status'=>'success','message'=>'Registration updated']);
         }
         break;
 
     case 'delete_registration':
         if ($method === 'POST') {
-            $id = (int)($_POST['id'] ?? 0);
-            $db->prepare("DELETE FROM event_registrations WHERE registration_id = ?")->execute([$id]);
-            $db->prepare("DELETE FROM registrations WHERE id = ?")->execute([$id]);
+            $rawId = $_POST['id'] ?? '';
+            if (strpos($rawId, 'b_') === 0) {
+                $id = (int)substr($rawId, 2);
+                try { $db->prepare("DELETE FROM bookings WHERE id=?")->execute([$id]); } catch (\Exception $e) {}
+            } else {
+                $id = (int)(strpos($rawId,'r_')===0 ? substr($rawId,2) : $rawId);
+                try { $db->prepare("DELETE FROM event_registrations WHERE registration_id=?")->execute([$id]); } catch (\Exception $e) {}
+                try { $db->prepare("DELETE FROM registrations WHERE id=?")->execute([$id]); } catch (\Exception $e) {}
+            }
             echo json_encode(['status'=>'success','message'=>'Registration deleted']);
         }
         break;
