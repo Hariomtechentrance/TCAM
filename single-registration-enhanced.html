@@ -234,12 +234,19 @@
     }
 
     function parseAadharNum(text) {
-        const fixed = text.replace(/[\dOlISBZG]{4}[\s\-][\dOlISBZG]{4}[\s\-][\dOlISBZG]{4}/g, m => fixOcrDigits(m));
-        const sp = fixed.match(/\d{4}[\s\-]\d{4}[\s\-]\d{4}/);
-        if (sp) return sp[0].replace(/[\s\-]/g,'');
-        const raw = fixOcrDigits(text).replace(/[^\d]/g,' ');
-        const s = raw.match(/\b\d{12}\b/);
-        return s ? s[0] : null;
+        const fixed = text.replace(/[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}[\s\-]+[OlISBZG\d]{4}/g, m => fixOcrDigits(m));
+        // Match XXXX XXXX XXXX with flexible spacing
+        const sp = fixed.match(/\d{4}\s+\d{4}\s+\d{4}/);
+        if (sp) return sp[0].replace(/\s/g,'');
+        const dash = fixed.match(/\d{4}-\d{4}-\d{4}/);
+        if (dash) return dash[0].replace(/-/g,'');
+        // Try isolated 12-digit token
+        const tokens = fixOcrDigits(text).replace(/[^\d\s]/g,' ').split(/\s+/);
+        const twelve = tokens.find(s => s.length === 12 && /^\d+$/.test(s));
+        if (twelve) return twelve;
+        // Last resort: any 12 consecutive digits
+        const m = fixOcrDigits(text).replace(/\D/g,'').match(/\d{12}/);
+        return m ? m[0] : null;
     }
 
     // Returns YYYY-MM-DD for HTML date input
@@ -260,9 +267,14 @@
                       'help','toll','free','aadhar','uidai','माझे','माझी'];
         return lines.find(l => {
             if (!/^[A-Za-z][A-Za-z\s\.]{4,50}$/.test(l)) return false;
+            const words = l.split(/\s+/).filter(w => w.length > 0);
+            if (words.length < 2 || words.length > 5) return false;
+            // Title Case: every word starts uppercase — filters OCR noise like "On id TEN py"
+            if (!words.every(w => /^[A-Z]/.test(w))) return false;
+            // Every word at least 2 chars
+            if (words.some(w => w.length < 2)) return false;
             const lower = l.toLowerCase();
             if (skip.some(w => lower.includes(w))) return false;
-            if (l.split(/\s+/).length < 2) return false;
             return true;
         }) || null;
     }
