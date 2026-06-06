@@ -37,6 +37,20 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (
     tournament_id INTEGER DEFAULT NULL, caption TEXT DEFAULT '',
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )");
+$db->exec("CREATE TABLE IF NOT EXISTS registrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    dob TEXT DEFAULT '',
+    mobile TEXT DEFAULT '',
+    email TEXT DEFAULT '',
+    aadhar_number TEXT DEFAULT '',
+    district TEXT DEFAULT '',
+    photo TEXT DEFAULT '',
+    proof TEXT DEFAULT '',
+    proof_file TEXT DEFAULT '',
+    status TEXT DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
 try { $db->exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'active'"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN date_of_birth TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN district TEXT DEFAULT ''"); } catch (PDOException $e) {}
@@ -94,9 +108,13 @@ switch ($action) {
             $today = (int)$db->query("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = DATE('now')")->fetchColumn();
             $active = $total; // no status field in bookings, show all as active
         } else {
-            $total = $db->query("SELECT COUNT(*) FROM registrations")->fetchColumn();
-            $today = $db->query("SELECT COUNT(*) FROM registrations WHERE DATE(created_at) = DATE('now')")->fetchColumn();
-            $active = $db->query("SELECT COUNT(*) FROM registrations WHERE status = 'active' OR status IS NULL OR status = ''")->fetchColumn();
+            try {
+                $total = $db->query("SELECT COUNT(*) FROM registrations")->fetchColumn();
+                $today = $db->query("SELECT COUNT(*) FROM registrations WHERE DATE(created_at) = DATE('now')")->fetchColumn();
+                $active = $db->query("SELECT COUNT(*) FROM registrations WHERE status = 'active' OR status IS NULL OR status = ''")->fetchColumn();
+            } catch (Exception $e) {
+                $total = 0; $today = 0; $active = 0;
+            }
         }
         $tournaments = $db->query("SELECT COUNT(*) FROM tournaments")->fetchColumn();
         $gallery = $db->query("SELECT COUNT(*) FROM gallery_images")->fetchColumn();
