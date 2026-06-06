@@ -228,29 +228,37 @@
         });
     }
 
-    // Bottom 38% crop, upscaled 2x — focused on Aadhar number strip
-    function preprocessAadharBottom(file) {
+    // Crop a horizontal band, upscale, and apply preprocessing mode
+    function preprocessCrop(file, startRatio, endRatio, mode) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             const url = URL.createObjectURL(file);
             img.onload = () => {
-                const cropY = Math.round(img.height * 0.62);
-                const cropH = img.height - cropY;
-                const scale = Math.min(3, 2400 / img.width);
+                const cropY = Math.round(img.height * startRatio);
+                const cropH = Math.round(img.height * (endRatio - startRatio));
+                const scale = Math.min(4, 2400 / img.width);
                 const w = Math.round(img.width * scale);
                 const h = Math.round(cropH * scale);
                 const canvas = document.createElement('canvas');
                 canvas.width = w; canvas.height = h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, cropY, img.width, cropH, 0, 0, w, h);
-                const imgData = ctx.getImageData(0, 0, w, h);
-                const d = imgData.data;
-                for (let i = 0; i < d.length; i += 4) {
-                    let g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-                    g = Math.min(255, Math.max(0, (g - 128) * 1.5 + 128));
-                    d[i] = d[i+1] = d[i+2] = g;
+                if (mode === 'binary') {
+                    const id = ctx.getImageData(0, 0, w, h), d = id.data;
+                    for (let i = 0; i < d.length; i += 4) {
+                        const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+                        d[i] = d[i+1] = d[i+2] = g > 150 ? 255 : 0;
+                    }
+                    ctx.putImageData(id, 0, 0);
+                } else if (mode === 'contrast') {
+                    const id = ctx.getImageData(0, 0, w, h), d = id.data;
+                    for (let i = 0; i < d.length; i += 4) {
+                        let g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+                        g = Math.min(255, Math.max(0, (g-128)*2.0+128));
+                        d[i] = d[i+1] = d[i+2] = g;
+                    }
+                    ctx.putImageData(id, 0, 0);
                 }
-                ctx.putImageData(imgData, 0, 0);
                 URL.revokeObjectURL(url);
                 canvas.toBlob(resolve, 'image/png');
             };
@@ -320,13 +328,22 @@
             const dob  = parseAadharDOB(text);
             const name = parseAadharName(text);
 
-            // Second focused pass on bottom strip if number not found
+            // Try multiple focused scans if number not found in full scan
             if (!num) {
-                st.innerHTML = '🔄 Scanning Aadhar number area…';
-                const bottomBlob = await preprocessAadharBottom(file);
-                const { data: { text: bText } } = await Tesseract.recognize(bottomBlob, 'eng', { logger: () => {} });
-                console.log('=== BOTTOM OCR ===\n', bText, '\n=================');
-                num = parseAadharNum(bText);
+                const numAttempts = [
+                    [0.50, 0.82, 'binary'],
+                    [0.60, 0.90, 'binary'],
+                    [0.50, 0.85, 'contrast'],
+                    [0.55, 0.88, 'raw'],
+                ];
+                for (const [s, e, mode] of numAttempts) {
+                    st.innerHTML = '🔄 Scanning Aadhar number area…';
+                    const b = await preprocessCrop(file, s, e, mode);
+                    const { data: { text: bt } } = await Tesseract.recognize(b, 'eng', { logger: () => {} });
+                    console.log(`=== CROP ${s}-${e} ${mode} ===\n`, bt);
+                    num = parseAadharNum(bt);
+                    if (num) break;
+                }
             }
 
             if (num)  document.getElementById('document_number').value = num;
@@ -339,11 +356,14 @@
 
             if (filled.length) {
                 st.style.background='#d4edda'; st.style.color='#155724';
-                st.innerHTML = '✅ Auto-filled — ' + filled.join(' &nbsp;|&nbsp; ') + '<br><small>Please verify the details before submitting.</small>';
+                let msg = '✅ Auto-filled — ' + filled.join(' &nbsp;|&nbsp; ') + '<br><small>Please verify the details before submitting.</small>';
+                if (!num) msg += '<br>⚠️ <span style="color:#856404;">Aadhar number unclear in photo — please type it below.</span>';
+                st.innerHTML = msg;
             } else {
                 st.style.background='#fff3cd'; st.style.color='#856404';
                 st.innerHTML='⚠️ Could not read card details. Please fill in manually.';
             }
+            if (!num) document.getElementById('document_number').focus();
         } catch(e) {
             st.style.background='#f8d7da'; st.style.color='#721c24';
             st.innerHTML='⚠️ Scan failed. Please fill in the details manually.';
