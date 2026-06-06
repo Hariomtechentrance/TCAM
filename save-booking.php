@@ -1,7 +1,5 @@
 <?php
 // TCAM Booking Handler
-require_once 'config.php';
-
 require_once 'cors.php';
 header('Content-Type: application/json');
 
@@ -10,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_POST['name'])) {
+if (empty($_POST['name'])) {
     echo json_encode(['status' => 'error', 'message' => 'Invalid or missing data']);
     exit;
 }
@@ -22,108 +20,132 @@ if (!preg_match('/^\d{12}$/', $aadhar_number)) {
     exit;
 }
 
-// File upload handling with security checks
-function saveUploadedFile($fileField, $prefix = '') {
-    if (!isset($_FILES[$fileField]) || $_FILES[$fileField]['error'] !== UPLOAD_ERR_OK) return '';
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+$dbPath   = __DIR__ . '/tcam_bookings.db';
+$uploadDir = __DIR__ . '/uploads';
+$uploadUrl = '/uploads/';
+$maxPhotoSize = 2 * 1024 * 1024; // 2 MB
 
+if (!is_dir($uploadDir)) {
+    @mkdir($uploadDir, 0755, true);
+}
+
+// ── FILE UPLOAD ───────────────────────────────────────────────────────────────
+function saveUploadedFile($fileField, $prefix, $uploadDir, $uploadUrl, $maxSize) {
+    if (!isset($_FILES[$fileField]) || $_FILES[$fileField]['error'] !== UPLOAD_ERR_OK) {
+        return '';
+    }
     $file = $_FILES[$fileField];
+    if ($file['size'] > $maxSize) {
+        throw new \RuntimeException('File size exceeds 2MB limit');
+    }
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-    $allowedImageMimes = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
-
-    if ($file['size'] > MAX_PHOTO_SIZE) {
-        throw new Exception('File size exceeds 2MB limit');
-    }
-    if (!array_key_exists($ext, $allowedImageMimes)) {
-        throw new Exception('Invalid format. Only JPG, PNG, WEBP allowed');
-    }
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $actualMime = finfo_file($finfo, $file['tmp_name']);
-    finfo_close($finfo);
-    if ($actualMime !== $allowedImageMimes[$ext]) {
-        throw new Exception('File content does not match its extension');
+    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!in_array($ext, $allowed, true)) {
+        throw new \RuntimeException('Invalid format. Only JPG, PNG, WEBP allowed');
     }
 
-    $filename = $prefix . bin2hex(random_bytes(16)) . '.' . $ext;
-    $targetPath = UPLOAD_DIR . '/' . $filename;
+    // Optional MIME check (skipped gracefully if fileinfo not available)
+    if (function_exists('finfo_open')) {
+        $mimeMap = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
+        $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo !== false) {
+            $actualMime = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            if (isset($mimeMap[$ext]) && $actualMime !== $mimeMap[$ext]) {
+                throw new \RuntimeException('File content does not match its extension');
+            }
+        }
+    }
+
+    $filename   = $prefix . bin2hex(random_bytes(16)) . '.' . $ext;
+    $targetPath = $uploadDir . '/' . $filename;
     if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-        return UPLOAD_URL . $filename;
+        return $uploadUrl . $filename;
     }
     return '';
 }
 
 try {
-    $proof_file_path = saveUploadedFile('proof_file', 'aadhar_');
-    $photo_path      = saveUploadedFile('photo', 'photo_');
-} catch (Exception $e) {
+    $proof_file_path = saveUploadedFile('proof_file', 'aadhar_', $uploadDir, $uploadUrl, $maxPhotoSize);
+    $photo_path      = saveUploadedFile('photo',      'photo_',  $uploadDir, $uploadUrl, $maxPhotoSize);
+} catch (\Throwable $e) {
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     exit;
 }
 
-$db = new SQLite3(DB_PATH);
+// ── DATABASE ──────────────────────────────────────────────────────────────────
+try {
+    $db = new PDO('sqlite:' . $dbPath);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-// Ensure aadhar_number column exists (migration-safe)
-$db->exec('CREATE TABLE IF NOT EXISTS bookings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    bookingId TEXT,
-    name TEXT,
-    dob TEXT,
-    district TEXT,
-    email TEXT,
-    phone TEXT,
-    proof TEXT,
-    proof_file TEXT,
-    photo TEXT,
-    message TEXT,
-    aadhar_number TEXT,
-    created_at TEXT
-)');
-// Add column if upgrading old schema
-try { $db->exec('ALTER TABLE bookings ADD COLUMN aadhar_number TEXT'); } catch(Exception $e) {}
+    $db->exec('CREATE TABLE IF NOT EXISTS bookings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bookingId TEXT UNIQUE,
+        name TEXT NOT NULL,
+        dob TEXT DEFAULT \'\',
+        district TEXT DEFAULT \'\',
+        email TEXT DEFAULT \'\',
+        phone TEXT NOT NULL,
+        proof TEXT DEFAULT \'\',
+        proof_file TEXT DEFAULT \'\',
+        photo TEXT DEFAULT \'\',
+        message TEXT DEFAULT \'\',
+        aadhar_number TEXT DEFAULT \'\',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )');
+    try { $db->exec('ALTER TABLE bookings ADD COLUMN aadhar_number TEXT DEFAULT \'\''); } catch (\PDOException $e) {}
+    try { $db->exec('ALTER TABLE bookings ADD COLUMN dob TEXT DEFAULT \'\''); } catch (\PDOException $e) {}
+    try { $db->exec('ALTER TABLE bookings ADD COLUMN district TEXT DEFAULT \'\''); } catch (\PDOException $e) {}
 
-// Duplicate Aadhar check
-$dupStmt = $db->prepare('SELECT bookingId, name FROM bookings WHERE aadhar_number = ? LIMIT 1');
-$dupStmt->bindValue(1, $aadhar_number, SQLITE3_TEXT);
-$dupResult = $dupStmt->execute()->fetchArray(SQLITE3_ASSOC);
-if ($dupResult) {
-    echo json_encode([
-        'status'  => 'duplicate',
-        'message' => 'This Aadhar card is already registered (ID: ' . htmlspecialchars($dupResult['bookingId']) . '). If you want to update your details, please use the Enhanced Player Registration page.',
-        'update_url' => 'single-registration-enhanced.html'
+    // Duplicate Aadhar check
+    $dupStmt = $db->prepare('SELECT bookingId, name FROM bookings WHERE aadhar_number = ? LIMIT 1');
+    $dupStmt->execute([$aadhar_number]);
+    $dupResult = $dupStmt->fetch();
+    if ($dupResult) {
+        echo json_encode([
+            'status'     => 'duplicate',
+            'message'    => 'This Aadhar card is already registered (ID: ' . htmlspecialchars($dupResult['bookingId']) . '). To update your details, use the Enhanced Player Registration page.',
+            'update_url' => 'single-registration-enhanced.html'
+        ]);
+        exit;
+    }
+
+    $bookingId = 'TCAM-' . strtoupper(bin2hex(random_bytes(4)));
+    $stmt = $db->prepare('INSERT INTO bookings
+        (bookingId, name, dob, district, email, phone, proof, proof_file, photo, message, aadhar_number, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([
+        $bookingId,
+        $_POST['name'],
+        $_POST['dob']      ?? '',
+        $_POST['district'] ?? '',
+        $_POST['email']    ?? '',
+        $_POST['phone'],
+        'aadhar',
+        $proof_file_path,
+        $photo_path,
+        $_POST['message']  ?? '',
+        $aadhar_number,
+        date('Y-m-d H:i:s')
     ]);
-    exit;
-}
 
-$bookingId = uniqid('TCAM-');
-$stmt = $db->prepare('INSERT INTO bookings (bookingId, name, dob, district, email, phone, proof, proof_file, photo, message, aadhar_number, created_at)
-    VALUES (:bookingId, :name, :dob, :district, :email, :phone, :proof, :proof_file, :photo, :message, :aadhar_number, :created_at)');
-$stmt->bindValue(':bookingId',      $bookingId,                                          SQLITE3_TEXT);
-$stmt->bindValue(':name',           $_POST['name'],                                      SQLITE3_TEXT);
-$stmt->bindValue(':dob',            $_POST['dob']     ?? '',                             SQLITE3_TEXT);
-$stmt->bindValue(':district',       $_POST['district'],                                  SQLITE3_TEXT);
-$stmt->bindValue(':email',          $_POST['email']   ?? '',                             SQLITE3_TEXT);
-$stmt->bindValue(':phone',          $_POST['phone'],                                     SQLITE3_TEXT);
-$stmt->bindValue(':proof',          'aadhar',                                            SQLITE3_TEXT);
-$stmt->bindValue(':proof_file',     $proof_file_path,                                   SQLITE3_TEXT);
-$stmt->bindValue(':photo',          $photo_path,                                         SQLITE3_TEXT);
-$stmt->bindValue(':message',        $_POST['message'] ?? '',                             SQLITE3_TEXT);
-$stmt->bindValue(':aadhar_number',  $aadhar_number,                                      SQLITE3_TEXT);
-$stmt->bindValue(':created_at',     date('Y-m-d H:i:s'),                               SQLITE3_TEXT);
-
-if ($stmt->execute()) {
     echo json_encode([
         'status' => 'success',
         'data'   => [
-            'bookingId'    => $bookingId,
-            'name'         => $_POST['name'],
-            'dob'          => $_POST['dob']      ?? '',
-            'district'     => $_POST['district'],
-            'aadhar_number'=> $aadhar_number,
-            'proof_file'   => $proof_file_path,
-            'photo'        => $photo_path
+            'bookingId'     => $bookingId,
+            'name'          => $_POST['name'],
+            'dob'           => $_POST['dob']      ?? '',
+            'district'      => $_POST['district'] ?? '',
+            'aadhar_number' => $aadhar_number,
+            'proof_file'    => $proof_file_path,
+            'photo'         => $photo_path
         ]
     ]);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Database insert failed']);
+
+} catch (\Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
 }
 exit;

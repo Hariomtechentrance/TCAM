@@ -54,52 +54,37 @@ if (!is_dir(UPLOAD_DIR)) {
     mkdir(UPLOAD_DIR, 0755, true);
 }
 
-// Database initialization
+// Database initialization — uses PDO so no SQLite3 extension required
 function initializeDatabase() {
-    $db = new SQLite3(DB_PATH);
-    
-    // Create bookings table
-    $db->exec('CREATE TABLE IF NOT EXISTS bookings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        bookingId TEXT UNIQUE,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        age INTEGER,
-        gender TEXT,
-        address TEXT,
-        city TEXT,
-        state TEXT,
-        pincode TEXT,
-        experience TEXT,
-        category TEXT,
-        photo_path TEXT,
-        proof_file_path TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )');
-    
-    // Create contacts table
-    $db->exec('CREATE TABLE IF NOT EXISTS contacts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT,
-        message TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )');
-    
-    // Create tournament entries table
-    $db->exec('CREATE TABLE IF NOT EXISTS tournament_entries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        team_name TEXT NOT NULL,
-        captain_name TEXT NOT NULL,
-        captain_phone TEXT NOT NULL,
-        players TEXT NOT NULL,
-        tournament_type TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )');
-    
-    $db->close();
+    try {
+        $db = new PDO('sqlite:' . DB_PATH);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->exec('CREATE TABLE IF NOT EXISTS bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bookingId TEXT UNIQUE,
+            name TEXT NOT NULL,
+            dob TEXT DEFAULT \'\',
+            district TEXT DEFAULT \'\',
+            email TEXT DEFAULT \'\',
+            phone TEXT NOT NULL,
+            proof TEXT DEFAULT \'\',
+            proof_file TEXT DEFAULT \'\',
+            photo TEXT DEFAULT \'\',
+            message TEXT DEFAULT \'\',
+            aadhar_number TEXT DEFAULT \'\',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )');
+        $db->exec('CREATE TABLE IF NOT EXISTS contacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT DEFAULT \'\',
+            message TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )');
+    } catch (\Throwable $e) {
+        // Silently fail — DB will be created on first actual write
+    }
 }
 
 // Initialize database on first load

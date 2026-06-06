@@ -1,7 +1,6 @@
 <?php
 require_once 'cors.php';
 header('Content-Type: application/json; charset=UTF-8');
-require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['duplicate' => false]);
@@ -15,11 +14,12 @@ if (!preg_match('/^\d{12}$/', $aadhar)) {
 }
 
 try {
-    $db = new SQLite3(DB_PATH);
+    $db = new PDO('sqlite:' . __DIR__ . '/tcam_bookings.db');
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $stmt = $db->prepare('SELECT bookingId FROM bookings WHERE aadhar_number = ? LIMIT 1');
-    $stmt->bindValue(1, $aadhar, SQLITE3_TEXT);
-    $row = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->execute([$aadhar]);
+    $row = $stmt->fetch();
     echo json_encode(['duplicate' => !empty($row)]);
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     echo json_encode(['duplicate' => false]);
 }
