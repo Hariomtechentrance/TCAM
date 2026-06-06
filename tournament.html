@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament - TCAM</title>
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: 60px auto 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            padding: 40px 24px 32px 24px;
+        }
+        h1 {
+            color: #ff6b35;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .placeholder {
+            text-align: center;
+            color: #888;
+            font-size: 1.2rem;
+            margin-top: 40px;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+        .tournament-section {
+            margin-top: 32px;
+        }
+        .tournament-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 28px;
+        }
+        .tournament-card {
+            background: linear-gradient(120deg, #f8fafc 80%, #ffe0b2 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            padding: 28px 22px 22px 22px;
+            position: relative;
+            transition: transform 0.25s, box-shadow 0.25s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-height: 220px;
+        }
+        .tournament-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 8px 32px rgba(255,107,53,0.13);
+        }
+        .tournament-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        .tournament-date, .tournament-venue {
+            font-size: 1.05rem;
+            color: #444;
+            margin-bottom: 7px;
+        }
+        .tournament-status {
+            font-size: 0.98rem;
+            color: #fff;
+            background: #ff6b35;
+            border-radius: 10px;
+            padding: 2px 12px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .tournament-btn {
+            margin-top: auto;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: #fff;
+            border: none;
+            border-radius: 22px;
+            padding: 0.6rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(255,107,53,0.08);
+        }
+        .tournament-btn:hover {
+            background: linear-gradient(45deg, #f7931e, #ff6b35);
+            transform: translateY(-2px) scale(1.04);
+        }
+        @media (max-width: 600px) {
+            .tournament-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html#home" class="back-link">&larr; Back to Home</a>
+        <h1>Tournament</h1>
+        <div class="placeholder">
+            Add your tournament schedules, results, and details here.
+        </div>
+        <section class="tournament-section">
+            <h2 style="text-align:center;color:#764ba2;margin-bottom:24px;font-size:2rem;">Upcoming Tournaments</h2>
+            
+            <!-- Featured Tournament -->
+            <div style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); border-radius: 20px; padding: 30px; margin-bottom: 30px; color: white; text-align: center; box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);">
+                <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 6px 16px; border-radius: 20px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                    🏆 Featured Tournament
+                </div>
+                <h3 style="font-size: 2rem; font-weight: bold; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">
+                    7th Under 17 Junior State Level<br>
+                    <span style="color: #ffe0b2;">Tennis Cricket Championship</span>
+                </h3>
+                <div style="font-size: 1.1rem; margin-bottom: 20px; opacity: 0.95;">
+                    <strong>(Men & Women)</strong>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin: 25px 0; align-items: center;">
+                    <div style="text-align: center; min-width: 100px; flex: 1 1 100px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 5px;">📅</div>
+                        <div style="font-weight: bold; margin-bottom: 3px;">Date</div>
+                        <div style="opacity: 0.9;">22nd - 24th August 2025</div>
+                    </div>
+                    <div style="text-align: center; min-width: 100px; flex: 1 1 100px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 5px;">📍</div>
+                        <div style="font-weight: bold; margin-bottom: 3px;">Location</div>
+                        <div style="opacity: 0.9;">Akaluj, Solapur</div>
+                    </div>
+                    <div style="text-align: center; min-width: 100px; flex: 1 1 100px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 5px;">📞</div>
+                        <div style="font-weight: bold; margin-bottom: 3px;">Contact</div>
+                        <div style="opacity: 0.9;">8421023200</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0; padding: 12px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; border-left: 4px solid #ffe0b2;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
+                        <span style="color: #ff4444;">🔴</span>
+                        <span>LIVE STREAM AVAILABLE</span>
+                        <span>📺</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px;">
+                    <button class="tournament-btn" onclick="openTournamentForm('7th Under 17 Junior State Level Tennis Cricket Championship')" style="background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.4); color: white; padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);" 
+                           onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" 
+                           onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';">Register Now</button>
+                    <button style="background: transparent; border: 2px solid rgba(255, 255, 255, 0.6); color: white; padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;" 
+                           onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='translateY(-2px)';" 
+                           onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)';">View Details</button>
+                </div>
+            </div>
+            
+            <div class="tournament-grid">
+                <div class="tournament-card">
+                    <span class="tournament-status">Registration Open</span>
+                    <div class="tournament-title">TCAM Maharashtra Premier League 2025</div>
+                    <div class="tournament-date"><b>Date:</b> 15 July 2025 - 20 July 2025</div>
+                    <div class="tournament-venue"><b>Venue:</b> Mumbai Sports Complex</div>
+                    <button class="tournament-btn" onclick="openTournamentForm('TCAM Maharashtra Premier League 2025')">Apply Now</button>
+                </div>
+                <div class="tournament-card">
+                    <span class="tournament-status" style="background:#43a047;">Upcoming</span>
+                    <div class="tournament-title">TCAM District Cup</div>
+                    <div class="tournament-date"><b>Date:</b> 5 August 2025</div>
+                    <div class="tournament-venue"><b>Venue:</b> Pune Sports Hub</div>
+                    <button class="tournament-btn" onclick="openTournamentForm('TCAM District Cup')">Apply Now</button>
+                </div>
+                <div class="tournament-card">
+                    <span class="tournament-status" style="background:#ff9800;">Upcoming</span>
+                    <div class="tournament-title">TCAM Women's Championship</div>
+                    <div class="tournament-date"><b>Date:</b> 22 August 2025</div>
+                    <div class="tournament-venue"><b>Venue:</b> Nashik Cricket Arena</div>
+                    <button class="tournament-btn" onclick="openTournamentForm('TCAM Women\'s Championship')">Apply Now</button>
+                </div>
+                <div class="tournament-card">
+                    <span class="tournament-status" style="background:#607d8b;">Upcoming</span>
+                    <div class="tournament-title">TCAM Junior League</div>
+                    <div class="tournament-date"><b>Date:</b> 10 September 2025</div>
+                    <div class="tournament-venue"><b>Venue:</b> Nagpur Tennis Cricket Ground</div>
+                    <button class="tournament-btn" onclick="openTournamentForm('TCAM Junior League')">Apply Now</button>
+                </div>
+            </div>
+        </section>
+        <!-- ...existing code... -->
+    </div>
+
+    <!-- Tournament Application Modal Form -->
+    <div id="tournamentFormModal" style="display:none;position:fixed;z-index:3000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.65);justify-content:center;align-items:center;">
+        <div style="background:#fff;padding:32px 24px 24px 24px;border-radius:16px;max-width:400px;width:95%;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <span onclick="closeTournamentForm()" style="position:absolute;top:12px;right:18px;font-size:2rem;cursor:pointer;color:#764ba2;">&times;</span>
+            <h2 style="color:#ff6b35;text-align:center;margin-bottom:18px;font-size:1.5rem;">Tournament Application</h2>
+            <form id="tournamentApplyForm" method="POST" action="save-tournament.php">
+                <input type="hidden" id="tournamentName" name="tournamentName">
+                <div style="margin-bottom:1rem;">
+                    <label for="applicantName" style="font-weight:bold;">Full Name</label>
+                    <input type="text" id="applicantName" name="applicantName" required style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid #ccc;">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label for="applicantEmail" style="font-weight:bold;">Email</label>
+                    <input type="email" id="applicantEmail" name="applicantEmail" required style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid #ccc;">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label for="applicantPhone" style="font-weight:bold;">Phone</label>
+                    <input type="tel" id="applicantPhone" name="applicantPhone" required style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid #ccc;">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label for="applicantDistrict" style="font-weight:bold;">District</label>
+                    <input type="text" id="applicantDistrict" name="applicantDistrict" required style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid #ccc;">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label for="applicantMessage" style="font-weight:bold;">Message (optional)</label>
+                    <textarea id="applicantMessage" name="applicantMessage" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid #ccc;height:70px;"></textarea>
+                </div>
+                <button type="submit" style="width:100%;background:linear-gradient(45deg,#ff6b35,#f7931e);color:#fff;padding:0.8rem;border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;font-weight:bold;">Apply</button>
+            </form>
+            <div style="margin-top:24px;text-align:center;">
+                <a href="view-tournament-entries.php" target="_blank" style="color:#764ba2;font-weight:bold;text-decoration:underline;">View All Tournament Applications</a>
+            </div>
+            <div id="tournamentFormSuccess" style="display:none;text-align:center;color:#43a047;margin-top:1rem;font-weight:bold;">
+                Application submitted successfully!
+            </div>
+        </div>
+    </div>
+    <script>
+        // ...existing code...
+
+        // Tournament Application Modal Logic
+        function openTournamentForm(tournamentName) {
+            document.getElementById('tournamentFormModal').style.display = 'flex';
+            document.getElementById('tournamentName').value = tournamentName;
+            document.getElementById('tournamentApplyForm').reset();
+            document.getElementById('tournamentFormSuccess').style.display = 'none';
+        }
+        function closeTournamentForm() {
+            document.getElementById('tournamentFormModal').style.display = 'none';
+        }
+        // document.getElementById('tournamentApplyForm').addEventListener('submit', function(e) {
+        //     e.preventDefault();
+        //     // You can replace this with AJAX to save to server
+        //     document.getElementById('tournamentFormSuccess').style.display = 'block';
+        //     setTimeout(closeTournamentForm, 1800);
+        // });
+    </script>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo-row">
+                    <img src="./images/logo.png" alt="TCAM Logo">
+                    <span class="footer-brand-name">TCAM</span>
+                </div>
+                <p class="footer-tagline">Tennis Cricket Association of Maharashtra — Affiliated to Tennis Cricket Association of India. Nurturing champions, building futures.</p>
+            </div>
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="managment.html">Management</a></li>
+                    <li><a href="tournament.php">Tournaments</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Get Involved</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html#booking">Register as Player</a></li>
+                    <li><a href="single-registration-enhanced.html">Update Registration</a></li>
+                    <li><a href="student-search.php">Search Registration</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Follow Us</h4>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/173JkY8Mw4/" target="_blank" class="social-link">
+                        <img src="Facebook.webp" alt="Facebook"> Facebook
+                    </a>
+                    <a href="https://www.instagram.com/tenniscricketmaharashtra?igsh=anphb3MyZDExdTdu" target="_blank" class="social-link">
+                        <img src="Instagram.webp" alt="Instagram"> Instagram
+                    </a>
+                    <a href="https://youtube.com/@tenniscricketmaharashtra?si=pVYR1NoF-RY67Toy" target="_blank" class="social-link">
+                        <img src="Youtube.webp" alt="YouTube"> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

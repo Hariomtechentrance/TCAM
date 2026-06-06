@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Successful - TCAM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/config.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        .container { max-width: 500px; margin: 40px auto; background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);}
+        h2 { color: #764ba2; text-align: center; margin-bottom: 2rem; }
+        .info-row { margin-bottom: 1.2rem; }
+        .label { font-weight: bold; color: #333; }
+        .value { color: #555; }
+        .download-btn { margin-top: 2rem; width: 100%; background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
+        .download-btn:hover { background: #ff6b35; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="idCard" style="background:#fff;max-width:340px;margin:0 auto;padding:24px 18px 32px 18px;border-radius:18px;box-shadow:0 5px 25px rgba(0,0,0,0.12);text-align:center;position:relative;">
+            <img src="./images/logo.png" alt="TCAM Logo" style="width:60px;margin-bottom:8px;">
+            <div style="font-size:1.1rem;font-weight:bold;color:#c33;margin-bottom:3px;">TENNIS CRICKET ASSOCIATION MAHARASHTRA (REGD.)</div>
+            <div style="font-size:0.92rem;color:#444;margin-bottom:10px;">AFFILIATED TO: TENNIS CRICKET ASSOCIATION OF INDIA</div>
+            <div style="font-size:1.3rem;font-weight:700;color:#234;margin-bottom:8px;">ID CARD</div>
+            <div style="margin:0 auto 12px auto;width:160px;height:200px;overflow:hidden;border-radius:12px;border:2px solid #eee;background:#f6f6f6;display:flex;align-items:center;justify-content:center;">
+                <img id="userPhoto" src="" alt="Candidate Photo" style="width:100%;object-fit:cover;">
+            </div>
+            <div style="text-align:left;margin-top:8px;">
+                <div style="margin-bottom:6px;"><b>ID:</b> <span id="cardId"></span></div>
+                <div style="margin-bottom:6px;"><b>Name:</b> <span id="cardName"></span></div>
+                <div style="margin-bottom:6px;"><b>Mobile:</b> <span id="cardMobile"></span></div>
+                <div style="margin-bottom:6px;"><b>City:</b> <span id="cardCity"></span></div>
+                <div style="margin-bottom:6px;"><b>State:</b> <span id="cardState"></span></div>
+                <div style="margin-bottom:6px;"><b>Joined:</b> <span id="cardJoined"></span></div>
+            </div>
+        </div>
+        <button class="download-btn" style="margin-top:28px;" onclick="downloadIdCard()">Download ID Card</button>
+    </div>
+    <script src="js/html2canvas.min.js"></script>
+    <script src="js/jspdf.umd.min.js"></script>
+    <script>
+        // Wait for all scripts to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if libraries loaded successfully
+            let retryCount = 0;
+            const maxRetries = 10;
+            
+            function checkLibraries() {
+                if (typeof html2canvas !== 'undefined' && typeof window.jspdf !== 'undefined') {
+                    console.log('PDF libraries loaded successfully');
+                    return true;
+                } else {
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        setTimeout(checkLibraries, 500);
+                    } else {
+                        console.error('Failed to load PDF libraries after', maxRetries, 'attempts');
+                        const btn = document.querySelector('.download-btn');
+                        if (btn) {
+                            btn.textContent = 'Download Unavailable';
+                            btn.disabled = true;
+                            btn.style.backgroundColor = '#ccc';
+                        }
+                    }
+                    return false;
+                }
+            }
+            
+            checkLibraries();
+        });
+        // Fill info from query string
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('cardId').textContent = params.get('bookingId') || '';
+        document.getElementById('cardName').textContent = params.get('name') || '';
+        document.getElementById('cardMobile').textContent = params.get('phone') || '';
+        document.getElementById('cardCity').textContent = params.get('district') || '';
+        document.getElementById('cardState').textContent = 'Maharashtra';
+        document.getElementById('cardJoined').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        var photoPath = params.get('photo');
+        if(photoPath) {
+            document.getElementById('userPhoto').src = decodeURIComponent(photoPath);
+        } else {
+            document.getElementById('userPhoto').src = 'images/default-photo.png';
+        }
+
+        function downloadIdCard() {
+            // Check if libraries are loaded
+            if (typeof html2canvas === 'undefined') {
+                alert('PDF generation library not loaded. Please refresh the page and try again.');
+                return;
+            }
+            
+            if (typeof window.jspdf === 'undefined') {
+                alert('PDF library not loaded. Please refresh the page and try again.');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            
+            // Show loading message
+            const btn = document.querySelector('.download-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Generating PDF...';
+            btn.disabled = true;
+            
+            try {
+                html2canvas(document.getElementById('idCard'), {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: document.getElementById('idCard').offsetWidth,
+                    height: document.getElementById('idCard').offsetHeight
+                }).then(function(canvas) {
+                    try {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF({
+                            orientation: 'portrait',
+                            unit: 'mm',
+                            format: 'a4'
+                        });
+                        
+                        // Calculate dimensions to fit the ID card nicely on the PDF
+                        const imgWidth = 85; // mm
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        
+                        // Center the image on the page
+                        const x = (210 - imgWidth) / 2; // A4 width is 210mm
+                        const y = 30; // Start from top with some margin
+                        
+                        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+                        
+                        // Add a title
+                        pdf.setFontSize(16);
+                        pdf.setTextColor(51, 51, 204);
+                        pdf.text('TCAM ID Card', 105, 20, { align: 'center' });
+                        
+                        // Save the PDF
+                        const fileName = 'TCAM_ID_Card_' + (document.getElementById('cardName').textContent || 'Member') + '.pdf';
+                        pdf.save(fileName);
+                        
+                        // Reset button
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        
+                    } catch (pdfError) {
+                        console.error('PDF generation error:', pdfError);
+                        // Fallback: download as image
+                        downloadAsImage(canvas);
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                }).catch(function(canvasError) {
+                    console.error('Canvas generation error:', canvasError);
+                    alert('Error capturing ID card. Please try again or contact support.');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                });
+            } catch (error) {
+                console.error('Download function error:', error);
+                alert('Error starting download. Please refresh the page and try again.');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        // Fallback function to download as image if PDF fails
+        function downloadAsImage(canvas) {
+            try {
+                const link = document.createElement('a');
+                link.download = 'TCAM_ID_Card_' + (document.getElementById('cardName').textContent || 'Member') + '.png';
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert('PDF generation failed. Downloaded as image instead.');
+            } catch (error) {
+                console.error('Image download fallback failed:', error);
+                alert('Download failed. Please try again or contact support.');
+            }
+        }
+    </script>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo-row">
+                    <img src="./images/logo.png" alt="TCAM Logo">
+                    <span class="footer-brand-name">TCAM</span>
+                </div>
+                <p class="footer-tagline">Tennis Cricket Association of Maharashtra — Affiliated to Tennis Cricket Association of India. Nurturing champions, building futures.</p>
+            </div>
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="managment.html">Management</a></li>
+                    <li><a href="tournament.php">Tournaments</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Get Involved</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html#booking">Register as Player</a></li>
+                    <li><a href="single-registration-enhanced.html">Update Registration</a></li>
+                    <li><a href="student-search.php">Search Registration</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Follow Us</h4>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/173JkY8Mw4/" target="_blank" class="social-link">
+                        <img src="Facebook.webp" alt="Facebook"> Facebook
+                    </a>
+                    <a href="https://www.instagram.com/tenniscricketmaharashtra?igsh=anphb3MyZDExdTdu" target="_blank" class="social-link">
+                        <img src="Instagram.webp" alt="Instagram"> Instagram
+                    </a>
+                    <a href="https://youtube.com/@tenniscricketmaharashtra?si=pVYR1NoF-RY67Toy" target="_blank" class="social-link">
+                        <img src="Youtube.webp" alt="YouTube"> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

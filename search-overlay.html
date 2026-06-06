@@ -1,0 +1,72 @@
+
+<!-- Student Search Modal -->
+<div id="searchModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius:15px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: #764ba2; margin: 0;">🔍 Search Your Registration</h3>
+            <button onclick="closeSearchModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 1.5rem; text-align: center;">
+            Already registered before? Search your existing registration and download your data instantly!
+        </p>
+        
+        <div class="form-group">
+            <label for="modal_search_type">Search By</label>
+            <select id="modal_search_type" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                <option value="">Select Search Type</option>
+                <option value="mobile">Mobile Number</option>
+                <option value="reg_id">TCAM ID</option>
+                <option value="document">Document Number (Aadhar/PAN)</option>
+                <option value="name">Name</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="modal_search_term">Enter Details</label>
+            <input type="text" id="modal_search_term" placeholder="Enter your details..." style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button onclick="performModalSearch()" class="submit-btn" style="background: #764ba2; padding: 0.8rem 2rem;">🔍 Search</button>
+            <a href="student-search.php" class="btn-secondary" style="display: inline-block; padding: 0.8rem 2rem; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Advanced Search</a>
+        </div>
+        
+        <div id="modalSearchResults" style="margin-top: 1.5rem;"></div>
+    </div>
+</div>
+
+<script>
+function openSearchModal() {
+    document.getElementById("searchModal").style.display = "flex";
+}
+
+function closeSearchModal() {
+    document.getElementById("searchModal").style.display = "none";
+}
+
+function performModalSearch() {
+    const searchType = document.getElementById("modal_search_type").value;
+    const searchTerm = document.getElementById("modal_search_term").value;
+    
+    if (!searchType || !searchTerm) {
+        alert("Please select search type and enter details");
+        return;
+    }
+    
+    // Redirect to student search with parameters
+    window.open(`student-search.php?search_type=${searchType}&search_term=${encodeURIComponent(searchTerm)}`, "_blank");
+}
+
+// Add click handler to search button in hero section
+document.addEventListener("DOMContentLoaded", function() {
+    const searchBtn = document.querySelector("a[href=\"#student-search\"]");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            openSearchModal();
+        });
+    }
+});
+</script>
+

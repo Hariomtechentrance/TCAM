@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Player Registration - TCAM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);}
+        h2 { color: #764ba2; text-align: center; margin-bottom: 2rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .form-group textarea { height: 100px; resize: vertical; }
+        .submit-btn { width: 100%; background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);}
+        .search-existing { background: #e8f4fd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; }
+        .search-existing a { color: #764ba2; text-decoration: none; font-weight: bold; }
+        .search-existing a:hover { text-decoration: underline; }
+        .required { color: #e74c3c; }
+        .photo-preview { max-width: 150px; max-height: 150px; margin-top: 10px; border-radius: 8px; border: 2px solid #ddd; }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .container { margin: 20px; padding: 1rem; }
+        }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" style="display:inline-block;margin-bottom:1.2rem;color:#ff6b35;text-decoration:none;font-weight:bold;font-size:1rem;">← Back to Home</a>
+        <h2>🏏 Update Player Registration</h2>
+        
+        <!-- Quick Lookup for Returning Students -->
+        <div class="search-existing" style="background:linear-gradient(135deg,#e8f4fd,#f0e6ff);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;border:2px solid #764ba2;">
+            <h3 style="color:#764ba2;margin-bottom:0.8rem;font-size:1.1rem;text-align:center;">🔍 Already Registered? Find Your Profile</h3>
+            <p style="text-align:center;color:#555;font-size:0.9rem;margin-bottom:1rem;">Enter your TCAM ID, Mobile Number, or Document Number to auto-fill your details. You'll only need to select the new tournament!</p>
+            <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;align-items:flex-end;">
+                <div style="flex:1;min-width:150px;">
+                    <select id="quickSearchType" style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;">
+                        <option value="reg_id">TCAM ID</option>
+                        <option value="mobile">Mobile Number</option>
+                        <option value="document">Document Number</option>
+                    </select>
+                </div>
+                <div style="flex:2;min-width:200px;">
+                    <input type="text" id="quickSearchTerm" placeholder="Enter your ID, mobile, or document number..." style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;">
+                </div>
+                <button type="button" id="quickSearchBtn" onclick="quickLookup()" style="padding:0.7rem 1.5rem;background:linear-gradient(45deg,#764ba2,#667eea);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:bold;cursor:pointer;transition:all 0.3s;">
+                    🔍 Find Me
+                </button>
+            </div>
+            <div id="quickSearchResult" style="margin-top:0.8rem;text-align:center;display:none;"></div>
+        </div>
+        
+        <form id="enhancedRegistrationForm" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" id="csrfToken">
+            
+            <!-- Personal Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Personal Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Full Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth <span class="required">*</span></label>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mobile">Mobile Number <span class="required">*</span></label>
+                    <input type="tel" id="mobile" name="mobile" pattern="[6-9][0-9]{9}" maxlength="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email">
+                </div>
+            </div>
+            
+            <!-- Document Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Aadhar Card</h3>
+            <input type="hidden" name="document_type" value="aadhar">
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="aadhar_upload">Upload Aadhar Card Image <span class="required">*</span></label>
+                    <input type="file" id="aadhar_upload" name="aadhar_upload" accept="image/jpeg,image/png,image/jpg">
+                    <small style="color:#666;">JPG / PNG. Your 12-digit number will be auto-scanned.</small>
+                    <div id="enh_ocrStatus" style="display:none;margin-top:8px;padding:8px 12px;border-radius:6px;font-size:0.92rem;"></div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="document_number">Aadhar Number <span class="required">*</span></label>
+                    <input type="text" id="document_number" name="document_number" maxlength="12" pattern="\d{12}"
+                           placeholder="12-digit Aadhar number (auto-filled after upload)" required
+                           style="letter-spacing:2px;font-size:1.1rem;">
+                    <div id="enh_duplicateMsg" style="display:none;"></div>
+                </div>
+            </div>
+            
+            <!-- Address Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Address Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City <span class="required">*</span></label>
+                    <input type="text" id="city" name="city" required>
+                </div>
+                <div class="form-group">
+                    <label for="state">State <span class="required">*</span></label>
+                    <select id="state" name="state" required>
+                        <option value="">Select State</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="district">District <span class="required">*</span></label>
+                    <input type="text" id="district" name="district" required>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="address">Full Address</label>
+                <textarea id="address" name="address" placeholder="Enter your complete address"></textarea>
+            </div>
+            
+            <!-- Family Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Family Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="parent_name">Parent/Guardian Name</label>
+                    <input type="text" id="parent_name" name="parent_name">
+                </div>
+                <div class="form-group">
+                    <label for="emergency_contact">Emergency Contact</label>
+                    <input type="tel" id="emergency_contact" name="emergency_contact" pattern="[6-9][0-9]{9}" maxlength="10">
+                </div>
+            </div>
+            
+            <!-- Medical Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Medical Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="blood_group">Blood Group</label>
+                    <select id="blood_group" name="blood_group">
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="joined">Registration Date <span class="required">*</span></label>
+                    <input type="date" id="joined" name="joined" required>
+                </div>
+            </div>
+            
+            <!-- Tournament Information -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Tournament Information</h3>
+            <div class="form-group full-width">
+                <label for="event_name">Tournament / event you are registering for <span class="required">*</span></label>
+                <input type="text" id="event_name" name="event_name" required placeholder="e.g. Mumbai District Cup 2026">
+            </div>
+            <div class="form-group full-width">
+                <label for="previous_tournaments">Previous Tournament Participation</label>
+                <textarea id="previous_tournaments" name="previous_tournaments" 
+                          placeholder="List any previous tournaments you've participated in..."></textarea>
+            </div>
+            
+            <!-- Photo Upload -->
+            <h3 style="color: #764ba2; margin-bottom: 1rem;">Photo Upload</h3>
+            <div class="form-group full-width">
+                <label for="photo">Upload Photo <span class="required">*</span> <span style="color:#666;font-weight:normal;">(required for first-time registration; optional when adding only a new event with the same ID)</span></label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+                <div id="photoPreview"></div>
+                <small style="color: #666;">Allowed formats: JPG, PNG, JPEG. Max size: 2MB</small>
+            </div>
+            
+            <button type="submit" class="submit-btn">📝 Register Now</button>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <script>
+    // ── Aadhar OCR for Enhanced form ─────────────────────────────
+    let enhOcrWorker = null;
+    async function getEnhOcrWorker() {
+        if (!enhOcrWorker) enhOcrWorker = await Tesseract.createWorker('eng');
+        return enhOcrWorker;
+    }
+    function parseAadharNum(text) {
+        const sp = text.match(/\d{4}[\s\-]\d{4}[\s\-]\d{4}/);
+        if (sp) return sp[0].replace(/[\s\-]/g,'');
+        const s = text.match(/\b\d{12}\b/);
+        return s ? s[0] : null;
+    }
+    function parseAadharName(text, enteredName) {
+        const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>2);
+        const candidates = lines.filter(l=>/^[A-Za-z\s\.]{3,40}$/.test(l) && !['Government of India','Govt of India'].includes(l));
+        if (!candidates.length) return null;
+        const first = (enteredName||'').split(' ')[0].toLowerCase();
+        for (const l of candidates) { if (l.toLowerCase().includes(first)) return l; }
+        return candidates[0];
+    }
+
+    document.getElementById('aadhar_upload').addEventListener('change', async function() {
+        const file = this.files[0]; if (!file) return;
+        const st = document.getElementById('enh_ocrStatus');
+        const inp = document.getElementById('document_number');
+        st.style.display = 'block';
+        st.style.cssText = 'display:block;padding:8px 12px;border-radius:6px;font-size:0.92rem;background:#f0e6ff;color:#764ba2;margin-top:8px;';
+        st.innerHTML = '🔄 Scanning Aadhar card… please wait';
+        try {
+            const { data: { text } } = await (await getEnhOcrWorker()).recognize(file);
+            const num = parseAadharNum(text);
+            const entered = document.getElementById('name').value;
+            const scanned = parseAadharName(text, entered);
+            if (num) {
+                inp.value = num;
+                let msg = `✅ Number: <b>${num.replace(/(\d{4})(\d{4})(\d{4})/,'$1 $2 $3')}</b>`;
+                if (scanned) {
+                    msg += ` &nbsp;|&nbsp; 📋 Name on card: <b>${scanned}</b>`;
+                    if (entered && !scanned.toLowerCase().includes(entered.split(' ')[0].toLowerCase()))
+                        msg += `<br>⚠️ <span style="color:#e67e22;">Name mismatch — verify your name matches the Aadhar card.</span>`;
+                }
+                st.style.background='#d4edda'; st.style.color='#155724'; st.innerHTML=msg;
+            } else {
+                st.style.background='#fff3cd'; st.style.color='#856404';
+                st.innerHTML='⚠️ Could not extract number. Please type your 12-digit Aadhar number manually.';
+            }
+        } catch(e) {
+            st.style.background='#f8d7da'; st.style.color='#721c24';
+            st.innerHTML='⚠️ Scan failed. Please type the Aadhar number manually.';
+        }
+    });
+
+    document.getElementById('document_number').addEventListener('blur', async function() {
+        const num = this.value.replace(/\s/g,'');
+        const msgEl = document.getElementById('enh_duplicateMsg');
+        if (num.length !== 12) { msgEl.style.display='none'; return; }
+        try {
+            const fd = new FormData(); fd.append('aadhar_number', num);
+            const res = await fetch(tcamApi('check-aadhar-duplicate.php'), {method:'POST',body:fd});
+            const data = await res.json();
+            if (data.duplicate) {
+                msgEl.style.cssText = 'display:block;padding:10px 14px;background:#f8d7da;color:#721c24;border-radius:8px;margin-top:6px;font-size:0.92rem;';
+                msgEl.innerHTML = `⚠️ This Aadhar card is already registered.<br>
+                    You can update your details below — just fill the form and submit again.`;
+            } else { msgEl.style.display='none'; }
+        } catch(e) { msgEl.style.display='none'; }
+    });
+
+        fetch(tcamApi('get-csrf-token.php'))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.csrf_token) document.getElementById('csrfToken').value = d.csrf_token;
+            })
+            .catch(function() {
+                alert('Could not load security token. Refresh the page.');
+            });
+        
+        // Quick Lookup for returning students
+        function quickLookup() {
+            const searchType = document.getElementById('quickSearchType').value;
+            const searchTerm = document.getElementById('quickSearchTerm').value.trim();
+            const resultDiv = document.getElementById('quickSearchResult');
+            
+            if (!searchTerm) { 
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">Please enter a search value</span>';
+                return; 
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<span style="color:#764ba2;">🔄 Searching...</span>';
+            
+            fetch(tcamApi(`student-search.php?format=json&search_type=${encodeURIComponent(searchType)}&search_term=${encodeURIComponent(searchTerm)}`))
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success' && data.results && data.results.length > 0) {
+                    const reg = data.results[0];
+                    // Auto-fill form
+                    document.getElementById('name').value = reg.name || '';
+                    document.getElementById('mobile').value = reg.mobile || '';
+                    document.getElementById('email').value = reg.email || '';
+                    document.getElementById('city').value = reg.city || '';
+                    document.getElementById('state').value = reg.state || '';
+                    document.getElementById('document_type').value = reg.document_type || '';
+                    document.getElementById('document_number').value = reg.document_number || '';
+                    if (reg.parent_name) document.getElementById('parent_name').value = reg.parent_name;
+                    if (reg.address) document.getElementById('address').value = reg.address;
+                    if (reg.emergency_contact) document.getElementById('emergency_contact').value = reg.emergency_contact;
+                    if (reg.blood_group) document.getElementById('blood_group').value = reg.blood_group;
+                    if (reg.date_of_birth) document.getElementById('dob').value = reg.date_of_birth;
+                    if (reg.previous_tournaments) document.getElementById('previous_tournaments').value = reg.previous_tournaments;
+                    
+                    resultDiv.innerHTML = '<span style="color:#27ae60;font-weight:bold;">✅ Found! TCAM ID: ' + reg.reg_id + ' — ' + reg.name + '</span><br><span style="color:#555;font-size:0.85rem;">Your details have been filled. Just select the tournament and submit!</span>';
+                    
+                    // Scroll to tournament field
+                    setTimeout(() => document.getElementById('event_name').scrollIntoView({behavior:'smooth',block:'center'}), 500);
+                } else {
+                    resultDiv.innerHTML = '<span style="color:#e74c3c;">❌ No registration found. Please fill out the form below for new registration.</span>';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                resultDiv.innerHTML = '<span style="color:#e74c3c;">Search failed. Please try again.</span>';
+            });
+        }
+        
+        // Allow Enter key in quick search
+        document.getElementById('quickSearchTerm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); quickLookup(); }
+        });
+        
+        // Auto-fill event name from URL (?event=TournamentName)
+        const urlEvent = new URLSearchParams(window.location.search).get('event');
+        if (urlEvent) {
+            document.getElementById('event_name').value = decodeURIComponent(urlEvent);
+        }
+        
+        // Set today's date as default
+        document.getElementById('joined').valueAsDate = new Date();
+        
+        // Photo preview
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('photoPreview');
+            
+            if (file) {
+                // Check file size (2MB limit)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Photo size must be less than 2MB');
+                    e.target.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    e.target.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="photo-preview" alt="Photo Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Form submission
+        document.getElementById('enhancedRegistrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Validate mobile number
+            const mobile = formData.get('mobile');
+            if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+                alert('Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9');
+                return;
+            }
+            
+            // Validate emergency contact if provided
+            const emergencyContact = formData.get('emergency_contact');
+            if (emergencyContact && !/^[6-9][0-9]{9}$/.test(emergencyContact)) {
+                alert('Please enter a valid 10-digit emergency contact number');
+                return;
+            }
+            
+            // Check for duplicate registration
+            fetch(tcamApi('check-duplicate.php'), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.same_profile) {
+                    submitRegistration(formData);
+                    return;
+                }
+                if (data.duplicate) {
+                    const msgEl = document.getElementById('enh_duplicateMsg');
+                    msgEl.style.cssText = 'display:block;padding:12px 16px;background:#f8d7da;color:#721c24;border-radius:8px;margin-top:8px;font-size:0.95rem;';
+                    msgEl.innerHTML = `⚠️ This Aadhar card is already registered (TCAM ID: <b>${data.existing_id || ''}</b>).<br>
+                        If you want to update your details, use the form below and submit — your record will be updated.<br>
+                        <a href="single-registration-enhanced.html" style="color:#721c24;font-weight:bold;">→ Enhanced Player Registration</a>`;
+                    document.getElementById('document_number').scrollIntoView({behavior:'smooth',block:'center'});
+                    return;
+                }
+                submitRegistration(formData);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // If duplicate check fails, proceed with registration
+                submitRegistration(formData);
+            });
+        });
+        
+        function submitRegistration(formData) {
+            fetch(tcamApi('save-id-registration-enhanced.php'), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`Registration successful! Your TCAM ID: ${data.id}\n\nPlease save this ID for future reference.`);
+                    window.location.href = 'registration-success.html?id=' + data.id;
+                } else if (data.status === 'event_added') {
+                    alert(data.message || ('Event added for TCAM ID ' + data.id));
+                    window.location.href = tcamApi('student-search.php') + '?search_type=reg_id&search_term=' + encodeURIComponent(data.id);
+                } else {
+                    alert('Registration failed: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Registration failed. Please try again.');
+            });
+        }
+        
+        // Check for URL parameters to reuse existing data
+        const urlParams = new URLSearchParams(window.location.search);
+        const reuseId = urlParams.get('reuse');
+        const reuseToken = urlParams.get('token');
+        
+        if (reuseId && reuseToken) {
+            fetch(tcamApi(`get-registration-data.php?id=${encodeURIComponent(reuseId)}&token=${encodeURIComponent(reuseToken)}`))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Fill form with existing data
+                    const registration = data.registration;
+                    document.getElementById('name').value = registration.name || '';
+                    document.getElementById('mobile').value = registration.mobile || '';
+                    document.getElementById('email').value = registration.email || '';
+                    document.getElementById('city').value = registration.city || '';
+                    document.getElementById('state').value = registration.state || '';
+                    document.getElementById('document_type').value = registration.document_type || '';
+                    document.getElementById('document_number').value = registration.document_number || '';
+                    document.getElementById('parent_name').value = registration.parent_name || '';
+                    document.getElementById('address').value = registration.address || '';
+                    document.getElementById('emergency_contact').value = registration.emergency_contact || '';
+                    document.getElementById('blood_group').value = registration.blood_group || '';
+                    document.getElementById('previous_tournaments').value = registration.previous_tournaments || '';
+                    
+                    if (registration.date_of_birth) {
+                        document.getElementById('dob').value = registration.date_of_birth;
+                    }
+                    
+                    alert('Existing registration data loaded. Please update any changed information and upload a new photo.');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading existing data:', error);
+            });
+        }
+    </script>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo-row">
+                    <img src="./images/logo.png" alt="TCAM Logo">
+                    <span class="footer-brand-name">TCAM</span>
+                </div>
+                <p class="footer-tagline">Tennis Cricket Association of Maharashtra — Affiliated to Tennis Cricket Association of India. Nurturing champions, building futures.</p>
+            </div>
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="managment.html">Management</a></li>
+                    <li><a href="tournament.php">Tournaments</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Get Involved</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html#booking">Register as Player</a></li>
+                    <li><a href="single-registration-enhanced.html">Update Registration</a></li>
+                    <li><a href="student-search.php">Search Registration</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Follow Us</h4>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/173JkY8Mw4/" target="_blank" class="social-link">
+                        <img src="Facebook.webp" alt="Facebook"> Facebook
+                    </a>
+                    <a href="https://www.instagram.com/tenniscricketmaharashtra?igsh=anphb3MyZDExdTdu" target="_blank" class="social-link">
+                        <img src="Instagram.webp" alt="Instagram"> Instagram
+                    </a>
+                    <a href="https://youtube.com/@tenniscricketmaharashtra?si=pVYR1NoF-RY67Toy" target="_blank" class="social-link">
+                        <img src="Youtube.webp" alt="YouTube"> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

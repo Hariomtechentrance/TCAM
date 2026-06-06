@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Tennis Cricket Association of Maharashtra</title>
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            /* Use the provided purple color as background */
+            background: #7b51a1;
+            color: #222;
+        }
+        .about-container {
+            max-width: 900px;
+            margin: 60px auto 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            padding: 40px 24px 32px 24px;
+            animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .about-title {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            letter-spacing: 2px;
+            animation: popIn 1s .2s both;
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8);}
+            80% { opacity: 1; transform: scale(1.05);}
+            100% { opacity: 1; transform: scale(1);}
+        }
+        .about-subtitle {
+            text-align: center;
+            text-wrap: balance; /* Modern browsers */
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 32px;
+            animation: fadeIn 1.2s .4s both;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            text-align: justify;
+            text-align-last: center;
+            hyphens: auto;
+            word-spacing: 0.1em;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0;}
+            to { opacity: 1;}
+        }
+        .about-section {
+            margin-bottom: 36px;
+            animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .about-section h2 {
+            color: #ff6b35;
+            font-size: 2rem;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(90deg,#ffb347 60%,#ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: popIn 1s .2s both;
+        }
+        .about-section h2::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: #ffb347;
+            border-radius: 2px;
+            margin-top: 6px;
+            margin-left: 2px;
+            opacity: 0.7;
+        }
+        .about-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .about-section ul li {
+            margin-bottom: 10px;
+            color: #222;
+            font-size: 1.08rem;
+            position: relative;
+            padding-left: 28px;
+            transition: background 0.3s;
+        }
+        .about-section ul li:before {
+            content: "✔️";
+            color: #f44336;
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.1rem;
+            transition: transform 0.3s;
+        }
+        .about-section ul li:hover {
+            background: #fff7e6;
+        }
+        .about-section ul li:hover:before {
+            transform: scale(1.2) rotate(-10deg);
+        }
+        .about-message, .about-message2 {
+            border-left: 4px solid #f44336;
+            padding-left: 18px;
+            margin: 32px 0;
+            color: #888;
+            font-style: italic;
+            background: #fff3e0;
+            border-radius: 0 12px 12px 0;
+            box-shadow: 0 2px 12px rgba(255,107,53,0.06);
+            animation: fadeIn 1.2s .7s both;
+        }
+        .about-message-title {
+            color: #f44336;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+        .about-vision {
+            margin-top: 30px;
+            animation: fadeInUp 1.2s .8s both;
+        }
+        .about-vision h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: #ff6b35;
+            letter-spacing: 1px;
+        }
+        .about-vision ul li {
+            color: #444;
+            padding-left: 28px;
+            position: relative;
+        }
+        .about-vision ul li:before {
+            content: "🏏";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.1rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+            color: #f44336;
+        }
+        /* Meenakshi image hover effect */
+        .about-section img {
+            transition: transform 0.4s cubic-bezier(.23,1.01,.32,1), box-shadow 0.3s;
+        }
+        .about-section img:hover {
+            transform: scale(1.08) rotate(-2deg);
+            box-shadow: 0 8px 32px rgba(255,107,53,0.18);
+        }
+        /* Responsive */
+        @media (max-width: 700px) {
+            .about-container {
+                padding: 18px 4vw 18px 4vw;
+            }
+            .about-section h2 {
+                font-size: 1.3rem;
+            }
+            .about-title {
+                font-size: 2rem;
+            }
+            .about-section img {
+                max-width: 280px !important;
+                width: 100% !important;
+                height: auto !important;
+                margin-bottom: 20px;
+            }
+            .about-section > div {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .about-section img {
+                max-width: 240px !important;
+            }
+            .about-section h2 {
+                font-size: 1.2rem;
+            }
+            .about-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <div class="about-container">
+        <a href="./index.html" class="back-link">&larr; Back to Home</a>
+        <div class="about-title">Tennis Cricket Association of Maharashtra</div>
+        <div class="about-subtitle" style="text-wrap: balance;">
+            The Tennis Cricket Association of Maharashtra (TCAM) is the official governing body for tennis cricket in Maharashtra. Established with a vision to promote and develop tennis cricket across the state, we provide a structured platform for players of all ages to showcase their talent and represent Maharashtra at national levels.
+        </div>
+        <div class="about-section">
+            <h2>Our Mission</h2>
+            <p>
+                To nurture and promote tennis cricket at the grassroots level in Maharashtra, identify and develop young talent across all districts, and provide them with opportunities to excel at state and national levels.
+            </p>
+            <ul>
+                <li>Promote tennis cricket across all 36 districts of Maharashtra</li>
+                <li>Organize structured district and state-level tournaments</li>
+                <li>Develop coaching programs in partnership with local academies</li>
+                <li>Establish strong district-level associations</li>
+                <li>Identify and nurture talent for national representation</li>
+            </ul>
+        </div>
+        <div class="about-section">
+            <h2>About Meenakshi Ghadigaonkar</h2>
+            <div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;">
+                <img src="./Meenakshi_Maam.jpg" alt="Meenakshi Ghadigaonkar" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
+                <div>
+                    <p>
+                        Meenakshi Ghadigaonkar was born into a humble farming family in the Latur district of Maharashtra. Her parents, Uttam Shankar Puri and Laxmibai Uttam Puri, instilled good values and discipline in her from an early age. Despite being physically challenged with one leg and one hand, her father had a deep interest in sports, especially kabaddi. His struggle and love for sports had a profound impact on Meenakshi's life and laid the foundation for her sporting spirit.
+                    </p>
+                    <p>
+                        After marriage, Meenakshi's life took a new turn. She married Vilas Ghadigaonkar and began a new life in Nashik, Maharashtra. Her husband and in-laws always encouraged her to pursue education and sports.
+                    </p>
+                    <p>
+                        Meenakshi Ghadigaonkar began her career as a sports teacher in schools and colleges, where she inspired and guided many young students. Her dedication to sports connected her with the Tennis Cricket Association of India. She initially served as the Secretary of the Nashik district, where her working style and leadership quickly gained recognition.
+                    </p>
+                    <p>
+                        Through consistent hard work and contribution, she became the State Secretary of Maharashtra, and today, she proudly serves as the National Secretary of the Tennis Cricket Association of India. Her journey from a small-town girl to a national-level leader is a living story of determination, confidence, and relentless effort.
+                    </p>
+                    <div class="about-message">
+                        <div class="about-message-title">Message to Future Players:</div>
+                        "Believe in yourself, stay disciplined, and play with all your heart. Your dedication will surely be recognized. Tennis Cricket is progressing rapidly, and the next shining star could be you. Keep growing continuously and never stop dreaming."
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="about-section">
+            <h2>About Mayuri Ghadigaonkar</h2>
+            <div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;">
+                <img src="./mayuri-giri.jpg" alt="Mayuri Ghadigaonkar" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center top;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
+                <div>
+            <p>
+                Mayuri Ghadigaonkar, daughter of Meenakshi Ghadigaonkar and Vilas Ghadigaonkar, has been interested in sports since childhood. Inspired by her parents, she has grown up with a passion for cricket and kabaddi. Her educational background includes an M.B.A., which she combines with her love for sports in her leadership role.
+            </p>
+            <p>
+                As the President of the Tennis Cricket Association Maharashtra, Mayuri is committed to taking the game of Tennis Cricket to rural areas, discovering emerging talents, and elevating them to the national level. Her vision extends beyond sports, aiming to create positive social transformation through athletic development.
+            </p>
+            </div>
+            </div>
+            <div class="about-message2">
+                <div class="about-message-title">Message to the Youth:</div>
+                "Dream big, but never shy away from working hard to achieve them. Discipline, perseverance, and confidence are the true strengths of success. Play with honesty on the field, and opportunities will surely knock at your door."
+            </div>
+            <div class="about-vision">
+                <h3>Vision for Maharashtra Tennis Cricket:</h3>
+                <ul>
+                    <li>Promote Tennis Cricket in rural areas</li>
+                    <li>Identify and nurture young talent</li>
+                    <li>Provide quality training and facilities</li>
+                    <li>Create pathways to national representation</li>
+                    <li>Foster sportsmanship and discipline</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo-row">
+                    <img src="./images/logo.png" alt="TCAM Logo">
+                    <span class="footer-brand-name">TCAM</span>
+                </div>
+                <p class="footer-tagline">Tennis Cricket Association of Maharashtra — Affiliated to Tennis Cricket Association of India. Nurturing champions, building futures.</p>
+            </div>
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="managment.html">Management</a></li>
+                    <li><a href="tournament.php">Tournaments</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Get Involved</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html#booking">Register as Player</a></li>
+                    <li><a href="single-registration-enhanced.html">Update Registration</a></li>
+                    <li><a href="student-search.php">Search Registration</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Follow Us</h4>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/173JkY8Mw4/" target="_blank" class="social-link">
+                        <img src="Facebook.webp" alt="Facebook"> Facebook
+                    </a>
+                    <a href="https://www.instagram.com/tenniscricketmaharashtra?igsh=anphb3MyZDExdTdu" target="_blank" class="social-link">
+                        <img src="Instagram.webp" alt="Instagram"> Instagram
+                    </a>
+                    <a href="https://youtube.com/@tenniscricketmaharashtra?si=pVYR1NoF-RY67Toy" target="_blank" class="social-link">
+                        <img src="Youtube.webp" alt="YouTube"> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

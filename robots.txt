@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin-login.php
+Disallow: /admin-panel.php
+Disallow: /admin-dashboard.php
+Disallow: /admin-panel-v2.php

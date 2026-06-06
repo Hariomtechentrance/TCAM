@@ -1,0 +1,32 @@
+# Database files — never commit live data
+*.db
+*.sqlite
+
+# Uploaded files — too large and private
+uploads/
+
+# PHP session and log files
+*.log
+security.log
+blocked_ips.txt
+
+# Live data / exported data — contains personal information
+contacts.txt
+tournament-entries.txt
+tcam_data.sql
+
+# Render build output
+_site/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment overrides
+.env
+
+# Local IDE / editor settings
+settings.json
+
+# Orphan files not part of this project
+App.js

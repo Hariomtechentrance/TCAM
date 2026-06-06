@@ -1,0 +1,53 @@
+services:
+  # ── PHP Backend Web Service ───────────────────────────────────────────────────
+  - type: web
+    name: tcam-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free          # Upgrade to "starter" or higher to add a persistent disk
+    envVars:
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"        # After frontend deploys, change to its Render URL
+      - key: CSRF_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: tcam_admin
+      - key: ADMIN_PASSWORD
+        value: ChangeMe123!   # Change this before going live
+
+    # Uncomment on a paid plan to keep DB + uploads across deploys:
+    # disk:
+    #   name: tcam-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+
+  # ── Static Frontend Site ──────────────────────────────────────────────────────
+  - type: web
+    name: tcam-frontend
+    runtime: static
+    buildCommand: |
+      set -e
+      mkdir -p _site
+      # Copy static pages
+      cp index.html about.html contact.html gallery.html tournament.html \
+         managment.html registration-success.html single-registration-enhanced.html \
+         404.html 500.html login.html _site/ 2>/dev/null || true
+      # Copy asset directories
+      cp -r css js fonts images bootstrap _site/
+      # Copy root-level images and media files
+      find . -maxdepth 1 \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \
+         -o -name "*.webp" -o -name "*.gif" -o -name "*.pdf" \) \
+         -exec cp {} _site/ \;
+      # Inject backend URL into config (overwrites the placeholder)
+      echo "window.TCAM_BACKEND_URL='${BACKEND_URL}';" > _site/js/config.js
+    staticPublishPath: _site
+    envVars:
+      - key: BACKEND_URL
+        value: ""   # Paste your backend URL here after Step 2 below
+    routes:
+      - type: rewrite
+        source: /404
+        destination: /404.html
+      - type: rewrite
+        source: /500
+        destination: /500.html

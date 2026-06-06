@@ -1,0 +1,16 @@
+
+# Gallery Security
+Options -Indexes
+<Files "*.php">
+    Deny from all
+</Files>
+
+# Allow image access
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg)$">
+    Allow from all
+</FilesMatch>
+
+# Prevent direct access to thumbnails directory
+<Directory "thumbnails">
+    Options -Indexes
+</Directory>

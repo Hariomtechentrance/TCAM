@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TCAM User Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);}
+        h2 { color: #764ba2; text-align: center; margin-bottom: 2rem; }
+        .data-row { margin-bottom: 1rem; }
+        .data-label { font-weight: bold; color: #333; }
+        .data-value { color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Registration Details</h2>
+        <div id="userData"></div>
+    </div>
+    <script>
+        // Get bookingId from query string
+        function getBookingId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('bookingId');
+        }
+        async function fetchUserData() {
+            const bookingId = getBookingId();
+            if (!bookingId) return;
+            const res = await fetch('user-data.php?bookingId=' + encodeURIComponent(bookingId));
+            const data = await res.json();
+            if (data.status === 'success') {
+                let html = '';
+                for (const key in data.user) {
+                    html += `<div class="data-row"><span class="data-label">${key.replace(/_/g, ' ')}:</span> <span class="data-value">${data.user[key]}</span></div>`;
+                }
+                document.getElementById('userData').innerHTML = html;
+            } else {
+                document.getElementById('userData').innerHTML = '<div style="color:#f44336;">User not found or not logged in.</div>';
+            }
+        }
+        fetchUserData();
+    </script>
+</body>
+</html>

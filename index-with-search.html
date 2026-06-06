@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TCAM - Tennis Cricket Association Maharashtra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .logo {
+            margin-bottom: 2rem;
+        }
+        
+        .logo img {
+            height: 80px;
+            border-radius: 10px;
+        }
+        
+        .title {
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        
+        .search-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-title {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .nav-links {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-content {
+                padding: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .search-container {
+                padding: 1.5rem;
+            }
+            
+            .nav-links {
+                top: 1rem;
+                right: 1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="single-registration-enhanced.html">📝 Register</a>
+            <a href="login-secure.php">🔐 Admin</a>
+        </div>
+        
+        <div class="hero-content">
+            <div class="logo">
+                <img src="images/logo.png" alt="TCAM Logo">
+            </div>
+            
+            <h1 class="title">TCAM Search Portal</h1>
+            <p class="subtitle">
+                Already registered before? Search your existing registration and download your data instantly!<br>
+                <span style="color: #ffe0b2;">Find your TCAM ID, download receipts, and reuse data for new tournaments</span>
+            </p>
+            
+            <div class="search-container">
+                <h2 class="search-title">🔍 Search Your Registration</h2>
+                
+                <form id="quickSearchForm">
+                    <div class="form-group">
+                        <label for="search_type">Search By</label>
+                        <select id="search_type" required>
+                            <option value="">Select Search Type</option>
+                            <option value="mobile">Mobile Number</option>
+                            <option value="reg_id">TCAM ID</option>
+                            <option value="document">Document ID (Aadhar / PAN / Driving Licence)</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="search_term">Enter Details</label>
+                        <input type="text" id="search_term" placeholder="Enter your details..." required>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">🔍 Search Registration</button>
+                        <a href="student-search.php" class="btn btn-secondary">Advanced Search</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('quickSearchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const searchType = document.getElementById('search_type').value;
+            const searchTerm = document.getElementById('search_term').value;
+            
+            if (!searchType || !searchTerm) {
+                alert('Please select search type and enter details');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Searching...';
+            submitBtn.disabled = true;
+            
+            try {
+                const url = new URL('student-search.php', window.location.href);
+                url.searchParams.set('format', 'json');
+                url.searchParams.set('search_type', searchType);
+                url.searchParams.set('search_term', searchTerm);
+                const response = await fetch(url.toString(), { credentials: 'same-origin' });
+                const result = await response.json();
+                
+                if (result.status === 'success' && result.results && result.results.length > 0) {
+                    displaySearchResults(result.results);
+                } else {
+                    alert(result.message || 'No registrations found. Please check your details and try again.');
+                }
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Search failed. Please try again.');
+            } finally {
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function displaySearchResults(results) {
+            const resultsHtml = results.map(reg => `
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #764ba2;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: #764ba2; margin: 0;">TCAM ID: ${reg.reg_id}</h3>
+                        ${reg.photo ? `<img src="uploads/${reg.photo}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">` : ''}
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div><strong>Name:</strong> ${reg.name}</div>
+                        <div><strong>Mobile:</strong> ${reg.mobile}</div>
+                        <div><strong>City:</strong> ${reg.city}</div>
+                        <div><strong>State:</strong> ${reg.state}</div>
+                        ${reg.document_number ? `<div><strong>Document:</strong> ${reg.document_number}</div>` : ''}
+                        <div><strong>Joined:</strong> ${reg.joined}</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="student-search.php?download=pdf&amp;id=${reg.id}&amp;token=${encodeURIComponent(reg.download_token || '')}" target="_blank" rel="noopener" style="background: #27ae60; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px;">📄 Download PDF</a>
+                        <a href="student-search.php?download=json&amp;id=${reg.id}&amp;token=${encodeURIComponent(reg.download_token || '')}" target="_blank" rel="noopener" style="background: #3498db; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px;">📊 Download JSON</a>
+                        <a href="single-registration-enhanced.html?reuse=${reg.id}&amp;token=${encodeURIComponent(reg.download_token || '')}" style="background: #ff6b35; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px;">🔄 Add another tournament</a>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Create results modal
+            const resultsModal = document.createElement('div');
+            resultsModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 10000; 
+                display: flex; justify-content: center; align-items: center; padding: 2rem;
+            `;
+            
+            resultsModal.innerHTML = `
+                <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="color: #764ba2; margin: 0;">🔍 Search Results (${results.length} found)</h2>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+                    </div>
+                    ${resultsHtml}
+                </div>
+            `;
+            
+            document.body.appendChild(resultsModal);
+        }
+    </script>
+</body>
+</html>

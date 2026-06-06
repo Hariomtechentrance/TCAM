@@ -1,0 +1,668 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management - TCAM</title>
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: 60px auto 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            padding: 40px 24px 32px 24px;
+        }
+        h1 {
+            color: #ff6b35;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .placeholder {
+            text-align: center;
+            color: #888;
+            font-size: 1.2rem;
+            margin-top: 40px;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+        .section-title {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin-top: 32px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .management-section {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 28px 22px 18px 22px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 12px rgba(118,75,162,0.06);
+            animation: fadeInUp 0.8s cubic-bezier(.4,2,.6,1.000);
+        }
+        .management-list {
+            margin: 0 0 18px 0;
+            padding: 0 0 0 18px;
+        }
+        .management-list li {
+            margin-bottom: 8px;
+            font-size: 1.08rem;
+        }
+        .apply-btn {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: #fff;
+            border: none;
+            border-radius: 22px;
+            padding: 0.6rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(255,107,53,0.08);
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .apply-btn:hover {
+            background: linear-gradient(45deg, #f7931e, #ff6b35);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .achievements {
+            margin-top: 18px;
+            background: #fff3e6;
+            border-left: 4px solid #ff6b35;
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 1.05rem;
+            color: #444;
+        }
+        .event-gallery {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .event-gallery img {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            transition: transform 0.2s;
+        }
+        .event-gallery img:hover {
+            transform: scale(1.07) rotate(-2deg);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        .committee-section {
+            width: 95vw;
+            max-width: 700px;
+            padding: 44px 32px 36px 32px;
+            background: linear-gradient(135deg, #fff 80%, #f7eafd 100%);
+            border-radius: 26px;
+            box-shadow: 0 10px 40px rgba(118,75,162,0.15), 0 2px 8px rgba(255,107,53,0.09);
+            animation: fadeInUp 1s cubic-bezier(.39,.575,.56,1.000);
+            position: relative;
+            margin: 0 auto;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .ribbon {
+            position: absolute;
+            left: -18px;
+            top: 24px;
+            background: linear-gradient(90deg, #764ba2 70%, #ff6b35 100%);
+            color: #fff;
+            padding: 6px 22px;
+            border-radius: 0 12px 12px 0;
+            font-weight: bold;
+            font-size: 1.06rem;
+            letter-spacing: 1.5px;
+            box-shadow: 0 2px 8px rgba(118,75,162,0.12);
+            z-index: 2;
+            animation: fadeInLeft 1.2s;
+        }
+        .ribbon span {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        .committee-section .section-title.gradient-text {
+            font-size: 2.3rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 28px;
+            background: linear-gradient(90deg, #764ba2 40%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1.5px;
+            animation: gradientMove 3s linear infinite alternate;
+        }
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .committee-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 14px rgba(118,75,162,0.08);
+            animation: fadeInUp 1.2s 0.2s both;
+        }
+        .committee-table th, .committee-table td {
+            padding: 18px 22px;
+            text-align: left;
+            font-size: 1.15rem;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+        }
+        .committee-table th {
+            background: linear-gradient(90deg, #764ba2 70%, #ff6b35 100%);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            font-size: 1.18rem;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        .committee-table tr {
+            transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+        }
+        .committee-table tr:nth-child(even) {
+            background: #f7f2fa;
+        }
+        .committee-table tr:nth-child(odd) {
+            background: #fff;
+        }
+        .committee-table tbody tr:hover {
+            background: #ffe5d1;
+            box-shadow: 0 2px 16px rgba(255,107,53,0.09);
+            transform: scale(1.025);
+            cursor: pointer;
+        }
+        .committee-table td:hover {
+            color: #764ba2;
+            font-weight: 600;
+            background: #fbe6ff;
+            transform: scale(1.06);
+            z-index: 2;
+        }
+        @media (max-width: 900px) {
+            .committee-section {
+                padding: 18px 1vw 14px 1vw;
+                max-width: 99vw;
+                min-height: 0;
+            }
+            .committee-table th, .committee-table td {
+                padding: 11px 6px;
+                font-size: 0.97rem;
+            }
+            .committee-section .section-title {
+                font-size: 1.3rem;
+            }
+            .ribbon {
+                left: -10px;
+                top: 16px;
+                padding: 4px 12px;
+                font-size: 0.95rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .committee-section {
+                padding: 5px 0.5vw 6px 0.5vw;
+            }
+            .committee-table th, .committee-table td {
+                padding: 7px 2px;
+                font-size: 0.92rem;
+            }
+        }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body contenteditable="false">
+    <script>
+        // Prevent editing
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.contentEditable = false;
+            document.designMode = 'off';
+            
+            // Remove any contenteditable attributes
+            document.querySelectorAll('*').forEach(function(el) {
+                el.removeAttribute('contenteditable');
+                el.contentEditable = false;
+            });
+            
+            // Prevent right-click
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            
+            // Prevent keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F2' || (e.ctrlKey && e.key === 'e')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+    <div class="container">
+        <a href="index.html#home" class="back-link">← Back to Home</a>
+        <h1>Management</h1>
+
+        <!-- State Level Dropdown -->
+        <div class="management-dropdowns" style="margin-bottom:32px;">
+            <div class="dropdown-section">
+                <button class="dropdown-btn" onclick="toggleDropdown('stateDropdown')">State Level Management ▾</button>
+                <div class="dropdown-content" id="stateDropdown" style="display:none;">
+                    <ul style="list-style:none;padding-left:0;">
+                        <li>State President</li>
+                        <li>State Secretary</li>
+                        <li>State Treasurer</li>
+                        <li>State Coaches</li>
+                        <li>State Event Volunteers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- District Level Dropdown (moved) -->
+        <div class="dropdown-section" style="margin-bottom:24px;">
+            <button class="dropdown-btn" onclick="toggleDropdown('districtDropdown')">District Level Management ▾</button>
+            <div class="dropdown-content" id="districtDropdown" style="display:none;max-height:300px;overflow-y:auto;">
+                <ul style="list-style:none;padding-left:0;columns:2;gap:24px;">
+                    <li><a href="#" onclick="showDistrictContact('Ahmednagar')" class="district-link">Ahmednagar</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Akola')" class="district-link">Akola</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Amravati')" class="district-link">Amravati</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Aurangabad')" class="district-link">Aurangabad</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Beed')" class="district-link">Beed</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Bhandara')" class="district-link">Bhandara</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Buldhana')" class="district-link">Buldhana</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Chandrapur')" class="district-link">Chandrapur</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Dhule')" class="district-link">Dhule</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Gadchiroli')" class="district-link">Gadchiroli</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Gondia')" class="district-link">Gondia</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Hingoli')" class="district-link">Hingoli</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Jalgaon')" class="district-link">Jalgaon</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Jalna')" class="district-link">Jalna</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Kolhapur')" class="district-link">Kolhapur</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Latur')" class="district-link">Latur</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Mumbai City')" class="district-link">Mumbai City</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Mumbai Suburban')" class="district-link">Mumbai Suburban</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Nagpur')" class="district-link">Nagpur</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Nanded')" class="district-link">Nanded</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Nandurbar')" class="district-link">Nandurbar</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Nashik')" class="district-link">Nashik</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Osmanabad')" class="district-link">Osmanabad</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Palghar')" class="district-link">Palghar</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Parbhani')" class="district-link">Parbhani</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Pune')" class="district-link">Pune</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Raigad')" class="district-link">Raigad</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Ratnagiri')" class="district-link">Ratnagiri</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Sangli')" class="district-link">Sangli</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Satara')" class="district-link">Satara</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Sindhudurg')" class="district-link">Sindhudurg</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Solapur')" class="district-link">Solapur</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Thane')" class="district-link">Thane</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Wardha')" class="district-link">Wardha</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Washim')" class="district-link">Washim</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Yavatmal')" class="district-link">Yavatmal</a></li>
+                </ul>
+            </div>
+        </div>
+        <style>
+            .dropdown-section {
+                margin-bottom: 12px;
+            }
+            .dropdown-btn {
+                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                color: #fff;
+                border: none;
+                border-radius: 22px;
+                padding: 0.6rem 1.5rem;
+                font-size: 1.08rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-align: left;
+                width: 100%;
+                margin-bottom: 2px;
+                box-shadow: 0 2px 8px rgba(255,107,53,0.08);
+                transition: background 0.2s, transform 0.2s;
+            }
+            .dropdown-btn:hover {
+                background: linear-gradient(45deg, #f7931e, #ff6b35);
+                transform: translateY(-2px) scale(1.03);
+            }
+            .dropdown-content {
+                background: #fff3e6;
+                border-radius: 10px;
+                padding: 16px 24px;
+                margin-top: 2px;
+                box-shadow: 0 2px 8px rgba(255,107,53,0.07);
+                animation: fadeInUp 0.5s;
+            }
+            .dropdown-content ul li {
+                margin-bottom: 7px;
+                font-size: 1.07rem;
+                color: #764ba2;
+                font-weight: 500;
+            }
+            
+            /* District Link Styles */
+            .district-link {
+                color: #764ba2;
+                text-decoration: none;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+                display: inline-block;
+                font-weight: 500;
+            }
+            
+            .district-link:hover {
+                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+            }
+            
+            /* Modal Styles */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.6);
+                backdrop-filter: blur(5px);
+                animation: fadeIn 0.3s ease;
+            }
+            
+            .modal-content {
+                background-color: #fff;
+                margin: 5% auto;
+                padding: 0;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 500px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+                overflow: hidden;
+            }
+            
+            .modal-close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                position: absolute;
+                right: 20px;
+                top: 15px;
+                cursor: pointer;
+                z-index: 1001;
+            }
+            
+            .modal-close:hover {
+                color: #ff6b35;
+            }
+            
+            #modalDistrictName {
+                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                color: white;
+                margin: 0;
+                padding: 20px 30px;
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+            
+            .modal-body {
+                padding: 25px 30px 30px;
+            }
+            
+            .contact-info p {
+                margin: 12px 0;
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            .contact-info strong {
+                color: #764ba2;
+                font-weight: 600;
+            }
+            
+            .modal-actions {
+                display: flex;
+                gap: 15px;
+                margin-top: 25px;
+                justify-content: center;
+            }
+            
+            .action-btn {
+                padding: 10px 20px;
+                border-radius: 25px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .call-btn {
+                background: linear-gradient(45deg, #28a745, #20c997);
+                color: white;
+            }
+            
+            .email-btn {
+                background: linear-gradient(45deg, #007bff, #6f42c1);
+                color: white;
+            }
+            
+            .action-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes slideIn {
+                from { 
+                    opacity: 0;
+                    transform: translateY(-50px) scale(0.9);
+                }
+                to { 
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+        </style>
+        
+
+        <!-- Maharashtra State Level Section -->
+        <div class="management-section">
+            <div class="section-title">Maharashtra State Level Management</div>
+            <ul class="management-list">
+                <li><strong>President:</strong> Mayuri Ghadigaonkar</li>
+                <li><strong>Secretary:</strong> Minakshi Ghadigaonkar</li>
+                <li><strong>Technical Director:</strong>Swapnil Thomare</li>
+                <li><strong>Media &amp; PR:</strong> Dhanashree Vilas</li>
+            </ul>
+            <div>
+                <strong>How to Apply:</strong> If you are passionate about tennis cricket and want to represent Maharashtra at the state level, apply for upcoming state events and trials.
+                <br>
+                <a href="contact.html" class="apply-btn">Apply for State Level Events</a>
+            </div>
+
+            <div class="achievements">
+                <strong>Recent Achievements:</strong>
+                <ul>
+                    <li>Successfully hosted the Maharashtra State Tennis Cricket Championship 2024 with 36 districts participating.</li>
+                    <li>Over 500+ players selected for national trials.</li>
+                    <li>Recognized by the International Tennis Cricket Federation for outstanding event management.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Committee Members Section -->
+        <div class="committee-section">
+            <div class="ribbon"><span>TCAM</span></div>
+            <h2 class="section-title gradient-text">Committee Members</h2>
+            <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <table class="committee-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Designation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Mayuri Raghunath Ghadigaonkar</td><td>President</td></tr>
+                    <tr><td>Vilas Ghadigaonkar</td><td>Vice President</td></tr>
+                    <tr><td>Minakshi Ghadigaonkar</td><td>Secretary</td></tr>
+                    <tr><td>Chandrakant Torne</td><td>Joint Secretary</td></tr>
+                    <tr><td>Ghansham Sanap</td><td>Treasurer</td></tr>
+                    <tr><td>Kranti Sanap</td><td>Member</td></tr>
+                    <tr><td>Aman Gupta</td><td>Member</td></tr>
+                    <tr><td>Swapnil Thomare</td><td>Member</td></tr>
+                    <tr><td>Rohit Ghadigaonkar</td><td>Member</td></tr>
+                    <tr><td>Dhanashree Vilas</td><td>Member</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- District Level Section -->
+        <div class="management-section">
+            <div class="section-title">District Level Management</div>
+            <ul class="management-list">
+                <li><strong>District Coordinators:</strong> Appointed for all 36 districts</li>
+                <li><strong>District Coaches:</strong> Certified by TCAM</li>
+                <li><strong>Event Volunteers:</strong> 200+ active members</li>
+            </ul>
+            <div>
+                <strong>How to Apply:</strong> Interested players and volunteers can join their respective district teams and participate in district-level tournaments and coaching camps.
+                <br>
+                <a href="contact.html" class="apply-btn">Apply for District Level</a>
+            </div>
+            <div class="achievements">
+                <strong>District Success Stories:</strong>
+                <ul>
+                    <li>Record participation in 2024 District Cups with over 1200 matches played.</li>
+                    <li>Many district players promoted to state and national teams.</li>
+                    <li>Community outreach programs increased grassroots engagement.</li>
+                </ul>
+            </div>
+           
+        </div>
+
+    </div>
+
+    <!-- District Contact Modal -->
+    <div id="districtModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDistrictModal()">×</span>
+            <h2 id="modalDistrictName">District Name</h2>
+            <div class="modal-body">
+                <div class="contact-info">
+                    <div id="modalPresident" style="display:none;"><p><strong>President:</strong> <span id="modalPresidentName">-</span></p></div>
+                    <div id="modalPresidentPhone" style="display:none;"><p><strong>President Phone:</strong> <span id="modalPresidentPhoneNum">-</span></p></div>
+                    <div id="modalVicePresident" style="display:none;"><p><strong>Vice President:</strong> <span id="modalVicePresidentName">-</span></p></div>
+                    <div id="modalVicePresidentPhone" style="display:none;"><p><strong>VP Phone:</strong> <span id="modalVicePresidentPhoneNum">-</span></p></div>
+                    <p><strong>Secretary:</strong> <span id="modalSecretary">-</span></p>
+                    <p><strong>Phone:</strong> <span id="modalPhone">-</span></p>
+                    <p><strong>Email:</strong> <span id="modalEmail">-</span></p>
+                    <div id="modalTreasurer" style="display:none;"><p><strong>Treasurer:</strong> <span id="modalTreasurerName">-</span></p></div>
+                    <div id="modalTreasurerEmail" style="display:none;"><p><strong>Treasurer Email:</strong> <span id="modalTreasurerEmailAddr">-</span></p></div>
+                    <p><strong>Address:</strong> <span id="modalAddress">-</span></p>
+                    <p><strong>Office Hours:</strong> <span id="modalHours">Mon - Sat, 10:00 AM - 6:00 PM</span></p>
+                </div>
+                <div class="modal-actions">
+                    <a href="#" id="modalCallBtn" class="action-btn call-btn">📞 Call Now</a>
+                    <a href="#" id="modalEmailBtn" class="action-btn email-btn">📧 Send Email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo-row">
+                    <img src="./images/logo.png" alt="TCAM Logo">
+                    <span class="footer-brand-name">TCAM</span>
+                </div>
+                <p class="footer-tagline">Tennis Cricket Association of Maharashtra — Affiliated to Tennis Cricket Association of India. Nurturing champions, building futures.</p>
+            </div>
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="managment.html">Management</a></li>
+                    <li><a href="tournament.php">Tournaments</a></li>
+                    <li><a href="gallery.php">Gallery</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Get Involved</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html#booking">Register as Player</a></li>
+                    <li><a href="single-registration-enhanced.html">Update Registration</a></li>
+                    <li><a href="student-search.php">Search Registration</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-heading">Follow Us</h4>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/share/173JkY8Mw4/" target="_blank" class="social-link">
+                        <img src="Facebook.webp" alt="Facebook"> Facebook
+                    </a>
+                    <a href="https://www.instagram.com/tenniscricketmaharashtra?igsh=anphb3MyZDExdTdu" target="_blank" class="social-link">
+                        <img src="Instagram.webp" alt="Instagram"> Instagram
+                    </a>
+                    <a href="https://youtube.com/@tenniscricketmaharashtra?si=pVYR1NoF-RY67Toy" target="_blank" class="social-link">
+                        <img src="Youtube.webp" alt="YouTube"> YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
+        </div>
+    </footer>
+</body></html>
