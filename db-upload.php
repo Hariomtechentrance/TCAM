@@ -11,8 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['secret'] ?? '') !== $secret) {
         die('<p style="color:red">Wrong secret key.</p>');
     }
+    $uploadErrors = [
+        UPLOAD_ERR_INI_SIZE   => 'File too large (exceeds server upload_max_filesize limit)',
+        UPLOAD_ERR_FORM_SIZE  => 'File too large (exceeds form MAX_FILE_SIZE)',
+        UPLOAD_ERR_PARTIAL    => 'File only partially uploaded',
+        UPLOAD_ERR_NO_FILE    => 'No file was uploaded',
+        UPLOAD_ERR_NO_TMP_DIR => 'Missing temp folder on server',
+        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+        UPLOAD_ERR_EXTENSION  => 'Upload blocked by PHP extension',
+    ];
     if (!isset($_FILES['dbfile']) || $_FILES['dbfile']['error'] !== UPLOAD_ERR_OK) {
-        die('<p style="color:red">Upload failed. Error: ' . ($_FILES['dbfile']['error'] ?? 'no file') . '</p>');
+        $code = $_FILES['dbfile']['error'] ?? -1;
+        $msg  = $uploadErrors[$code] ?? "Unknown error (code $code)";
+        die('<p style="color:red">Upload failed: ' . htmlspecialchars($msg) . '</p>');
     }
     $f = $_FILES['dbfile'];
     // Basic validation — SQLite files start with "SQLite format 3"

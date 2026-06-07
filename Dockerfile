@@ -18,6 +18,10 @@ RUN a2enmod rewrite headers deflate expires
 # Allow .htaccess overrides site-wide
 RUN sed -i 's|AllowOverride None|AllowOverride All|g' /etc/apache2/apache2.conf
 
+# Increase PHP upload limits for DB migration tool
+RUN echo "upload_max_filesize = 32M\npost_max_size = 32M\nmemory_limit = 128M\nmax_execution_time = 120" \
+    > /usr/local/etc/php/conf.d/uploads.ini
+
 # Copy project files
 COPY . /var/www/html/
 
