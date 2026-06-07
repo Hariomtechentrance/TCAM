@@ -4,7 +4,7 @@ services:
     name: tcam-backend
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free          # Upgrade to "starter" or higher to add a persistent disk
+    plan: starter       # Free plan has no persistent disk — use starter or higher
     envVars:
       - key: CORS_ALLOWED_ORIGINS
         value: "*"        # After frontend deploys, change to its Render URL
@@ -14,12 +14,15 @@ services:
         value: tcam_admin
       - key: ADMIN_PASSWORD
         value: ChangeMe123!   # Change this before going live
+      - key: TCAM_DB_PATH
+        value: /var/data/tcam_bookings.db
+      - key: TCAM_UPLOAD_DIR
+        value: /var/data/uploads
 
-    # Uncomment on a paid plan to keep DB + uploads across deploys:
-    # disk:
-    #   name: tcam-data
-    #   mountPath: /var/data
-    #   sizeGB: 1
+    disk:
+      name: tcam-data
+      mountPath: /var/data
+      sizeGB: 1
 
   # ── Static Frontend Site ──────────────────────────────────────────────────────
   - type: web

@@ -39,18 +39,34 @@ $db->exec("CREATE TABLE IF NOT EXISTS gallery_images (
 )");
 $db->exec("CREATE TABLE IF NOT EXISTS registrations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reg_id VARCHAR(10),
     name TEXT NOT NULL,
-    dob TEXT DEFAULT '',
     mobile TEXT DEFAULT '',
     email TEXT DEFAULT '',
-    aadhar_number TEXT DEFAULT '',
+    city TEXT DEFAULT '',
+    state TEXT DEFAULT '',
     district TEXT DEFAULT '',
-    photo TEXT DEFAULT '',
+    date_of_birth DATE DEFAULT '',
+    dob TEXT DEFAULT '',
+    document_type TEXT DEFAULT '',
+    document_number TEXT DEFAULT '',
+    document_number_normalized TEXT DEFAULT '',
+    download_token TEXT DEFAULT '',
+    address TEXT DEFAULT '',
+    parent_name TEXT DEFAULT '',
+    emergency_contact TEXT DEFAULT '',
+    blood_group TEXT DEFAULT '',
+    joined DATE DEFAULT '',
+    previous_tournaments TEXT DEFAULT '',
+    aadhar_number TEXT DEFAULT '',
     proof TEXT DEFAULT '',
     proof_file TEXT DEFAULT '',
+    photo TEXT DEFAULT '',
     status TEXT DEFAULT 'active',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )");
+// Add any missing columns to existing registrations table on live server
+try { $db->exec("ALTER TABLE registrations ADD COLUMN reg_id VARCHAR(10)"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'active'"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN date_of_birth TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN district TEXT DEFAULT ''"); } catch (PDOException $e) {}
@@ -59,6 +75,18 @@ try { $db->exec("ALTER TABLE registrations ADD COLUMN aadhar_number TEXT DEFAULT
 try { $db->exec("ALTER TABLE registrations ADD COLUMN proof TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN proof_file TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE registrations ADD COLUMN photo TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN city TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN state TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN document_type TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN document_number TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN document_number_normalized TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN download_token TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN address TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN parent_name TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN emergency_contact TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN blood_group TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN joined TEXT DEFAULT ''"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE registrations ADD COLUMN previous_tournaments TEXT DEFAULT ''"); } catch (PDOException $e) {}
 // Ensure bookings table has aadhar_number column (may be missing on old schema)
 try { $db->exec("ALTER TABLE bookings ADD COLUMN aadhar_number TEXT DEFAULT ''"); } catch (PDOException $e) {}
 try { $db->exec("ALTER TABLE bookings ADD COLUMN dob TEXT DEFAULT ''"); } catch (PDOException $e) {}
@@ -212,12 +240,12 @@ switch ($action) {
                 if (!empty($_GET['mobile']))  { $where[] = "mobile LIKE ?";          $params[] = '%'.$_GET['mobile'].'%'; }
                 if (!empty($_GET['reg_id']))  { $where[] = "reg_id = ?";             $params[] = $_GET['reg_id']; }
                 if (!empty($_GET['email']))   { $where[] = "email LIKE ?";           $params[] = '%'.$_GET['email'].'%'; }
-                if (!empty($_GET['city']))    { $where[] = "district LIKE ?";        $params[] = '%'.$_GET['city'].'%'; }
-                if (!empty($_GET['dob']))     { $where[] = "dob = ?";               $params[] = $_GET['dob']; }
+                if (!empty($_GET['city']))    { $where[] = "(city LIKE ? OR district LIKE ?)"; $params[] = '%'.$_GET['city'].'%'; $params[] = '%'.$_GET['city'].'%'; }
+                if (!empty($_GET['dob']))     { $where[] = "(date_of_birth = ? OR dob = ?)"; $params[] = $_GET['dob']; $params[] = $_GET['dob']; }
                 if (!empty($_GET['date_from'])) { $where[] = "DATE(created_at) >= ?"; $params[] = $_GET['date_from']; }
                 if (!empty($_GET['date_to']))   { $where[] = "DATE(created_at) <= ?"; $params[] = $_GET['date_to']; }
-                if (!empty($_GET['document_number'])) { $where[] = "aadhar_number LIKE ?"; $params[] = '%'.$_GET['document_number'].'%'; }
-                if (!empty($_GET['document_type']))   { $where[] = "proof LIKE ?"; $params[] = '%'.$_GET['document_type'].'%'; }
+                if (!empty($_GET['document_number'])) { $where[] = "(document_number LIKE ? OR aadhar_number LIKE ?)"; $params[] = '%'.$_GET['document_number'].'%'; $params[] = '%'.$_GET['document_number'].'%'; }
+                if (!empty($_GET['document_type']))   { $where[] = "(document_type LIKE ? OR proof LIKE ?)"; $params[] = '%'.$_GET['document_type'].'%'; $params[] = '%'.$_GET['document_type'].'%'; }
 
                 $sql = "SELECT * FROM registrations";
                 if ($where) $sql .= " WHERE ".implode(" AND ", $where);
@@ -230,12 +258,12 @@ switch ($action) {
                         'name'          => $r['name'] ?? '',
                         'mobile'        => $r['mobile'] ?? '',
                         'email'         => $r['email'] ?? '',
-                        'city'          => $r['district'] ?? '',
-                        'date_of_birth' => $r['dob'] ?? '',
-                        'document_type' => $r['proof'] ?? 'aadhar',
-                        'document_number'=> $r['aadhar_number'] ?? '',
+                        'city'          => $r['city'] ?? $r['district'] ?? '',
+                        'date_of_birth' => $r['date_of_birth'] ?? $r['dob'] ?? '',
+                        'document_type' => $r['document_type'] ?? $r['proof'] ?? 'aadhar',
+                        'document_number'=> $r['document_number'] ?? $r['aadhar_number'] ?? '',
                         'photo'         => $r['photo'] ?? '',
-                        'proof_file'    => $r['proof_file'] ?? '',
+                        'proof_file'    => $r['proof_file'] ?? $r['document_number'] ?? '',
                         'status'        => $r['status'] ?? 'active',
                         'events'        => [],
                         'created_at'    => $r['created_at'] ?? '',
