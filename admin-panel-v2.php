@@ -1329,7 +1329,7 @@ async function loadMedia() {
     const params = new URLSearchParams({action:'media_list'});
     if (section) params.set('section', section);
     const r = await fetch(API + '?' + params.toString());
-    const j = await r.json();
+    let j = await r.json();
     const grid = document.getElementById('mediaGrid');
     if (!j.data || j.data.length === 0) {
         if (!window._mediaSyncAttempted) {

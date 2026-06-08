@@ -34,9 +34,51 @@ class SecureDatabase {
      * Apply lightweight migrations (SQLite) for tokens, events, normalized IDs
      */
     private function ensureSchema() {
+        // Create registrations table first — must exist before any INSERTs or ALTERs
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS registrations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reg_id VARCHAR(10),
+            name TEXT NOT NULL,
+            mobile TEXT DEFAULT '',
+            email TEXT DEFAULT '',
+            city TEXT DEFAULT '',
+            state TEXT DEFAULT '',
+            district TEXT DEFAULT '',
+            date_of_birth DATE DEFAULT '',
+            dob TEXT DEFAULT '',
+            document_type TEXT DEFAULT '',
+            document_number TEXT DEFAULT '',
+            document_number_normalized TEXT DEFAULT '',
+            download_token TEXT DEFAULT '',
+            address TEXT DEFAULT '',
+            parent_name TEXT DEFAULT '',
+            emergency_contact TEXT DEFAULT '',
+            blood_group TEXT DEFAULT '',
+            joined DATE DEFAULT '',
+            previous_tournaments TEXT DEFAULT '',
+            aadhar_number TEXT DEFAULT '',
+            proof TEXT DEFAULT '',
+            proof_file TEXT DEFAULT '',
+            photo TEXT DEFAULT '',
+            status TEXT DEFAULT 'active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+
         $alters = [
+            'ALTER TABLE registrations ADD COLUMN reg_id VARCHAR(10)',
             'ALTER TABLE registrations ADD COLUMN document_number_normalized VARCHAR(64) DEFAULT NULL',
             'ALTER TABLE registrations ADD COLUMN download_token VARCHAR(64) DEFAULT NULL',
+            'ALTER TABLE registrations ADD COLUMN city TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN state TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN date_of_birth TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN document_type TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN document_number TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN address TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN parent_name TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN emergency_contact TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN blood_group TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN joined TEXT DEFAULT \'\'',
+            'ALTER TABLE registrations ADD COLUMN previous_tournaments TEXT DEFAULT \'\'',
         ];
         foreach ($alters as $sql) {
             try {
