@@ -3,14 +3,33 @@
  * Admin API — TCAM
  * RESTful JSON API for admin AJAX operations
  */
+
+// Match session cookie settings used by admin-login.php so the same session is resumed
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.use_only_cookies', 1);
+ini_set('session.gc_maxlifetime', 7200);   // 2 hours — outlasts the 30-min activity check
+$_https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+ini_set('session.cookie_secure', $_https ? '1' : '0');
 session_start();
 
 // Check auth
-if (empty($_SESSION['admin_logged_in'])) {
+if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
 }
+
+// Enforce 30-minute inactivity timeout (same as admin-auth.php)
+if (isset($_SESSION['admin_last_activity']) && (time() - $_SESSION['admin_last_activity']) > 1800) {
+    session_unset();
+    session_destroy();
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Session expired']);
+    exit;
+}
+// Refresh activity timestamp on every API call
+$_SESSION['admin_last_activity'] = time();
 
 header('Content-Type: application/json; charset=UTF-8');
 

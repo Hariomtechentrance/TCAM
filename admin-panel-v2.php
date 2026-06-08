@@ -6,7 +6,7 @@
 require_once 'admin-auth.php';
 
 // Run migration on first load
-$dbPath = __DIR__ . '/tcam_bookings.db';
+$dbPath = getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db';
 $db = new PDO('sqlite:' . $dbPath);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->exec("CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY AUTOINCREMENT, tournament_id TEXT UNIQUE, name TEXT NOT NULL, start_date TEXT, end_date TEXT, venue TEXT, city TEXT, state TEXT DEFAULT 'Maharashtra', participants INTEGER DEFAULT 0, status TEXT DEFAULT 'upcoming', winner TEXT DEFAULT '', runner_up TEXT DEFAULT '', organizer TEXT DEFAULT '', contact_person TEXT DEFAULT '', contact_mobile TEXT DEFAULT '', prize_money TEXT DEFAULT '', description TEXT DEFAULT '', image_path TEXT DEFAULT '', featured INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
