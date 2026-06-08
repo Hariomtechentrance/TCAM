@@ -5,7 +5,7 @@
  * Access: https://tcam.in/db-upload.php
  */
 $secret = 'tcam_upload_2024';
-$dbPath = __DIR__ . '/tcam_bookings.db';
+$dbPath = getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['secret'] ?? '') !== $secret) {
