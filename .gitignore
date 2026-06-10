@@ -1,6 +1,8 @@
 # Database files — never commit live data
 *.db
 *.sqlite
+# Exception: seed database bundled into Docker image for Render (free tier has no persistent disk)
+!tcam_bookings.db
 
 # Uploaded files — too large and private
 uploads/
