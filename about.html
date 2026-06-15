@@ -164,13 +164,30 @@
             text-decoration: underline;
             color: #f44336;
         }
-        /* Meenakshi image hover effect */
-        .about-section img {
-            transition: transform 0.4s cubic-bezier(.23,1.01,.32,1), box-shadow 0.3s;
+        .about-person-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 28px;
+            flex-wrap: wrap;
         }
-        .about-section img:hover {
-            transform: scale(1.08) rotate(-2deg);
-            box-shadow: 0 8px 32px rgba(255,107,53,0.18);
+        .about-person-layout > div {
+            flex: 1 1 360px;
+            min-width: 0;
+        }
+        .about-person-photo {
+            width: clamp(240px, 34vw, 340px) !important;
+            max-width: 100% !important;
+            height: auto !important;
+            display: block;
+            border-radius: 14px !important;
+            box-shadow: 0 6px 22px rgba(0,0,0,0.12) !important;
+            flex: 0 0 auto;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+        }
+        .about-person-photo:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.16) !important;
+            filter: saturate(1.03);
         }
         /* Responsive */
         @media (max-width: 700px) {
@@ -183,22 +200,23 @@
             .about-title {
                 font-size: 2rem;
             }
-            .about-section img {
-                max-width: 280px !important;
-                width: 100% !important;
-                height: auto !important;
+            .about-person-photo {
+                width: min(100%, 320px) !important;
                 margin-bottom: 20px;
             }
-            .about-section > div {
+            .about-person-layout {
                 flex-direction: column !important;
                 align-items: center !important;
-                text-align: center;
+            }
+            .about-person-layout > div {
+                flex-basis: auto;
+                width: 100%;
             }
         }
         
         @media (max-width: 480px) {
-            .about-section img {
-                max-width: 240px !important;
+            .about-person-photo {
+                width: min(100%, 280px) !important;
             }
             .about-section h2 {
                 font-size: 1.2rem;
@@ -231,18 +249,18 @@
             </ul>
         </div>
         <div class="about-section">
-            <h2>About Meenakshi Ghadigaonkar</h2>
-            <div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;">
-                <img src="./Meenakshi_Maam.jpg" alt="Meenakshi Ghadigaonkar" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
+            <h2>About Meenakshi Giri</h2>
+            <div class="about-person-layout">
+                <img src="./Meenakshi_Maam.jpg" alt="Meenakshi Giri" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
                 <div>
                     <p>
-                        Meenakshi Ghadigaonkar was born into a humble farming family in the Latur district of Maharashtra. Her parents, Uttam Shankar Puri and Laxmibai Uttam Puri, instilled good values and discipline in her from an early age. Despite being physically challenged with one leg and one hand, her father had a deep interest in sports, especially kabaddi. His struggle and love for sports had a profound impact on Meenakshi's life and laid the foundation for her sporting spirit.
+                        Meenakshi Giri was born into a humble farming family in the Latur district of Maharashtra. Her parents, Uttam Shankar Puri and Laxmibai Uttam Puri, instilled good values and discipline in her from an early age. Despite being physically challenged with one leg and one hand, her father had a deep interest in sports, especially kabaddi. His struggle and love for sports had a profound impact on Meenakshi's life and laid the foundation for her sporting spirit.
                     </p>
                     <p>
-                        After marriage, Meenakshi's life took a new turn. She married Vilas Ghadigaonkar and began a new life in Nashik, Maharashtra. Her husband and in-laws always encouraged her to pursue education and sports.
+                        After marriage, Meenakshi's life took a new turn. She married Vilas Giri and began a new life in Nashik, Maharashtra. Her husband and in-laws always encouraged her to pursue education and sports.
                     </p>
                     <p>
-                        Meenakshi Ghadigaonkar began her career as a sports teacher in schools and colleges, where she inspired and guided many young students. Her dedication to sports connected her with the Tennis Cricket Association of India. She initially served as the Secretary of the Nashik district, where her working style and leadership quickly gained recognition.
+                        Meenakshi Giri began her career as a sports teacher in schools and colleges, where she inspired and guided many young students. Her dedication to sports connected her with the Tennis Cricket Association of India. She initially served as the Secretary of the Nashik district, where her working style and leadership quickly gained recognition.
                     </p>
                     <p>
                         Through consistent hard work and contribution, she became the State Secretary of Maharashtra, and today, she proudly serves as the National Secretary of the Tennis Cricket Association of India. Her journey from a small-town girl to a national-level leader is a living story of determination, confidence, and relentless effort.
@@ -256,11 +274,11 @@
         </div>
         <div class="about-section">
             <h2>About Mayuri Ghadigaonkar</h2>
-            <div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;">
+            <div class="about-person-layout">
                 <img src="./mayuri-giri.jpg" alt="Mayuri Ghadigaonkar" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center top;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
                 <div>
             <p>
-                Mayuri Ghadigaonkar, daughter of Minakshi Giri and Vilas Ghadigaonkar, has been interested in sports since childhood. Inspired by her parents, she has grown up with a passion for cricket and kabaddi. Her educational background includes an M.B.A., which she combines with her love for sports in her leadership role.
+                Mayuri Ghadigaonkar, daughter of Minakshi Giri and Vilas Giri, has been interested in sports since childhood. Inspired by her parents, she has grown up with a passion for cricket and kabaddi. Her educational background includes an M.B.A., which she combines with her love for sports in her leadership role.
             </p>
             <p>
                 As the President of the Tennis Cricket Association Maharashtra, Mayuri is committed to taking the game of Tennis Cricket to rural areas, discovering emerging talents, and elevating them to the national level. Her vision extends beyond sports, aiming to create positive social transformation through athletic development.

@@ -10,97 +10,118 @@
         h2 { color: #764ba2; text-align: center; margin-bottom: 2rem; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
         .form-group textarea { height: 100px; resize: vertical; }
+        .form-group small { color: #888; font-size: 0.82rem; margin-top: 4px; display: block; }
         .submit-btn { width: 100%; background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; }
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);}
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem; display: none; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .tcam-id { font-size: 1.4rem; font-weight: bold; color: #764ba2; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Single Player Registration</h2>
-        <form id="singleRegistrationForm">
+
+        <div id="alertBox" class="alert"></div>
+
+        <form id="singleRegistrationForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="name">Full Name</label>
+                <label for="name">Full Name *</label>
                 <input type="text" id="name" name="name" required>
             </div>
             <div class="form-group">
-                <label for="dob">Date of Birth</label>
+                <label for="dob">Date of Birth *</label>
                 <input type="date" id="dob" name="dob" required>
             </div>
             <div class="form-group">
-                <label for="district">District</label>
+                <label for="district">District *</label>
                 <input type="text" id="district" name="district" required>
             </div>
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="email">Email Address *</label>
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" required>
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+                <small>10-digit mobile number</small>
             </div>
             <div class="form-group">
-                <label for="date">Preferred Date</label>
-                <input type="date" id="date" name="date" required>
+                <label for="aadhar_number">Aadhar Number *</label>
+                <input type="text" id="aadhar_number" name="aadhar_number"
+                       pattern="[0-9\s]{12,14}" inputmode="numeric"
+                       placeholder="1234 5678 9012" required>
+                <small>12-digit Aadhar number (spaces allowed)</small>
             </div>
             <div class="form-group">
-                <label for="time">Preferred Time</label>
-                <select id="time" name="time" required>
-                    <option value="">Select Time</option>
-                    <option value="09:00">9:00 AM</option>
-                    <option value="11:00">11:00 AM</option>
-                    <option value="14:00">2:00 PM</option>
-                    <option value="16:00">4:00 PM</option>
-                    <option value="18:00">6:00 PM</option>
-                </select>
+                <label for="proof_file">Aadhar Card Image *</label>
+                <input type="file" id="proof_file" name="proof_file"
+                       accept="image/jpeg,image/png,image/webp" required>
+                <small>JPG, PNG or WEBP – max 2 MB</small>
             </div>
             <div class="form-group">
-                <label for="players">Number of Players</label>
-                <select id="players" name="players" required>
-                    <option value="">Select Players</option>
-                    <option value="1">1 Player</option>
-                </select>
+                <label for="photo">Player Photo</label>
+                <input type="file" id="photo" name="photo"
+                       accept="image/jpeg,image/png,image/webp">
+                <small>Optional – JPG, PNG or WEBP – max 2 MB</small>
             </div>
             <div class="form-group">
-                <label for="venue">Preferred Venue</label>
-                <select id="venue" name="venue" required>
-                    <option value="">Select Venue</option>
-                    <option value="mumbai">Mumbai Sports Complex</option>
-                    <option value="delhi">Delhi Cricket Center</option>
-                    <option value="bangalore">Bangalore Tennis Cricket Arena</option>
-                    <option value="pune">Pune Sports Hub</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="message">Special Requirements</label>
+                <label for="message">Additional Information</label>
                 <textarea id="message" name="message" placeholder="Any special requirements or additional information..."></textarea>
             </div>
-            <button type="submit" class="submit-btn">Register</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Register</button>
         </form>
     </div>
     <script>
+        const alertBox = document.getElementById('alertBox');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showAlert(type, html) {
+            alertBox.className = 'alert alert-' + type;
+            alertBox.innerHTML = html;
+            alertBox.style.display = 'block';
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
         document.getElementById('singleRegistrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => data[key] = value);
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering…';
+            alertBox.style.display = 'none';
+
             try {
                 const response = await fetch('save-booking.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: new FormData(this)
                 });
                 const result = await response.json();
+
                 if (result.status === 'success') {
-                    alert(`Thank you ${result.name}! Your registration is successful.\n\nYour TCAM ID: ${result.bookingId}`);
+                    this.reset();
+                    showAlert('success',
+                        `✅ Registration successful!<br>` +
+                        `Welcome, <strong>${result.data.name}</strong>!<br>` +
+                        `Your TCAM ID: <span class="tcam-id">${result.data.bookingId}</span><br>` +
+                        `<small>Save this ID — you will need it to search your registration.</small>`
+                    );
+                } else if (result.status === 'duplicate') {
+                    showAlert('error',
+                        `⚠️ ${result.message}<br>` +
+                        `<a href="${result.update_url}" style="color:#721c24;font-weight:bold;">Update your registration →</a>`
+                    );
                 } else {
-                    alert('Registration failed. Please try again.');
+                    showAlert('error', '❌ ' + (result.message || 'Registration failed. Please try again.'));
                 }
             } catch (err) {
-                alert('Could not connect to server. Please try again later.');
+                showAlert('error', '❌ Could not connect to server. Please try again later.');
             }
-            this.reset();
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Register';
         });
     </script>
 </body>

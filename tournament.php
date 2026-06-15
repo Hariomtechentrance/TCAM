@@ -247,8 +247,8 @@ if (!$featured && !empty($tournaments)) $featured = $tournaments[0];
                 <p class="desc"><?php echo htmlspecialchars($featured['description']); ?></p>
             <?php endif; ?>
             <div class="featured-meta">
-                <div><div class="icon">📅</div><div class="label">Date</div><div class="value"><?php echo $featured['start_date'] ? date('d M Y', strtotime($featured['start_date'])) : 'TBD'; ?><?php echo $featured['end_date'] ? ' – ' . date('d M Y', strtotime($featured['end_date'])) : ''; ?></div></div>
-                <div><div class="icon">📍</div><div class="label">Venue</div><div class="value"><?php echo htmlspecialchars($featured['venue'] ?: 'TBD'); ?><?php echo $featured['city'] ? ', ' . htmlspecialchars($featured['city']) : ''; ?></div></div>
+                <div><div class="icon"></div><div class="label">Date</div><div class="value"><?php echo $featured['start_date'] ? date('d M Y', strtotime($featured['start_date'])) : 'TBD'; ?><?php echo $featured['end_date'] ? ' – ' . date('d M Y', strtotime($featured['end_date'])) : ''; ?></div></div>
+                <div><div class="icon"></div><div class="label">Venue</div><div class="value"><?php echo htmlspecialchars($featured['venue'] ?: 'TBD'); ?><?php echo $featured['city'] ? ', ' . htmlspecialchars($featured['city']) : ''; ?></div></div>
                 <?php if ($featured['contact_mobile']): ?>
                 <div><div class="icon">📞</div><div class="label">Contact</div><div class="value"><?php echo htmlspecialchars($featured['contact_mobile']); ?></div></div>
                 <?php endif; ?>
@@ -262,7 +262,7 @@ if (!$featured && !empty($tournaments)) $featured = $tournaments[0];
 
         <?php if (empty($tournaments)): ?>
             <div class="empty">
-                <i>🏏</i>
+                <i> </i>
                 <h3>No tournaments yet</h3>
                 <p>Check back soon for exciting tournament announcements!</p>
             </div>
@@ -278,10 +278,10 @@ if (!$featured && !empty($tournaments)) $featured = $tournaments[0];
                         <?php endif; ?>
                         <span class="status-tag status-<?php echo $t['status']; ?>"><?php echo ucfirst($t['status']); ?></span>
                         <h3><?php echo htmlspecialchars($t['name']); ?></h3>
-                        <div class="meta"><span>📅</span> <?php echo $t['start_date'] ? date('d M Y', strtotime($t['start_date'])) : 'TBD'; ?><?php echo $t['end_date'] ? ' – ' . date('d M Y', strtotime($t['end_date'])) : ''; ?></div>
-                        <div class="meta"><span>📍</span> <?php echo htmlspecialchars($t['venue'] ?: 'TBD'); ?><?php echo $t['city'] ? ', ' . htmlspecialchars($t['city']) : ''; ?></div>
+                        <div class="meta"><span></span> <?php echo $t['start_date'] ? date('d M Y', strtotime($t['start_date'])) : 'TBD'; ?><?php echo $t['end_date'] ? ' – ' . date('d M Y', strtotime($t['end_date'])) : ''; ?></div>
+                        <div class="meta"><span></span> <?php echo htmlspecialchars($t['venue'] ?: 'TBD'); ?><?php echo $t['city'] ? ', ' . htmlspecialchars($t['city']) : ''; ?></div>
                         <?php if ($t['winner'] && $t['status'] === 'completed'): ?>
-                            <div class="meta"><span>🏆</span> Winner: <strong style="color:#27ae60"><?php echo htmlspecialchars($t['winner']); ?></strong></div>
+                            <div class="meta"><span></span> Winner: <strong style="color:#27ae60"><?php echo htmlspecialchars($t['winner']); ?></strong></div>
                         <?php endif; ?>
                         <div class="footer">
                             <?php if ($t['prize_money']): ?>
