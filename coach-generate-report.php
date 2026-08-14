@@ -4,6 +4,7 @@
  */
 require_once 'coach-auth.php';
 require_once 'secure-database.php';
+require_once 'lib/fpdf/fpdf.php';
 
 $selectedIds = $_POST['selected_ids'] ?? [];
 $reportText = trim($_POST['report_text'] ?? '');
@@ -25,10 +26,10 @@ if (empty($selectedIds)) {
 
 $db = SecureDatabase::getInstance();
 $placeholders = implode(',', array_fill(0, count($selectedIds), '?'));
-$params = array_merge([$district], $selectedIds);
 
-$sql = "SELECT r.*, GROUP_CONCAT(DISTINCT er.event_name, ', ') as events FROM registrations r LEFT JOIN event_registrations er ON er.registration_id = r.id WHERE r.district = ? AND r.id IN ($placeholders) GROUP BY r.id ORDER BY r.name ASC";
-$stmt = $db->execute($sql, $params);
+// Coaches can select students from any district, not just their own.
+$sql = "SELECT * FROM bookings WHERE id IN ($placeholders) ORDER BY name ASC";
+$stmt = $db->execute($sql, $selectedIds);
 $registrations = $stmt->fetchAll();
 
 if (empty($registrations)) {
@@ -45,64 +46,54 @@ $reportData = [
 ];
 $db->insert('coach_reports', $reportData);
 
-function pdfEncode($string) {
-    return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $string);
-}
-
 $filename = 'TCAM_Coach_Report_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $district) . '_' . date('Ymd_His') . '.pdf';
+$coachName = $_SESSION['coach_name'] ?? $_SESSION['coach_username'] ?? '';
 
-$lines = [];
-$lines[] = "TCAM Coach Report";
-$lines[] = "District: $district";
-$lines[] = "Coach: " . ($_SESSION['coach_username'] ?? '');
+function pdfSafe($text) {
+    $converted = @iconv('UTF-8', 'CP1252//TRANSLIT//IGNORE', (string)$text);
+    return $converted !== false ? $converted : (string)$text;
+}
+
+$pdf = new FPDF('P', 'mm', 'A4');
+$pdf->SetAutoPageBreak(true, 15);
+$pdf->AddPage();
+
+$pdf->SetFont('Helvetica', 'B', 16);
+$pdf->Cell(0, 10, 'TCAM Coach Report', 0, 1);
+$pdf->SetFont('Helvetica', '', 11);
+$pdf->Cell(0, 7, pdfSafe('Coach: ' . $coachName), 0, 1);
 if ($eventName !== '') {
-    $lines[] = "Event: $eventName";
+    $pdf->Cell(0, 7, pdfSafe('Event: ' . $eventName), 0, 1);
 }
-$lines[] = "Generated: " . date('Y-m-d H:i:s');
-$lines[] = "";
+$pdf->Cell(0, 7, 'Generated: ' . date('Y-m-d H:i:s'), 0, 1);
+$pdf->Ln(3);
+
 if ($reportText !== '') {
-    $lines[] = "Coach Notes:";
-    foreach (preg_split('/\r?\n/', wordwrap($reportText, 90, "\n")) as $noteLine) {
-        $lines[] = $noteLine;
-    }
-    $lines[] = "";
+    $pdf->SetFont('Helvetica', 'B', 11);
+    $pdf->Cell(0, 7, 'Coach Notes:', 0, 1);
+    $pdf->SetFont('Helvetica', '', 11);
+    $pdf->MultiCell(0, 6, pdfSafe($reportText));
+    $pdf->Ln(3);
 }
-$lines[] = "Selected Candidates:";
-$lines[] = str_repeat('=', 40);
+
+$pdf->SetFont('Helvetica', 'B', 12);
+$pdf->Cell(0, 8, 'Selected Candidates (' . count($registrations) . ')', 0, 1);
+$pdf->SetDrawColor(180, 180, 180);
+$pdf->SetFont('Helvetica', '', 10);
 foreach ($registrations as $registration) {
-    $lines[] = sprintf("Name: %s", $registration['name']);
-    $lines[] = sprintf("TCAM ID: %s", $registration['reg_id']);
-    $lines[] = sprintf("Mobile: %s", $registration['mobile']);
-    $lines[] = sprintf("District: %s", $registration['district']);
-    $lines[] = sprintf("City: %s", $registration['city']);
-    $lines[] = sprintf("Event(s): %s", $registration['events'] ?? '');
-    $lines[] = str_repeat('-', 40);
+    $pdf->SetFont('Helvetica', 'B', 10);
+    $pdf->Cell(0, 6, pdfSafe('Name: ' . $registration['name']), 0, 1);
+    $pdf->SetFont('Helvetica', '', 10);
+    $pdf->Cell(0, 6, pdfSafe('Booking ID: ' . $registration['bookingId']), 0, 1);
+    $pdf->Cell(0, 6, pdfSafe('Mobile: ' . $registration['phone']), 0, 1);
+    $pdf->Cell(0, 6, pdfSafe('DOB: ' . $registration['dob']), 0, 1);
+    $pdf->Cell(0, 6, pdfSafe('District: ' . $registration['district']), 0, 1);
+    $y = $pdf->GetY() + 2;
+    $pdf->Line(10, $y, 200, $y);
+    $pdf->Ln(6);
 }
-
-$pdfContent = "%PDF-1.3\n";
-$pdfContent .= "1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj\n";
-
-$textParts = [];
-foreach ($lines as $line) {
-    $textParts[] = "(" . pdfEncode($line) . ") Tj T*";
-}
-$textStream = "BT /F1 12 Tf 40 760 Td " . implode(' ', $textParts) . " ET";
-$streamLength = strlen($textStream);
-
-$pdfContent .= "2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj\n";
-$pdfContent .= "3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>endobj\n";
-$pdfContent .= "4 0 obj<< /Length $streamLength >>stream\n$textStream\nendstream\nendobj\n";
-$pdfContent .= "5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n";
-
-$xref = strlen($pdfContent);
-$pdfContent .= "xref\n0 6\n0000000000 65535 f \n";
-$offsets = [1 => 9, 2 => 52, 3 => 103, 4 => 213, 5 => 278];
-foreach ($offsets as $offset) {
-    $pdfContent .= sprintf('%010d 00000 n \n', $offset);
-}
-$pdfContent .= "trailer<< /Size 6 /Root 1 0 R >>\nstartxref\n" . $xref . "\n%%EOF";
 
 header('Content-Type: application/pdf');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
-echo $pdfContent;
+echo $pdf->Output('S');
 exit;

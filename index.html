@@ -706,11 +706,15 @@
                     <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
                         <button class="register-btn" style="width:100%;border-radius:8px;background:#764ba2;" onclick="closeMenu();openCoachModal();">🏏 Register as Coach</button>
                     </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu();">🔑 Coach Login</a>
+                    </li>
                 </ul>
             </nav>
             <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
                 <button class="register-btn header-register-btn" onclick="scrollToBooking()">Register Now</button>
                 <button class="register-btn header-register-btn" style="background:#764ba2;" onclick="openCoachModal()">  Register as Coach</button>
+                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
             </div>
         </div>
     </header>
@@ -1605,9 +1609,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
                 const r = await fetch(tcamApi('public-coach-register.php'), { method: 'POST', body: fd });
                 const j = await r.json();
                 if (j.status === 'success') {
-                    showCoachToast('Registration completed. Admin will review and activate your account.');
                     coachModal.style.display = 'none';
                     document.getElementById('coachRegisterForm').reset();
+                    alert(j.message || 'Registration completed.');
                 } else {
                     showCoachToast(j.message || 'Unable to submit');
                 }

@@ -9,28 +9,27 @@ require_once 'secure-database.php';
 $db = SecureDatabase::getInstance();
 $district = $_SESSION['coach_district'];
 $search = trim($_GET['search'] ?? '');
-$event_name = trim($_GET['event_name'] ?? '');
 
-$eventRows = $db->execute("SELECT DISTINCT er.event_name FROM event_registrations er JOIN registrations r ON r.id = er.registration_id WHERE r.district = ? ORDER BY er.event_name ASC", [$district])->fetchAll();
-$eventOptions = array_column($eventRows, 'event_name');
-
-$where = ['r.district = ?'];
-$params = [$district];
+// Every coach can see every student, regardless of which district they
+// registered under — the coach's own district is only used for the PDF
+// filename/team label, never to restrict who shows up here.
+$where = [];
+$params = [];
 if ($search !== '') {
-    $where[] = "(r.name LIKE ? OR r.mobile LIKE ? OR r.reg_id LIKE ? OR r.document_number LIKE ? OR r.city LIKE ? OR r.state LIKE ? )";
+    $where[] = "(name LIKE ? OR phone LIKE ? OR bookingId LIKE ? OR email LIKE ? OR district LIKE ?)";
     $term = "%$search%";
-    array_push($params, $term, $term, $term, $term, $term, $term);
+    array_push($params, $term, $term, $term, $term, $term);
 }
-if ($event_name !== '') {
-    $where[] = "er.event_name = ?";
-    $params[] = $event_name;
-}
+$whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-$sql = "SELECT r.*, GROUP_CONCAT(DISTINCT er.event_name, ', ') as events FROM registrations r LEFT JOIN event_registrations er ON er.registration_id = r.id";
-if (!empty($where)) {
-    $sql .= " WHERE " . implode(' AND ', $where);
-}
-$sql .= " GROUP BY r.id ORDER BY r.created_at DESC LIMIT 300";
+$perPage = 100;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$total = (int)$db->execute("SELECT COUNT(*) c FROM bookings $whereSql", $params)->fetch()['c'];
+$totalPages = max(1, (int)ceil($total / $perPage));
+$page = min($page, $totalPages);
+$offset = ($page - 1) * $perPage;
+
+$sql = "SELECT * FROM bookings $whereSql ORDER BY created_at DESC LIMIT $perPage OFFSET $offset";
 $results = $db->execute($sql, $params)->fetchAll();
 
 function htmlEscape($value) {
@@ -79,7 +78,7 @@ function htmlEscape($value) {
     <div class="topbar">
         <div>
             <h1>Coach Dashboard</h1>
-            <div class="text-small">District: <?php echo htmlEscape($district); ?> — Logged in as <?php echo htmlEscape($_SESSION['coach_username']); ?></div>
+            <div class="text-small">Your district: <?php echo htmlEscape($district); ?> — Logged in as <?php echo htmlEscape($_SESSION['coach_username']); ?></div>
         </div>
         <div>
             <a href="coach-logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -88,59 +87,77 @@ function htmlEscape($value) {
 
     <div class="container">
         <div class="panel">
-            <h2>District Registrations</h2>
+            <h2>All Student Registrations</h2>
             <form class="filters" method="GET" action="coach-panel.php">
-                <input type="text" name="search" placeholder="Search by name / mobile / TCAM ID / city" value="<?php echo htmlEscape($search); ?>">
-                <select name="event_name">
-                    <option value="">All tournaments/events</option>
-                    <?php foreach ($eventOptions as $eventOption): ?>
-                        <option value="<?php echo htmlEscape($eventOption); ?>" <?php echo $eventOption === $event_name ? 'selected' : ''; ?>><?php echo htmlEscape($eventOption); ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <input type="text" name="search" placeholder="Search by name / mobile / booking ID / email / district" value="<?php echo htmlEscape($search); ?>">
                 <button type="submit">Filter</button>
             </form>
+            <div class="text-small" style="margin-bottom:12px;"><?php echo (int)$total; ?> student<?php echo $total === 1 ? '' : 's'; ?> found — page <?php echo $page; ?> of <?php echo $totalPages; ?></div>
 
             <?php if (empty($results)): ?>
-                <div class="empty-state">No candidates found for this district and filter. Please adjust the search or select a different event.</div>
+                <div class="empty-state">No students found. Please adjust the search.</div>
             <?php else: ?>
-            <form method="POST" action="coach-generate-report.php">
+            <form method="POST" action="coach-generate-report.php" autocomplete="off">
                 <div class="select-all">
-                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
-                    <label for="selectAll">Select all visible candidates</label>
+                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" autocomplete="off">
+                    <label for="selectAll">Select all visible students</label>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th></th>
-                            <th>TCAM ID</th>
+                            <th>Booking ID</th>
                             <th>Name</th>
                             <th>Mobile</th>
-                            <th>City</th>
-                            <th>Event(s)</th>
-                            <th>Date</th>
+                            <th>DOB</th>
+                            <th>District</th>
+                            <th>Registration Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($results as $row): ?>
                             <tr>
-                                <td><input type="checkbox" name="selected_ids[]" value="<?php echo (int)$row['id']; ?>"></td>
-                                <td><?php echo htmlEscape($row['reg_id']); ?></td>
+                                <td><input type="checkbox" name="selected_ids[]" value="<?php echo (int)$row['id']; ?>" autocomplete="off"></td>
+                                <td><?php echo htmlEscape($row['bookingId']); ?></td>
                                 <td><?php echo htmlEscape($row['name']); ?></td>
-                                <td><?php echo htmlEscape($row['mobile']); ?></td>
-                                <td><?php echo htmlEscape($row['city']); ?></td>
-                                <td><?php echo htmlEscape($row['events'] ?: '-'); ?></td>
-                                <td><?php echo htmlEscape($row['joined'] ?? ''); ?></td>
+                                <td><?php echo htmlEscape($row['phone']); ?></td>
+                                <td><?php echo htmlEscape($row['dob']); ?></td>
+                                <td><?php echo htmlEscape($row['district']); ?></td>
+                                <td><?php echo htmlEscape($row['created_at'] ?? ''); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
 
+                <?php if ($totalPages > 1): ?>
+                <div style="display:flex; gap:10px; align-items:center; margin-top:16px;">
+                    <?php if ($page > 1): ?>
+                        <a href="coach-panel.php?search=<?php echo urlencode($search); ?>&page=<?php echo $page - 1; ?>">&larr; Previous</a>
+                    <?php endif; ?>
+                    <span class="text-small">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+                    <?php if ($page < $totalPages): ?>
+                        <a href="coach-panel.php?search=<?php echo urlencode($search); ?>&page=<?php echo $page + 1; ?>">Next &rarr;</a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <div class="report-area">
-                    <label for="event_name">Tournament / Event Name</label>
-                    <input type="text" id="event_name" name="event_name" value="<?php echo htmlEscape($event_name); ?>" style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px; margin-bottom:14px;">
                     <label for="report_text">Coach Report</label>
                     <textarea id="report_text" name="report_text" placeholder="Write your report here... eg. These candidates are appearing for the tournament, selected for district squad."></textarea>
-                    <button type="submit">Download Selected Students PDF</button>
+                    <button type="submit" formaction="coach-generate-report.php">Download Selected Students PDF</button>
+                </div>
+
+                <div class="report-area">
+                    <h2 style="margin:0 0 14px;">Team Entry Report (PDF with photos)</h2>
+                    <label for="report_title">Championship / Tournament Title</label>
+                    <input type="text" id="report_title" name="report_title" placeholder="e.g. 5th Senior National Tennis Cricket Championship (Men/Women) - 2026" style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px; margin-bottom:14px;">
+                    <label for="report_venue">Venue</label>
+                    <input type="text" id="report_venue" name="report_venue" placeholder="e.g. Centurion University Bhubaneswar" style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px; margin-bottom:14px;">
+                    <label for="report_dates">Dates</label>
+                    <input type="text" id="report_dates" name="report_dates" placeholder="e.g. 09-Mar-2026 To 14-Mar-2026" style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px; margin-bottom:14px;">
+                    <label for="report_team_label">Team Label</label>
+                    <input type="text" id="report_team_label" name="report_team_label" placeholder="e.g. <?php echo htmlEscape($district); ?> (Women)" style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px; margin-bottom:14px;">
+                    <button type="submit" formaction="coach-team-report.php" style="background:#7c3aed;">Download Team Entry Report (PDF with Photos)</button>
                 </div>
             </form>
             <?php endif; ?>

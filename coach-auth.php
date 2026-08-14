@@ -4,8 +4,8 @@
  * Protects coach pages and enforces district login.
  */
 
-session_start();
 require_once 'security-config.php';
+session_start();
 
 if (empty($_SESSION['coach_logged_in']) || $_SESSION['coach_logged_in'] !== true) {
     header('Location: coach-login.php');

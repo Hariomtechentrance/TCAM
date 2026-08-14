@@ -2,9 +2,10 @@
 /**
  * TCAM Coach Login and Registration Page
  */
-session_start();
 require_once 'security-config.php';
+session_start();
 require_once 'secure-database.php';
+require_once 'includes/coach-account.php';
 
 if (!empty($_SESSION['coach_logged_in']) && $_SESSION['coach_logged_in'] === true) {
     header('Location: coach-panel.php');
@@ -20,28 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = Security::sanitizeInput($_POST['name'] ?? '');
         $mobile = Security::sanitizeInput($_POST['mobile'] ?? '');
         $district = Security::sanitizeInput($_POST['district'] ?? '');
-        $username = trim($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $confirm = $_POST['confirm_password'] ?? '';
 
-        if ($name === '' || $mobile === '' || $district === '' || $username === '' || $password === '' || $confirm === '') {
-            $error = 'All fields are required for registration.';
-        } elseif ($password !== $confirm) {
-            $error = 'Passwords do not match.';
-        } elseif (strlen($password) < 6) {
-            $error = 'Password must be at least 6 characters.';
+        if ($name === '' || $mobile === '' || $district === '') {
+            $error = 'Name, mobile and district are required for registration.';
         } else {
             try {
                 $db = SecureDatabase::getInstance();
-                $stmt = $db->getPDO()->prepare('SELECT COUNT(*) FROM coach_users WHERE username = ?');
-                $stmt->execute([$username]);
-                if ($stmt->fetchColumn() > 0) {
-                    $error = 'Username already exists. Please choose another.';
+                $account = createCoachAccount($db->getPDO(), $name, $mobile, $district);
+                if ($account['ok']) {
+                    $success = 'Registration complete. Login username: "' . $account['username'] . '" — password is your mobile number.';
                 } else {
-                    $hash = password_hash($password, PASSWORD_DEFAULT);
-                    $ins = $db->getPDO()->prepare('INSERT INTO coach_users (username, password_hash, district, mobile, name) VALUES (?, ?, ?, ?, ?)');
-                    $ins->execute([$username, $hash, $district, $mobile, $name]);
-                    $success = 'Registration complete. You can now login using your credentials.';
+                    $error = $account['error'];
                 }
             } catch (Exception $e) {
                 $error = 'Unable to create coach account. Please try again later.';
@@ -63,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($coach && password_verify($password, $coach['password_hash'])) {
                     $_SESSION['coach_logged_in'] = true;
                     $_SESSION['coach_username'] = $coach['username'];
+                    $_SESSION['coach_name'] = $coach['name'] !== '' ? $coach['name'] : $coach['username'];
                     $_SESSION['coach_user_id'] = $coach['id'];
                     $_SESSION['coach_district'] = $coach['district'];
                     $_SESSION['coach_last_activity'] = time();
@@ -138,15 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input id="regMobile" name="mobile" type="text" placeholder="Enter mobile number" required>
                 <label for="regDistrict">District</label>
                 <input id="regDistrict" name="district" type="text" placeholder="Enter your district" required>
-                <label for="regUsername">Username</label>
-                <input id="regUsername" name="username" type="text" required>
-                <label for="regPassword">Password</label>
-                <input id="regPassword" name="password" type="password" required>
-                <label for="regConfirmPassword">Confirm Password</label>
-                <input id="regConfirmPassword" name="confirm_password" type="password" required>
                 <button type="submit">Register Coach</button>
             </form>
-            <div class="note">The district you choose here is fixed until admin approves a change.</div>
+            <div class="note">Your login username will be your name and your password will be your mobile number. The district you choose here is fixed until admin approves a change.</div>
         </div>
     </div>
     <script>

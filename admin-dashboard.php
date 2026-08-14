@@ -4,8 +4,8 @@
  * Complete admin panel for managing registrations
  */
 
-session_start();
 require_once 'security-config.php';
+session_start();
 require_once 'secure-database.php';
 
 // Check if admin is logged in
@@ -20,7 +20,7 @@ $stats = [
     'total_registrations' => $db->execute("SELECT COUNT(*) as count FROM registrations")->fetch()['count'],
     'today_registrations' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE DATE(created_at) = DATE('now')")->fetch()['count'],
     'this_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count'],
-    'pending_events' => $db->execute("SELECT COUNT(*) as count FROM event_registrations WHERE status = 'pending'")->fetch()['count']
+    'pending_events' => $db->execute("SELECT COUNT(*) as count FROM event_registrations")->fetch()['count']
 ];
 
 // Get recent registrations
@@ -443,7 +443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="admin-dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                 <a href="admin-search.php"><i class="fas fa-search"></i> Search</a>
                 <a href="registration-reports.php"><i class="fas fa-chart-bar"></i> Reports</a>
-                <a href="login-production.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a href="login-production.php?logout=1"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </nav>
         </div>
     </header>
@@ -515,9 +515,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             
+            <form id="teamReportForm" method="POST" action="admin-team-report.php" target="_blank">
             <table>
                 <thead>
                     <tr>
+                        <th><input type="checkbox" onclick="document.querySelectorAll('input[name=\'selected_ids[]\']').forEach(function(cb){cb.checked=this.checked;}, this)" title="Select all on this page"></th>
                         <th>Photo</th>
                         <th>TCAM ID</th>
                         <th>Name</th>
@@ -534,6 +536,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if (!empty($registrations)): ?>
                         <?php foreach ($registrations as $registration): ?>
                             <tr>
+                                <td><input type="checkbox" name="selected_ids[]" value="<?php echo (int)$registration['id']; ?>"></td>
                                 <td>
                                     <?php if ($registration['photo']): ?>
                                         <img src="uploads/<?php echo htmlspecialchars($registration['photo']); ?>" 
@@ -588,7 +591,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 2rem; color: #666;">
+                            <td colspan="11" style="text-align: center; padding: 2rem; color: #666;">
                                 <?php if (!empty($searchTerm)): ?>
                                     No registrations found matching your search criteria.
                                 <?php else: ?>
@@ -599,6 +602,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endif; ?>
                 </tbody>
             </table>
+
+            <?php if (!empty($registrations)): ?>
+            <div style="padding: 1.25rem; border-top: 1px solid #e5e7eb;">
+                <h3 style="margin: 0 0 0.75rem; font-size: 1.05rem; color: #111827;">Team Entry Report (PDF with photos)</h3>
+                <p style="margin: 0 0 0.75rem; color: #666; font-size: 0.9rem;">Check the boxes above for the rows to include (this page only), fill in the tournament details, then generate.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:4px;">Championship / Tournament Title</label>
+                        <input type="text" name="report_title" placeholder="e.g. 5th Senior National Tennis Cricket Championship (Men/Women) - 2026" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:4px;">Venue</label>
+                        <input type="text" name="report_venue" placeholder="e.g. Centurion University Bhubaneswar" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:4px;">Dates</label>
+                        <input type="text" name="report_dates" placeholder="e.g. 09-Mar-2026 To 14-Mar-2026" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:4px;">Team Label</label>
+                        <input type="text" name="report_team_label" placeholder="e.g. ITCF000527-MAHARASHTRA (WOMEN)" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Download Team Entry Report PDF</button>
+            </div>
+            <?php endif; ?>
+            </form>
         </div>
 
         <!-- Pagination -->

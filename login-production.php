@@ -9,6 +9,13 @@ $_https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
 ini_set('session.cookie_secure', $_https ? '1' : '0');
 session_start();
 
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: login-production.php');
+    exit;
+}
+
 // Production credentials — use hashed password; never store plaintext
 $PRODUCTION_USERNAME = 'admin';
 $PRODUCTION_PASSWORD_HASH = '$2y$12$XVSmT6xLcKAqjqkTsWO4WuTwYFHuOYivzv3UNMNSWQQPFHQlrBRlm'; // change via: password_hash('newpassword', PASSWORD_DEFAULT)
