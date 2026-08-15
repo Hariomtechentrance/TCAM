@@ -4,7 +4,7 @@
  * Adds missing fields for admin functionality
  */
 
-require_once 'security-config.php';
+require_once 'includes/require-admin.php';
 require_once 'secure-database.php';
 
 echo "<h2>🔄 Updating Database Schema for Admin Panel</h2>";

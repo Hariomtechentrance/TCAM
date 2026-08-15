@@ -2,6 +2,8 @@
 // One-time import script to bring filesystem images into DB (safe to run repeatedly)
 // This is a CLI helper. Run: php sync_now.php
 
+require_once 'includes/require-admin.php';
+
 try {
     $dbPath = __DIR__ . '/tcam_bookings.db';
     $db = new PDO('sqlite:' . $dbPath);

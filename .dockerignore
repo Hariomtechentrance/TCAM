@@ -1,0 +1,8 @@
+.git
+.gitignore
+.qoder
+.dockerignore
+Dockerfile
+*.md
+TCAM_*.pdf
+.DS_Store

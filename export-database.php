@@ -4,7 +4,7 @@
  * Exports all registration data for migration to GoDaddy
  */
 
-require_once 'security-config.php';
+require_once 'includes/require-admin.php';
 require_once 'secure-database.php';
 
 header('Content-Type: application/sql');

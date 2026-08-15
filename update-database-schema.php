@@ -4,7 +4,7 @@
  * Adds Aadhar/document number and other required fields
  */
 
-require_once 'security-config.php';
+require_once 'includes/require-admin.php';
 require_once 'secure-database.php';
 
 try {

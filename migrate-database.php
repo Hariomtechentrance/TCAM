@@ -5,6 +5,8 @@
  * Safe to run multiple times (uses IF NOT EXISTS)
  */
 
+require_once 'includes/require-admin.php';
+
 $dbPath = __DIR__ . '/tcam_bookings.db';
 $db = new PDO('sqlite:' . $dbPath);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
