@@ -13,7 +13,6 @@ if (!empty($_SESSION['coach_logged_in']) && $_SESSION['coach_logged_in'] === tru
 }
 
 $error = '';
-$success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'login';
 
@@ -29,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $db = SecureDatabase::getInstance();
                 $account = createCoachAccount($db->getPDO(), $name, $mobile, $district);
                 if ($account['ok']) {
-                    $success = 'Registration complete. Login username: "' . $account['username'] . '" — password is your mobile number.';
+                    header('Location: coach-login.php');
+                    exit;
                 } else {
                     $error = $account['error'];
                 }
@@ -102,9 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>Login or register once here. District is fixed during registration and can only be changed by admin.</p>
         <?php if (!empty($error)): ?>
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-        <?php if (!empty($success)): ?>
-            <div class="success"><?php echo htmlspecialchars($success); ?></div>
         <?php endif; ?>
         <div class="toggle-row">
             <button id="loginTab" class="active">Login</button>
