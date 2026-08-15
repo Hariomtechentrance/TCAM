@@ -28,7 +28,7 @@ $db = SecureDatabase::getInstance();
 $placeholders = implode(',', array_fill(0, count($selectedIds), '?'));
 
 // Coaches can select students from any district, not just their own.
-$sql = "SELECT * FROM bookings WHERE id IN ($placeholders) ORDER BY name ASC";
+$sql = "SELECT * FROM bookings WHERE id IN ($placeholders) ORDER BY created_at DESC";
 $stmt = $db->execute($sql, $selectedIds);
 $registrations = $stmt->fetchAll();
 
