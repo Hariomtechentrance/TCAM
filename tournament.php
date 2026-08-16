@@ -3,7 +3,7 @@
  * Dynamic Tournament Page — TCAM
  * Theme-matched with main website (white/orange/light)
  */
-$dbPath = __DIR__ . '/tcam_bookings.db';
+$dbPath = getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db';
 $db = new PDO('sqlite:' . $dbPath);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);

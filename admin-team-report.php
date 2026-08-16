@@ -13,10 +13,24 @@ if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
     exit;
 }
 
-$selectedIds = $_POST['selected_ids'] ?? [];
-$selectedIds = array_map('intval', is_array($selectedIds) ? $selectedIds : []);
-$selectedIds = array_values(array_filter($selectedIds, fn($id) => $id > 0));
-if (empty($selectedIds)) {
+// Checkbox values are "booking:123" or "registration:45" since rows can
+// come from either table.
+$rawSelected = $_POST['selected_ids'] ?? [];
+$bookingIds = [];
+$regIds = [];
+foreach ((is_array($rawSelected) ? $rawSelected : []) as $raw) {
+    if (preg_match('/^(booking|registration):(\d+)$/', (string) $raw, $m)) {
+        if ($m[1] === 'booking') {
+            $bookingIds[] = (int) $m[2];
+        } else {
+            $regIds[] = (int) $m[2];
+        }
+    } elseif (ctype_digit((string) $raw)) {
+        // Back-compat: plain numeric ids are treated as registrations.
+        $regIds[] = (int) $raw;
+    }
+}
+if (empty($bookingIds) && empty($regIds)) {
     header('Location: admin-dashboard.php?error=1');
     exit;
 }
@@ -27,9 +41,36 @@ $dates = trim($_POST['report_dates'] ?? '');
 $teamLabel = trim($_POST['report_team_label'] ?? '');
 
 $db = SecureDatabase::getInstance();
-$placeholders = implode(',', array_fill(0, count($selectedIds), '?'));
-$sql = "SELECT * FROM registrations WHERE id IN ($placeholders) ORDER BY name ASC";
-$registrations = $db->execute($sql, $selectedIds)->fetchAll();
+$registrations = [];
+
+if (!empty($regIds)) {
+    $placeholders = implode(',', array_fill(0, count($regIds), '?'));
+    $rows = $db->execute("SELECT * FROM registrations WHERE id IN ($placeholders)", $regIds)->fetchAll();
+    foreach ($rows as $row) {
+        $registrations[] = $row;
+    }
+}
+
+if (!empty($bookingIds)) {
+    $placeholders = implode(',', array_fill(0, count($bookingIds), '?'));
+    $rows = $db->execute("SELECT * FROM bookings WHERE id IN ($placeholders)", $bookingIds)->fetchAll();
+    foreach ($rows as $row) {
+        // The PDF template expects registrations-table columns; bookings
+        // only has name/dob/district/phone/photo, so map what's available.
+        $registrations[] = [
+            'reg_id' => $row['bookingId'] ?? '',
+            'name' => $row['name'] ?? '',
+            'parent_name' => '',
+            'dob' => $row['dob'] ?? '',
+            'address' => '',
+            'city' => $row['district'] ?? '',
+            'state' => '',
+            'photo' => preg_replace('#^/?uploads/#', '', $row['photo'] ?? ''),
+        ];
+    }
+}
+
+usort($registrations, fn($a, $b) => strcasecmp($a['name'] ?? '', $b['name'] ?? ''));
 
 if (empty($registrations)) {
     header('Location: admin-dashboard.php?error=1');

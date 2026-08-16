@@ -14,7 +14,7 @@ if (!preg_match('/^\d{12}$/', $aadhar)) {
 }
 
 try {
-    $db = new PDO('sqlite:' . __DIR__ . '/tcam_bookings.db');
+    $db = new PDO('sqlite:' . (getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db'));
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $stmt = $db->prepare('SELECT bookingId FROM bookings WHERE aadhar_number = ? LIMIT 1');
     $stmt->execute([$aadhar]);

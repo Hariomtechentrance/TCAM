@@ -2,7 +2,7 @@
 require_once 'cors.php';
 header('Content-Type: application/json; charset=UTF-8');
 try {
-    $db = new PDO('sqlite:' . __DIR__ . '/tcam_bookings.db');
+    $db = new PDO('sqlite:' . (getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db'));
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // ensure districts table exists and seed if empty
     $db->exec("CREATE TABLE IF NOT EXISTS districts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE NOT NULL)");

@@ -6,6 +6,7 @@
 
 require_once 'security-config.php';
 require_once 'secure-database.php';
+require_once 'lib/fpdf/fpdf.php';
 
 Security::rateLimit(20, 300);
 
@@ -164,8 +165,6 @@ if (isset($_GET['download'], $_GET['id'], $_GET['token'])) {
 
         if ($downloadType === 'pdf') {
             generatePDFReceipt($reg);
-        } elseif ($downloadType === 'json') {
-            generateJSONData($reg);
         }
         exit;
     } catch (Exception $e) {
@@ -251,75 +250,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !isset($_GET['format']) && !isset($_
 
 // Generate PDF receipt function
 function generatePDFReceipt($registration) {
+    $safe = function ($text) {
+        $converted = @iconv('UTF-8', 'CP1252//TRANSLIT//IGNORE', (string) $text);
+        return $converted !== false ? $converted : (string) $text;
+    };
+
+    $pdf = new FPDF('P', 'mm', 'A4');
+    $pdf->SetAutoPageBreak(true, 15);
+    $pdf->AddPage();
+
+    $pdf->SetFont('Helvetica', 'B', 16);
+    $pdf->Cell(0, 10, $safe('Tennis Cricket Association Maharashtra'), 0, 1, 'C');
+    $pdf->SetFont('Helvetica', '', 12);
+    $pdf->Cell(0, 8, 'Registration Receipt', 0, 1, 'C');
+    $pdf->Ln(6);
+
+    $pdf->SetFont('Helvetica', '', 11);
+    $fields = [
+        'TCAM ID' => $registration['reg_id'],
+        'Name' => $registration['name'],
+        'Mobile' => $registration['mobile'],
+        'City' => $registration['city'],
+        'State' => $registration['state'],
+        'Registration Date' => $registration['joined'],
+    ];
+    if (!empty($registration['document_number'])) {
+        $fields['Document Number'] = $registration['document_number'];
+    }
+    foreach ($fields as $label => $value) {
+        $pdf->SetFont('Helvetica', 'B', 11);
+        $pdf->Cell(55, 8, $safe($label) . ':', 0, 0);
+        $pdf->SetFont('Helvetica', '', 11);
+        $pdf->Cell(0, 8, $safe($value), 0, 1);
+    }
+
+    $pdf->Ln(10);
+    $pdf->SetFont('Helvetica', '', 9);
+    $pdf->Cell(0, 6, 'This is an official receipt from TCAM. Keep it safe for future reference.', 0, 1, 'C');
+    $pdf->Cell(0, 6, 'Generated on: ' . date('Y-m-d H:i:s'), 0, 1, 'C');
+
     header('Content-Type: application/pdf');
     header('Content-Disposition: attachment; filename="TCAM_Receipt_' . $registration['reg_id'] . '.pdf"');
-    
-    $html = "
-    <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; border-bottom: 2px solid #764ba2; padding-bottom: 20px; margin-bottom: 20px; }
-            .content { margin: 20px 0; }
-            .field { margin: 10px 0; }
-            .label { font-weight: bold; color: #764ba2; }
-            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
-        </style>
-    </head>
-    <body>
-        <div class='header'>
-            <h1>🏏 Tennis Cricket Association Maharashtra</h1>
-            <h2>Registration Receipt</h2>
-        </div>
-        <div class='content'>
-            <div class='field'><span class='label'>TCAM ID:</span> " . $registration['reg_id'] . "</div>
-            <div class='field'><span class='label'>Name:</span> " . $registration['name'] . "</div>
-            <div class='field'><span class='label'>Mobile:</span> " . $registration['mobile'] . "</div>
-            <div class='field'><span class='label'>City:</span> " . $registration['city'] . "</div>
-            <div class='field'><span class='label'>State:</span> " . $registration['state'] . "</div>
-            <div class='field'><span class='label'>Registration Date:</span> " . $registration['joined'] . "</div>";
-    
-    if (!empty($registration['document_number'])) {
-        $html .= "<div class='field'><span class='label'>Document Number:</span> " . $registration['document_number'] . "</div>";
-    }
-    
-    $html .= "
-        </div>
-        <div class='footer'>
-            <p>This is an official receipt from TCAM. Keep it safe for future reference.</p>
-            <p>Generated on: " . date('Y-m-d H:i:s') . "</p>
-        </div>
-    </body>
-    </html>";
-    
-    echo $html;
-    exit;
-}
-
-// Generate JSON data function
-function generateJSONData($registration) {
-    header('Content-Type: application/json');
-    header('Content-Disposition: attachment; filename="TCAM_Data_' . $registration['reg_id'] . '.json"');
-    
-    $data = [
-        'tcam_id' => $registration['reg_id'],
-        'name' => $registration['name'],
-        'mobile' => $registration['mobile'],
-        'city' => $registration['city'],
-        'state' => $registration['state'],
-        'registration_date' => $registration['joined'],
-        'document_number' => $registration['document_number'] ?? '',
-        'document_type' => $registration['document_type'] ?? '',
-        'date_of_birth' => $registration['date_of_birth'] ?? '',
-        'parent_name' => $registration['parent_name'] ?? '',
-        'address' => $registration['address'] ?? '',
-        'emergency_contact' => $registration['emergency_contact'] ?? '',
-        'blood_group' => $registration['blood_group'] ?? '',
-        'previous_tournaments' => $registration['previous_tournaments'] ?? '',
-        'photo' => $registration['photo'] ?? ''
-    ];
-    
-    echo json_encode($data, JSON_PRETTY_PRINT);
+    echo $pdf->Output('S');
     exit;
 }
 
@@ -679,8 +651,6 @@ function generateJSONData($registration) {
                             ?>
                             <a href="?download=pdf&amp;id=<?php echo $rid; ?>&amp;token=<?php echo $tk; ?>"
                                class="btn btn-success btn-small">📄 Download PDF</a>
-                            <a href="?download=json&amp;id=<?php echo $rid; ?>&amp;token=<?php echo $tk; ?>"
-                               class="btn btn-info btn-small">📊 Download JSON</a>
                             <a href="single-registration-enhanced.html?reuse=<?php echo $rid; ?>&amp;token=<?php echo $tk; ?>"
                                class="btn btn-danger btn-small">🔄 Update Registration</a>
                             <?php else: ?>

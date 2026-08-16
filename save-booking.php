@@ -21,7 +21,7 @@ if (!preg_match('/^\d{12}$/', $aadhar_number)) {
 }
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-$dbPath   = __DIR__ . '/tcam_bookings.db';
+$dbPath   = getenv('TCAM_DB_PATH') ?: __DIR__ . '/tcam_bookings.db';
 $uploadDir = __DIR__ . '/uploads';
 $uploadUrl = '/uploads/';
 $maxPhotoSize = 2 * 1024 * 1024; // 2 MB

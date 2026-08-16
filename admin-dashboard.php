@@ -14,17 +14,24 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// Get statistics
+// Get statistics — every real registration lives in one of two tables:
+// `bookings` (the main homepage "Register Now" form) and `registrations`
+// (the separate, more detailed "Enhanced ID Registration" form). Both must
+// be counted and listed together for the dashboard to reflect reality.
 $db = SecureDatabase::getInstance();
+$bookingsTotal = (int) $db->execute("SELECT COUNT(*) as count FROM bookings")->fetch()['count'];
+$regsTotal = (int) $db->execute("SELECT COUNT(*) as count FROM registrations")->fetch()['count'];
+$bookingsToday = (int) $db->execute("SELECT COUNT(*) as count FROM bookings WHERE DATE(created_at) = DATE('now')")->fetch()['count'];
+$regsToday = (int) $db->execute("SELECT COUNT(*) as count FROM registrations WHERE DATE(joined) = DATE('now')")->fetch()['count'];
+$bookingsMonth = (int) $db->execute("SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count'];
+$regsMonth = (int) $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', joined) = strftime('%Y-%m', 'now')")->fetch()['count'];
+
 $stats = [
-    'total_registrations' => $db->execute("SELECT COUNT(*) as count FROM registrations")->fetch()['count'],
-    'today_registrations' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE DATE(created_at) = DATE('now')")->fetch()['count'],
-    'this_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count'],
+    'total_registrations' => $bookingsTotal + $regsTotal,
+    'today_registrations' => $bookingsToday + $regsToday,
+    'this_month' => $bookingsMonth + $regsMonth,
     'pending_events' => $db->execute("SELECT COUNT(*) as count FROM event_registrations")->fetch()['count']
 ];
-
-// Get recent registrations
-$recentRegistrations = $db->execute("SELECT * FROM registrations ORDER BY created_at DESC LIMIT 10")->fetchAll();
 
 // Get search parameters
 $searchType = $_GET['search_type'] ?? '';
@@ -33,66 +40,102 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 20;
 $offset = ($page - 1) * $limit;
 
-// Build search query
-$whereClause = '';
-$params = [];
+// Build search filters per source table — column names differ between the
+// two (mobile vs phone, reg_id vs bookingId, document_number vs
+// aadhar_number), so each side needs its own WHERE clause.
+$bookingsWhere = '';
+$regsWhere = '';
+$bookingsParams = [];
+$regsParams = [];
 if (!empty($searchTerm) && !empty($searchType)) {
+    $term = "%$searchTerm%";
     switch ($searchType) {
         case 'mobile':
-            $whereClause = "WHERE mobile LIKE ?";
-            $params[] = "%$searchTerm%";
+            $bookingsWhere = "WHERE phone LIKE ?"; $bookingsParams[] = $term;
+            $regsWhere = "WHERE mobile LIKE ?"; $regsParams[] = $term;
             break;
         case 'reg_id':
-            $whereClause = "WHERE reg_id = ?";
-            $params[] = $searchTerm;
+            $bookingsWhere = "WHERE bookingId LIKE ?"; $bookingsParams[] = $term;
+            $regsWhere = "WHERE reg_id LIKE ?"; $regsParams[] = $term;
             break;
         case 'name':
-            $whereClause = "WHERE name LIKE ?";
-            $params[] = "%$searchTerm%";
+            $bookingsWhere = "WHERE name LIKE ?"; $bookingsParams[] = $term;
+            $regsWhere = "WHERE name LIKE ?"; $regsParams[] = $term;
             break;
         case 'document':
-            $whereClause = "WHERE document_number LIKE ?";
-            $params[] = "%$searchTerm%";
+            $bookingsWhere = "WHERE aadhar_number LIKE ?"; $bookingsParams[] = $term;
+            $regsWhere = "WHERE document_number LIKE ?"; $regsParams[] = $term;
             break;
         case 'email':
-            $whereClause = "WHERE email LIKE ?";
-            $params[] = "%$searchTerm%";
+            $bookingsWhere = "WHERE email LIKE ?"; $bookingsParams[] = $term;
+            $regsWhere = "WHERE email LIKE ?"; $regsParams[] = $term;
             break;
     }
 }
 
-// Get registrations with pagination
-$countQuery = "SELECT COUNT(*) as total FROM registrations $whereClause";
-$totalResults = $db->execute($countQuery, $params)->fetch()['total'];
+$unifiedSelect = "SELECT 'booking' AS source, id AS source_id, bookingId AS display_id, name, phone AS mobile,
+        email, district AS city, aadhar_number AS document_number, 'active' AS status, created_at AS joined, photo
+    FROM bookings $bookingsWhere
+    UNION ALL
+    SELECT 'registration' AS source, id AS source_id, reg_id AS display_id, name, mobile,
+        email, city, document_number, COALESCE(status, 'active') AS status, joined, photo
+    FROM registrations $regsWhere";
 
-$query = "SELECT * FROM registrations $whereClause ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
-$registrations = $db->execute($query, $params)->fetchAll();
+$countParams = array_merge($bookingsParams, $regsParams);
+$totalResults = (int) $db->execute(
+    "SELECT COUNT(*) as total FROM ($unifiedSelect)",
+    $countParams
+)->fetch()['total'];
 
-$totalPages = ceil($totalResults / $limit);
+$listParams = array_merge($bookingsParams, $regsParams);
+$registrations = $db->execute(
+    "SELECT * FROM ($unifiedSelect) ORDER BY joined DESC LIMIT $limit OFFSET $offset",
+    $listParams
+)->fetchAll();
+
+// Booking photos are stored as "uploads/xxx.jpg" (sometimes with a leading
+// slash); registration photos are stored as a bare filename. Normalize both
+// to a bare filename so the table can render one <img> pattern for either.
+foreach ($registrations as &$row) {
+    $row['photo'] = preg_replace('#^/?uploads/#', '', $row['photo'] ?? '');
+}
+unset($row);
+
+$totalPages = max(1, (int) ceil($totalResults / $limit));
 
 // Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    $source = $_POST['source'] ?? 'registration';
     $id = (int)($_POST['id'] ?? 0);
-    
+    $table = $source === 'booking' ? 'bookings' : 'registrations';
+
     switch ($action) {
         case 'delete':
-            $db->execute("DELETE FROM registrations WHERE id = ?", [$id]);
-            $db->execute("DELETE FROM event_registrations WHERE registration_id = ?", [$id]);
+            $db->execute("DELETE FROM $table WHERE id = ?", [$id]);
+            if ($table === 'registrations') {
+                $db->execute("DELETE FROM event_registrations WHERE registration_id = ?", [$id]);
+            }
             $message = "Registration deleted successfully!";
             break;
-            
+
         case 'cancel':
-            $db->execute("UPDATE registrations SET status = 'cancelled' WHERE id = ?", [$id]);
-            $message = "Registration cancelled successfully!";
+            if ($table === 'registrations') {
+                $db->execute("UPDATE registrations SET status = 'cancelled' WHERE id = ?", [$id]);
+                $message = "Registration cancelled successfully!";
+            } else {
+                $message = "Bookings can be deleted but not cancelled — use Delete instead.";
+            }
             break;
-            
+
         case 'activate':
-            $db->execute("UPDATE registrations SET status = 'active' WHERE id = ?", [$id]);
-            $message = "Registration activated successfully!";
+            if ($table === 'registrations') {
+                $db->execute("UPDATE registrations SET status = 'active' WHERE id = ?", [$id]);
+                $message = "Registration activated successfully!";
+            }
             break;
     }
-    
+
     if (isset($message)) {
         echo "<script>alert('$message'); window.location.href = 'admin-dashboard.php';</script>";
         exit;
@@ -522,6 +565,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th><input type="checkbox" onclick="document.querySelectorAll('input[name=\'selected_ids[]\']').forEach(function(cb){cb.checked=this.checked;}, this)" title="Select all on this page"></th>
                         <th>Photo</th>
                         <th>TCAM ID</th>
+                        <th>Source</th>
                         <th>Name</th>
                         <th>Mobile</th>
                         <th>Email</th>
@@ -536,10 +580,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if (!empty($registrations)): ?>
                         <?php foreach ($registrations as $registration): ?>
                             <tr>
-                                <td><input type="checkbox" name="selected_ids[]" value="<?php echo (int)$registration['id']; ?>"></td>
+                                <td><input type="checkbox" name="selected_ids[]" value="<?php echo htmlspecialchars($registration['source']); ?>:<?php echo (int)$registration['source_id']; ?>"></td>
                                 <td>
                                     <?php if ($registration['photo']): ?>
-                                        <img src="uploads/<?php echo htmlspecialchars($registration['photo']); ?>" 
+                                        <img src="uploads/<?php echo htmlspecialchars($registration['photo']); ?>"
                                              alt="Photo" class="photo-thumbnail">
                                     <?php else: ?>
                                         <div class="photo-thumbnail" style="background: #e1e5e9; display: flex; align-items: center; justify-content: center; color: #999;">
@@ -547,13 +591,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     <?php endif; ?>
                                 </td>
-                                <td><strong><?php echo htmlspecialchars($registration['reg_id']); ?></strong></td>
+                                <td><strong><?php echo htmlspecialchars($registration['display_id']); ?></strong></td>
+                                <td><?php echo $registration['source'] === 'booking' ? 'Booking' : 'Registration'; ?></td>
                                 <td><?php echo htmlspecialchars($registration['name']); ?></td>
                                 <td><?php echo htmlspecialchars($registration['mobile']); ?></td>
                                 <td><?php echo htmlspecialchars($registration['email'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($registration['city']); ?></td>
                                 <td>
-                                    <?php 
+                                    <?php
                                     if (!empty($registration['document_number'])) {
                                         echo substr($registration['document_number'], 0, 4) . '****';
                                     } else {
@@ -569,19 +614,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <td><?php echo date('d M Y', strtotime($registration['joined'])); ?></td>
                                 <td>
                                     <div class="actions">
-                                        <button onclick="editRegistration(<?php echo $registration['id']; ?>)" 
+                                        <button onclick="editRegistration('<?php echo $registration['source']; ?>', <?php echo (int)$registration['source_id']; ?>)"
                                                 class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
-                                        <button onclick="viewRegistration(<?php echo $registration['id']; ?>)" 
+                                        <?php if ($registration['source'] === 'registration'): ?>
+                                        <button onclick="viewRegistration(<?php echo (int)$registration['source_id']; ?>)"
                                                 class="btn btn-sm btn-success">
                                             <i class="fas fa-eye"></i> View
                                         </button>
-                                        <button onclick="confirmAction('cancel', <?php echo $registration['id']; ?>)" 
+                                        <button onclick="confirmAction('cancel', '<?php echo $registration['source']; ?>', <?php echo (int)$registration['source_id']; ?>)"
                                                 class="btn btn-sm btn-warning">
                                             <i class="fas fa-ban"></i> Cancel
                                         </button>
-                                        <button onclick="confirmAction('delete', <?php echo $registration['id']; ?>)" 
+                                        <?php endif; ?>
+                                        <button onclick="confirmAction('delete', '<?php echo $registration['source']; ?>', <?php echo (int)$registration['source_id']; ?>)"
                                                 class="btn btn-sm btn-danger">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
@@ -591,7 +638,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="11" style="text-align: center; padding: 2rem; color: #666;">
+                            <td colspan="12" style="text-align: center; padding: 2rem; color: #666;">
                                 <?php if (!empty($searchTerm)): ?>
                                     No registrations found matching your search criteria.
                                 <?php else: ?>
@@ -662,28 +709,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Hidden Forms for Actions -->
     <form id="actionForm" method="POST" style="display: none;">
         <input type="hidden" name="action" id="actionInput">
+        <input type="hidden" name="source" id="sourceInput">
         <input type="hidden" name="id" id="idInput">
     </form>
 
     <script>
-        function confirmAction(action, id) {
+        function confirmAction(action, source, id) {
             const messages = {
                 'delete': 'Are you sure you want to delete this registration? This action cannot be undone.',
                 'cancel': 'Are you sure you want to cancel this registration?',
                 'activate': 'Are you sure you want to activate this registration?'
             };
-            
+
             if (confirm(messages[action])) {
                 document.getElementById('actionInput').value = action;
+                document.getElementById('sourceInput').value = source;
                 document.getElementById('idInput').value = id;
                 document.getElementById('actionForm').submit();
             }
         }
-        
-        function editRegistration(id) {
-            window.open('edit-registration.php?id=' + id, '_blank', 'width=800,height=600,scrollbars=yes');
+
+        function editRegistration(source, id) {
+            const page = source === 'booking' ? 'edit-booking.php' : 'edit-registration.php';
+            window.open(page + '?id=' + id, '_blank', 'width=800,height=600,scrollbars=yes');
         }
-        
+
         function viewRegistration(id) {
             window.open('view-registration.php?id=' + id, '_blank', 'width=800,height=600,scrollbars=yes');
         }

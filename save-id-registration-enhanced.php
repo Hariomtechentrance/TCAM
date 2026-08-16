@@ -126,12 +126,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            // Re-submitting the same document number is how a student edits
+            // their existing profile (the "Update Registration" flow
+            // pre-fills this form from their old data) — so the edited
+            // field values need to actually land on the record, not just
+            // add another event underneath the untouched old data.
+            $updateData = [
+                'name' => $name,
+                'email' => $email,
+                'city' => $city,
+                'state' => $state,
+                'district' => $district,
+                'date_of_birth' => $dob,
+                'address' => $address,
+                'parent_name' => $parent_name,
+                'emergency_contact' => $emergency_contact,
+                'blood_group' => $blood_group,
+                'previous_tournaments' => $previous_tournaments,
+            ];
+
+            $photo = $_FILES['photo'] ?? null;
+            if ($photo && (int) ($photo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                $photoValidation = Security::validateFileUpload($photo, ['jpg', 'jpeg', 'png'], 2097152);
+                if (!$photoValidation['success']) {
+                    echo json_encode(['status' => 'error', 'message' => $photoValidation['error']]);
+                    exit;
+                }
+                $newPhotoFilename = Security::generateSecureFilename($photo['name']);
+                $newPhotoPath = $uploadDir . $newPhotoFilename;
+                if (move_uploaded_file($photo['tmp_name'], $newPhotoPath)) {
+                    chmod($newPhotoPath, 0644);
+                    $updateData['photo'] = $newPhotoFilename;
+                    $oldPhotoPath = $uploadDir . $existingReg['photo'];
+                    if (!empty($existingReg['photo']) && file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                    }
+                }
+            }
+
+            $db->update('registrations', $updateData, ['id' => $existingReg['id']]);
+
             $db->insert('event_registrations', [
                 'registration_id' => $existingReg['id'],
                 'event_name' => $event_name
             ]);
 
-            Security::logEvent('EVENT_REGISTRATION_ADDED', [
+            Security::logEvent('REGISTRATION_UPDATED_VIA_REUSE', [
                 'reg_id' => $existingReg['reg_id'],
                 'event' => $event_name
             ]);
@@ -139,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode([
                 'status' => 'event_added',
                 'id' => $existingReg['reg_id'],
-                'message' => 'You already have TCAM ID ' . $existingReg['reg_id'] . '. This event has been added to your record — no duplicate profile was created.'
+                'message' => 'Your details have been updated and TCAM ID ' . $existingReg['reg_id'] . ' now has this event added.'
             ]);
             exit;
         }
