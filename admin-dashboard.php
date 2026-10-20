@@ -36,42 +36,60 @@ $stats = [
 // Get search parameters
 $searchType = $_GET['search_type'] ?? '';
 $searchTerm = $_GET['search_term'] ?? '';
+$dateFrom = $_GET['date_from'] ?? '';
+$dateTo = $_GET['date_to'] ?? '';
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 20;
 $offset = ($page - 1) * $limit;
 
 // Build search filters per source table — column names differ between the
 // two (mobile vs phone, reg_id vs bookingId, document_number vs
-// aadhar_number), so each side needs its own WHERE clause.
-$bookingsWhere = '';
-$regsWhere = '';
+// aadhar_number, created_at vs joined), so each side needs its own set of
+// conditions, ANDed together, then joined into one WHERE clause.
+$bookingsConds = [];
+$regsConds = [];
 $bookingsParams = [];
 $regsParams = [];
+
 if (!empty($searchTerm) && !empty($searchType)) {
     $term = "%$searchTerm%";
     switch ($searchType) {
         case 'mobile':
-            $bookingsWhere = "WHERE phone LIKE ?"; $bookingsParams[] = $term;
-            $regsWhere = "WHERE mobile LIKE ?"; $regsParams[] = $term;
+            $bookingsConds[] = "phone LIKE ?"; $bookingsParams[] = $term;
+            $regsConds[] = "mobile LIKE ?"; $regsParams[] = $term;
             break;
         case 'reg_id':
-            $bookingsWhere = "WHERE bookingId LIKE ?"; $bookingsParams[] = $term;
-            $regsWhere = "WHERE reg_id LIKE ?"; $regsParams[] = $term;
+            $bookingsConds[] = "bookingId LIKE ?"; $bookingsParams[] = $term;
+            $regsConds[] = "reg_id LIKE ?"; $regsParams[] = $term;
             break;
         case 'name':
-            $bookingsWhere = "WHERE name LIKE ?"; $bookingsParams[] = $term;
-            $regsWhere = "WHERE name LIKE ?"; $regsParams[] = $term;
+            $bookingsConds[] = "name LIKE ?"; $bookingsParams[] = $term;
+            $regsConds[] = "name LIKE ?"; $regsParams[] = $term;
             break;
         case 'document':
-            $bookingsWhere = "WHERE aadhar_number LIKE ?"; $bookingsParams[] = $term;
-            $regsWhere = "WHERE document_number LIKE ?"; $regsParams[] = $term;
+            $bookingsConds[] = "aadhar_number LIKE ?"; $bookingsParams[] = $term;
+            $regsConds[] = "document_number LIKE ?"; $regsParams[] = $term;
             break;
         case 'email':
-            $bookingsWhere = "WHERE email LIKE ?"; $bookingsParams[] = $term;
-            $regsWhere = "WHERE email LIKE ?"; $regsParams[] = $term;
+            $bookingsConds[] = "email LIKE ?"; $bookingsParams[] = $term;
+            $regsConds[] = "email LIKE ?"; $regsParams[] = $term;
             break;
     }
 }
+
+// Date-range filter — applies on top of any text search above, filtered on
+// each table's own "when registered" column (created_at / joined).
+if (!empty($dateFrom)) {
+    $bookingsConds[] = "DATE(created_at) >= ?"; $bookingsParams[] = $dateFrom;
+    $regsConds[] = "DATE(joined) >= ?"; $regsParams[] = $dateFrom;
+}
+if (!empty($dateTo)) {
+    $bookingsConds[] = "DATE(created_at) <= ?"; $bookingsParams[] = $dateTo;
+    $regsConds[] = "DATE(joined) <= ?"; $regsParams[] = $dateTo;
+}
+
+$bookingsWhere = $bookingsConds ? ('WHERE ' . implode(' AND ', $bookingsConds)) : '';
+$regsWhere = $regsConds ? ('WHERE ' . implode(' AND ', $regsConds)) : '';
 
 $unifiedSelect = "SELECT 'booking' AS source, id AS source_id, bookingId AS display_id, name, phone AS mobile,
         email, district AS city, aadhar_number AS document_number, 'active' AS status, created_at AS joined, photo
@@ -251,9 +269,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .search-form {
             display: grid;
-            grid-template-columns: 1fr 1fr auto auto;
+            grid-template-columns: 1.2fr 1.2fr 1fr 1fr auto auto;
             gap: 1rem;
             align-items: end;
+        }
+
+        .quick-filters {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .quick-filters-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 0.3rem;
+        }
+
+        .quick-filters a {
+            padding: 0.4rem 0.9rem;
+            background: #f3f0fa;
+            color: #764ba2;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .quick-filters a:hover {
+            background: #764ba2;
+            color: white;
         }
         
         .form-group {
@@ -528,28 +579,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="form-group">
                     <label for="search_term">Search Term</label>
-                    <input type="text" name="search_term" id="search_term" 
-                           value="<?php echo htmlspecialchars($searchTerm); ?>" 
+                    <input type="text" name="search_term" id="search_term"
+                           value="<?php echo htmlspecialchars($searchTerm); ?>"
                            placeholder="Enter search term...">
                 </div>
+                <div class="form-group">
+                    <label for="date_from">Registered From</label>
+                    <input type="date" name="date_from" id="date_from" value="<?php echo htmlspecialchars($dateFrom); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="date_to">Registered To</label>
+                    <input type="date" name="date_to" id="date_to" value="<?php echo htmlspecialchars($dateTo); ?>">
+                </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> Search
+                    <i class="fas fa-search"></i> Apply Filters
                 </button>
                 <a href="admin-dashboard.php" class="btn btn-warning">
                     <i class="fas fa-redo"></i> Reset
                 </a>
             </form>
+            <div class="quick-filters">
+                <span class="quick-filters-label">Quick filters:</span>
+                <a href="?date_from=<?php echo date('Y-m-d'); ?>&date_to=<?php echo date('Y-m-d'); ?>">Today</a>
+                <a href="?date_from=<?php echo date('Y-m-01'); ?>&date_to=<?php echo date('Y-m-d'); ?>">This month</a>
+                <a href="?date_from=<?php echo date('Y-m-d', strtotime('-1 month', strtotime(date('Y-m-01')))); ?>&date_to=<?php echo date('Y-m-d'); ?>">Last 2 months</a>
+                <a href="?date_from=<?php echo date('Y-m-d', strtotime('-30 days')); ?>&date_to=<?php echo date('Y-m-d'); ?>">Last 30 days</a>
+            </div>
         </div>
 
         <!-- Results Table -->
         <div class="data-table">
             <div class="table-header">
                 <div class="table-title">
-                    <?php 
-                    if (!empty($searchTerm)) {
-                        echo "Search Results (" . number_format($totalResults) . " found)";
+                    <?php
+                    $titleBits = [];
+                    if (!empty($searchTerm)) $titleBits[] = "matching \"" . htmlspecialchars($searchTerm) . "\"";
+                    if (!empty($dateFrom) || !empty($dateTo)) {
+                        $titleBits[] = "from " . ($dateFrom ?: '…') . " to " . ($dateTo ?: '…');
+                    }
+                    if ($titleBits) {
+                        echo "Results (" . number_format($totalResults) . " found) — " . implode(', ', $titleBits);
                     } else {
-                        echo "All Registrations";
+                        echo "All Registrations (" . number_format($totalResults) . ")";
                     }
                     ?>
                 </div>
@@ -679,26 +750,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <!-- Pagination -->
+        <?php
+        $pageQueryTail = '&search_type=' . urlencode($searchType)
+            . '&search_term=' . urlencode($searchTerm)
+            . '&date_from=' . urlencode($dateFrom)
+            . '&date_to=' . urlencode($dateTo);
+        ?>
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php if ($page > 1): ?>
-                    <a href="?page=<?php echo $page - 1; ?>&search_type=<?php echo urlencode($searchType); ?>&search_term=<?php echo urlencode($searchTerm); ?>">
+                    <a href="?page=<?php echo $page - 1; ?><?php echo $pageQueryTail; ?>">
                         <i class="fas fa-chevron-left"></i> Previous
                     </a>
                 <?php endif; ?>
-                
+
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <?php if ($i == $page): ?>
                         <span class="active"><?php echo $i; ?></span>
                     <?php else: ?>
-                        <a href="?page=<?php echo $i; ?>&search_type=<?php echo urlencode($searchType); ?>&search_term=<?php echo urlencode($searchTerm); ?>">
+                        <a href="?page=<?php echo $i; ?><?php echo $pageQueryTail; ?>">
                             <?php echo $i; ?>
                         </a>
                     <?php endif; ?>
                 <?php endfor; ?>
-                
+
                 <?php if ($page < $totalPages): ?>
-                    <a href="?page=<?php echo $page + 1; ?>&search_type=<?php echo urlencode($searchType); ?>&search_term=<?php echo urlencode($searchTerm); ?>">
+                    <a href="?page=<?php echo $page + 1; ?><?php echo $pageQueryTail; ?>">
                         Next <i class="fas fa-chevron-right"></i>
                     </a>
                 <?php endif; ?>
