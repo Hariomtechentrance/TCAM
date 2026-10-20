@@ -4,7 +4,7 @@
  * RESTful JSON API for admin AJAX operations
  */
 
-// Match session cookie settings used by admin-login.php so the same session is resumed
+// Match session cookie settings used by login-production.php so the same session is resumed
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 ini_set('session.use_only_cookies', 1);
@@ -20,7 +20,7 @@ if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
     exit;
 }
 
-// Enforce 30-minute inactivity timeout (same as admin-auth.php)
+// Enforce 30-minute inactivity timeout
 if (isset($_SESSION['admin_last_activity']) && (time() - $_SESSION['admin_last_activity']) > 1800) {
     session_unset();
     session_destroy();
@@ -171,7 +171,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS districts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
 )");
-$districtList = ['Ahmednagar','Akola','Amravati','Sambhaji Nagar','Beed','Bhandara','Buldhana','Chandrapur','Dhule','Gadchiroli','Gondia','Hingoli','Jalgaon','Jalna','Kolhapur','Latur','Mumbai City','Mumbai Suburban','Nagpur','Nanded','Nandurbar','Nashik','Dharashive','Palghar','Parbhani','Pune','Raigad','Ratnagiri','Sangli','Satara','Sindhudurg','Solapur','Thane','Wardha','Washim','Yavatmal'];
+$districtList = ['Ahilyanagar','Akola','Amravati','Sambhaji Nagar','Beed','Bhandara','Buldhana','Chandrapur','Dhule','Gadchiroli','Gondia','Hingoli','Jalgaon','Jalna','Kolhapur','Latur','Mumbai City','Mumbai Suburban','Nagpur','Nanded','Nandurbar','Nashik','Dharashiv','Palghar','Parbhani','Pune','Raigad','Ratnagiri','Sangli','Satara','Sindhudurg','Solapur','Thane','Wardha','Washim','Yavatmal'];
 $distStmt = $db->prepare("INSERT OR IGNORE INTO districts (name) VALUES (?)");
 foreach ($districtList as $d) { $distStmt->execute([$d]); }
 

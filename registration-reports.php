@@ -4,8 +4,8 @@
  * Comprehensive reporting and analytics
  */
 
-session_start();
 require_once 'security-config.php';
+session_start();
 require_once 'secure-database.php';
 
 // Check if admin is logged in
@@ -24,50 +24,92 @@ $endDate = $_GET['end_date'] ?? date('Y-m-d');
 // Generate reports based on type
 switch ($reportType) {
     case 'overview':
+        // Real students are split across two tables: `registrations` (the
+        // detailed ID-registration form) and `bookings` (the main homepage
+        // "Register Now" form, where most people actually register) — every
+        // overview number below sums both so the report isn't wildly
+        // undercounting.
         $stats = [
-            'total' => $db->execute("SELECT COUNT(*) as count FROM registrations")->fetch()['count'],
-            'this_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count'],
-            'last_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', date('now', strtotime('-1 month'))")->fetch()['count'],
-            'this_year' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y', created_at) = strftime('%Y', 'now')")->fetch()['count'],
-            'active' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE status = 'active'")->fetch()['count'],
+            'total' => $db->execute("SELECT COUNT(*) as count FROM registrations")->fetch()['count']
+                + $db->execute("SELECT COUNT(*) as count FROM bookings")->fetch()['count'],
+            'this_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count']
+                + $db->execute("SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')")->fetch()['count'],
+            'last_month' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', date('now', '-1 month'))")->fetch()['count']
+                + $db->execute("SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', date('now', '-1 month'))")->fetch()['count'],
+            'this_year' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE strftime('%Y', created_at) = strftime('%Y', 'now')")->fetch()['count']
+                + $db->execute("SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y', created_at) = strftime('%Y', 'now')")->fetch()['count'],
+            'active' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE status = 'active'")->fetch()['count']
+                + $db->execute("SELECT COUNT(*) as count FROM bookings")->fetch()['count'],
             'cancelled' => $db->execute("SELECT COUNT(*) as count FROM registrations WHERE status = 'cancelled'")->fetch()['count'],
         ];
-        
-        // City distribution
-        $cityStats = $db->execute("SELECT city, COUNT(*) as count FROM registrations GROUP BY city ORDER BY count DESC LIMIT 10")->fetchAll();
-        
-        // Document type distribution
-        $docStats = $db->execute("SELECT document_type, COUNT(*) as count FROM registrations GROUP BY document_type ORDER BY count DESC")->fetchAll();
-        
-        // Monthly registration trend
+
+        // City/district distribution across both tables
+        $cityStats = $db->execute("
+            SELECT city, SUM(count) as count FROM (
+                SELECT city, COUNT(*) as count FROM registrations GROUP BY city
+                UNION ALL
+                SELECT district AS city, COUNT(*) as count FROM bookings GROUP BY district
+            ) GROUP BY city ORDER BY count DESC LIMIT 10
+        ")->fetchAll();
+
+        // Document type distribution (bookings only ever collect Aadhar)
+        $docStats = $db->execute("
+            SELECT document_type, SUM(count) as count FROM (
+                SELECT document_type, COUNT(*) as count FROM registrations WHERE document_type IS NOT NULL AND document_type != '' GROUP BY document_type
+                UNION ALL
+                SELECT 'aadhar' AS document_type, COUNT(*) as count FROM bookings WHERE aadhar_number IS NOT NULL AND aadhar_number != ''
+            ) GROUP BY document_type ORDER BY count DESC
+        ")->fetchAll();
+
+        // Monthly registration trend across both tables
         $monthlyTrend = $db->execute("
-            SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count 
-            FROM registrations 
-            WHERE created_at >= date('now', '-11 months')
-            GROUP BY strftime('%Y-%m', created_at) 
-            ORDER BY month
+            SELECT month, SUM(count) as count FROM (
+                SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count
+                FROM registrations WHERE created_at >= date('now', '-11 months')
+                GROUP BY strftime('%Y-%m', created_at)
+                UNION ALL
+                SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count
+                FROM bookings WHERE created_at >= date('now', '-11 months')
+                GROUP BY strftime('%Y-%m', created_at)
+            ) GROUP BY month ORDER BY month
         ")->fetchAll();
         break;
         
     case 'detailed':
         $registrations = $db->execute("
-            SELECT * FROM registrations 
-            WHERE DATE(created_at) BETWEEN ? AND ? 
+            SELECT reg_id, name, mobile, email, city, state, document_type, document_number, status, joined, created_at
+            FROM registrations WHERE DATE(created_at) BETWEEN ? AND ?
+            UNION ALL
+            SELECT bookingId AS reg_id, name, phone AS mobile, email, district AS city, '' AS state,
+                'aadhar' AS document_type, aadhar_number AS document_number, 'active' AS status,
+                created_at AS joined, created_at
+            FROM bookings WHERE DATE(created_at) BETWEEN ? AND ?
             ORDER BY created_at DESC
-        ", [$startDate, $endDate])->fetchAll();
+        ", [$startDate, $endDate, $startDate, $endDate])->fetchAll();
         break;
-        
+
     case 'export':
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="tcam_registrations_' . date('Y-m-d') . '.csv"');
-        
+        header('Content-Disposition: attachment; filename="tcam_registrations_' . $startDate . '_to_' . $endDate . '.csv"');
+
         $output = fopen('php://output', 'w');
-        
+
         // Header
         fputcsv($output, ['TCAM ID', 'Name', 'Mobile', 'Email', 'City', 'State', 'Document Type', 'Document Number', 'Status', 'Registration Date', 'Created At']);
-        
-        // Data
-        $registrations = $db->execute("SELECT * FROM registrations ORDER BY created_at DESC")->fetchAll();
+
+        // Data — both registrations and bookings, so the export isn't
+        // missing everyone who came through the main homepage form.
+        // Respects the same start_date/end_date range as the detailed report.
+        $registrations = $db->execute("
+            SELECT reg_id, name, mobile, email, city, state, document_type, document_number, status, joined, created_at
+            FROM registrations WHERE DATE(created_at) BETWEEN ? AND ?
+            UNION ALL
+            SELECT bookingId AS reg_id, name, phone AS mobile, email, district AS city, '' AS state,
+                'aadhar' AS document_type, aadhar_number AS document_number, 'active' AS status,
+                created_at AS joined, created_at
+            FROM bookings WHERE DATE(created_at) BETWEEN ? AND ?
+            ORDER BY created_at DESC
+        ", [$startDate, $endDate, $startDate, $endDate])->fetchAll();
         foreach ($registrations as $reg) {
             fputcsv($output, [
                 $reg['reg_id'],
@@ -341,7 +383,7 @@ switch ($reportType) {
                 <a href="admin-dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                 <a href="admin-search.php"><i class="fas fa-search"></i> Search</a>
                 <a href="registration-reports.php"><i class="fas fa-chart-bar"></i> Reports</a>
-                <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a href="login-production.php?logout=1"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </nav>
         </div>
     </header>
@@ -359,25 +401,25 @@ switch ($reportType) {
                     </select>
                 </div>
                 
-                <?php if ($reportType === 'detailed'): ?>
+                <?php if ($reportType === 'detailed' || $reportType === 'export'): ?>
                     <div class="form-group">
                         <label for="start_date">Start Date</label>
                         <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="end_date">End Date</label>
                         <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
                     </div>
                 <?php endif; ?>
-                
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-sync"></i> Generate Report
                 </button>
-                
+
                 <?php if ($reportType === 'export'): ?>
-                    <button type="button" onclick="window.location.href='?report_type=export'" class="btn btn-success">
-                        <i class="fas fa-download"></i> Download CSV
+                    <button type="button" onclick="window.location.href='?report_type=export&start_date=<?php echo urlencode($startDate); ?>&end_date=<?php echo urlencode($endDate); ?>'" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download CSV (selected range)
                     </button>
                 <?php endif; ?>
             </form>

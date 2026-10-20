@@ -2,6 +2,11 @@
 /**
  * TCAM Admin Team Entry Report (PDF with photos)
  */
+// FPDF builds the whole PDF (every embedded photo included) in memory before
+// output, so a large team selection can exceed the container's default
+// 128M limit — bump it just for this request.
+ini_set('memory_limit', '512M');
+
 require_once 'security-config.php';
 session_start();
 require_once 'secure-database.php';

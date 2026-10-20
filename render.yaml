@@ -32,9 +32,9 @@ services:
       set -e
       mkdir -p _site
       # Copy static pages
-      cp index.html about.html contact.html gallery.html tournament.html \
+      cp index.html about.html contact.html gallery.html \
          managment.html registration-success.html single-registration-enhanced.html \
-         404.html 500.html login.html _site/ 2>/dev/null || true
+         404.html 500.html _site/ 2>/dev/null || true
       # Copy asset directories
       cp -r css js fonts images bootstrap _site/
       # Copy root-level images and media files

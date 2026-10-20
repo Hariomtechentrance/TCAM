@@ -2,37 +2,52 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management - TCAM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/theme.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', Arial, sans-serif;
+            background: #0B0F1A;
             margin: 0;
-            color: #222;
+            color: #F2F4F7;
         }
         .container {
             max-width: 900px;
-            margin: 60px auto 0 auto;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            margin: -40px auto 0 auto;
+            position: relative;
+            z-index: 2;
+            background: #141A2B;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             padding: 40px 24px 32px 24px;
+            animation: tcamContainerIn 0.7s cubic-bezier(.4,0,.2,1) both;
+        }
+        @keyframes tcamContainerIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         h1 {
-            color: #ff6b35;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 2.4rem;
+            color: #F2F4F7;
             text-align: center;
             margin-bottom: 32px;
         }
         .placeholder {
             text-align: center;
-            color: #888;
+            color: #8B93A7;
             font-size: 1.2rem;
             margin-top: 40px;
         }
         a.back-link {
             display: inline-block;
             margin-bottom: 24px;
-            color: #ff6b35;
+            color: #FF7A1A;
             text-decoration: none;
             font-weight: bold;
             font-size: 1.1rem;
@@ -41,18 +56,21 @@
             text-decoration: underline;
         }
         .section-title {
-            color: #764ba2;
+            color: #FF7A1A;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 700;
             font-size: 1.5rem;
             margin-top: 32px;
             margin-bottom: 18px;
             text-align: left;
         }
         .management-section {
-            background: #f8f9fa;
+            background: #1a222c;
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 14px;
             padding: 28px 22px 18px 22px;
             margin-bottom: 32px;
-            box-shadow: 0 2px 12px rgba(118,75,162,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
             animation: fadeInUp 0.8s cubic-bezier(.4,2,.6,1.000);
         }
         .management-list {
@@ -64,32 +82,33 @@
             font-size: 1.08rem;
         }
         .apply-btn {
-            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            background: linear-gradient(90deg, #FF7A1A, #ff9a4d);
             color: #fff;
             border: none;
-            border-radius: 22px;
-            padding: 0.6rem 1.5rem;
+            border-radius: 999px;
+            padding: 0.7rem 1.8rem;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 700;
+            letter-spacing: 0.3px;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.2s, transform 0.2s;
-            box-shadow: 0 2px 8px rgba(255,107,53,0.08);
+            transition: background 0.2s, transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s ease;
+            box-shadow: 0 10px 24px rgba(255,107,53,0.28);
             margin-top: 10px;
             display: inline-block;
         }
         .apply-btn:hover {
-            background: linear-gradient(45deg, #f7931e, #ff6b35);
+            background: linear-gradient(45deg, #ff9a4d, #FF7A1A);
             transform: translateY(-2px) scale(1.04);
         }
         .achievements {
             margin-top: 18px;
-            background: #fff3e6;
-            border-left: 4px solid #ff6b35;
+            background: rgba(255,122,26,0.1);
+            border-left: 4px solid #FF7A1A;
             border-radius: 8px;
             padding: 14px 18px;
             font-size: 1.05rem;
-            color: #444;
+            color: #C4CAD4;
         }
         .event-gallery {
             display: flex;
@@ -112,16 +131,14 @@
             from { opacity: 0; transform: translateY(40px);}
             to { opacity: 1; transform: translateY(0);}
         }
-        body {
-            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-        }
         .committee-section {
             width: 95vw;
             max-width: 700px;
             padding: 44px 32px 36px 32px;
-            background: linear-gradient(135deg, #fff 80%, #f7eafd 100%);
+            background: #141A2B;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 26px;
-            box-shadow: 0 10px 40px rgba(118,75,162,0.15), 0 2px 8px rgba(255,107,53,0.09);
+            box-shadow: 0 20px 55px rgba(0,0,0,0.45);
             animation: fadeInUp 1s cubic-bezier(.39,.575,.56,1.000);
             position: relative;
             margin: 0 auto;
@@ -135,7 +152,7 @@
             position: absolute;
             left: -18px;
             top: 24px;
-            background: linear-gradient(90deg, #764ba2 70%, #ff6b35 100%);
+            background: linear-gradient(90deg, #FF7A1A 70%, #FF7A1A 100%);
             color: #fff;
             padding: 6px 22px;
             border-radius: 0 12px 12px 0;
@@ -154,7 +171,7 @@
             font-weight: 900;
             text-align: center;
             margin-bottom: 28px;
-            background: linear-gradient(90deg, #764ba2 40%, #ff6b35 100%);
+            background: linear-gradient(90deg, #FF7A1A 40%, #FF7A1A 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -174,20 +191,22 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            background: #fff;
+            background: #0B0F1A;
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 2px 14px rgba(118,75,162,0.08);
+            box-shadow: 0 2px 14px rgba(0,0,0,0.3);
             animation: fadeInUp 1.2s 0.2s both;
         }
         .committee-table th, .committee-table td {
             padding: 18px 22px;
             text-align: left;
             font-size: 1.15rem;
+            color: #F2F4F7;
             transition: background 0.2s, color 0.2s, transform 0.2s;
         }
         .committee-table th {
-            background: linear-gradient(90deg, #764ba2 70%, #ff6b35 100%);
+            background: #FF7A1A;
             color: #fff;
             font-weight: 700;
             border: none;
@@ -199,21 +218,21 @@
             transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
         }
         .committee-table tr:nth-child(even) {
-            background: #f7f2fa;
+            background: #161d26;
         }
         .committee-table tr:nth-child(odd) {
-            background: #fff;
+            background: #0B0F1A;
         }
         .committee-table tbody tr:hover {
-            background: #ffe5d1;
-            box-shadow: 0 2px 16px rgba(255,107,53,0.09);
+            background: rgba(255,122,26,0.14);
+            box-shadow: 0 2px 16px rgba(255,122,26,0.15);
             transform: scale(1.025);
             cursor: pointer;
         }
         .committee-table td:hover {
-            color: #764ba2;
+            color: #D7FA4C;
             font-weight: 600;
-            background: #fbe6ff;
+            background: rgba(215,250,76,0.1);
             transform: scale(1.06);
             z-index: 2;
         }
@@ -249,7 +268,50 @@
     </style>
     <script src="js/config.js"></script>
 </head>
-<body contenteditable="false">
+<body contenteditable="false" class="tcam-dark-bg">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+        <div class="nav-container">
+            <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="TCAM Logo" style="height:40px;vertical-align:middle;margin-right:10px;">
+                TCAM
+            </a>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html"                   onclick="closeMenu()">Home</a></li>
+                    <li><a href="about.html"                   onclick="closeMenu()">About Us</a></li>
+                    <li><a href="managment.html"               onclick="closeMenu()">Management</a></li>
+                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
+                    <li><a href="tournament.php"               onclick="closeMenu()">Tournament</a></li>
+                    <li><a href="gallery.php"                  onclick="closeMenu()">Gallery</a></li>
+                    <li><a href="student-search.php"           onclick="closeMenu()">🔍 Search Data</a></li>
+                    <li><a href="single-registration-enhanced.html" onclick="closeMenu()">Update Registration</a></li>
+                    <!-- Mobile-only buttons inside drawer -->
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.5rem;">
+                        <a href="index.html#booking" style="display:block;text-align:center;width:100%;border-radius:8px;background:#D7FA4C;color:#10140A;text-decoration:none;padding:0.7rem 1.5rem;font-weight:800;text-transform:uppercase;" onclick="closeMenu()">Register Now</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="index.html" style="display:block;text-align:center;width:100%;border-radius:8px;background:#FF7A1A;color:#fff;text-decoration:none;padding:0.7rem 1.5rem;font-weight:bold;" onclick="closeMenu()">🏏 Register as Coach</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu()">🔑 Coach Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
+                <a href="index.html#booking" class="register-btn header-register-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Register Now</a>
+                <a href="index.html" class="register-btn header-register-btn" style="background:#FF7A1A;text-decoration:none;display:inline-flex;align-items:center;">Register as Coach</a>
+                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
+            </div>
+        </div>
+    </header>
+
+
     <script>
         // Prevent editing
         document.addEventListener('DOMContentLoaded', function() {
@@ -275,9 +337,13 @@
             });
         });
     </script>
-    <div class="container">
-        <a href="index.html#home" class="back-link">← Back to Home</a>
+    <div class="tcam-hero">
+        <a href="index.html#home" class="tcam-hero-back">← Back to Home</a>
+        <span class="tcam-hero-eyebrow">Leadership</span>
         <h1>Management</h1>
+    </div>
+
+    <div class="container">
 
         <!-- State Level Dropdown -->
         <div class="management-dropdowns" style="margin-bottom:32px;">
@@ -300,14 +366,14 @@
             <button class="dropdown-btn" onclick="toggleDropdown('districtDropdown')">District Level Management ▾</button>
             <div class="dropdown-content" id="districtDropdown" style="display:none;max-height:300px;overflow-y:auto;">
                 <ul style="list-style:none;padding-left:0;columns:2;gap:24px;">
-                    <li><a href="#" onclick="showDistrictContact('Ahmednagar')" class="district-link">Ahmednagar</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Ahilyanagar')" class="district-link">Ahilyanagar</a></li>
                     <li><a href="#" onclick="showDistrictContact('Akola')" class="district-link">Akola</a></li>
                     <li><a href="#" onclick="showDistrictContact('Amravati')" class="district-link">Amravati</a></li>
                     <li><a href="#" onclick="showDistrictContact('Beed')" class="district-link">Beed</a></li>
                     <li><a href="#" onclick="showDistrictContact('Bhandara')" class="district-link">Bhandara</a></li>
                     <li><a href="#" onclick="showDistrictContact('Buldhana')" class="district-link">Buldhana</a></li>
                     <li><a href="#" onclick="showDistrictContact('Chandrapur')" class="district-link">Chandrapur</a></li>
-                    <li><a href="#" onclick="showDistrictContact('Dharashive')" class="district-link">Dharashive</a></li>
+                    <li><a href="#" onclick="showDistrictContact('Dharashiv')" class="district-link">Dharashiv</a></li>
                     <li><a href="#" onclick="showDistrictContact('Dhule')" class="district-link">Dhule</a></li>
                     <li><a href="#" onclick="showDistrictContact('Gadchiroli')" class="district-link">Gadchiroli</a></li>
                     <li><a href="#" onclick="showDistrictContact('Gondia')" class="district-link">Gondia</a></li>
@@ -344,7 +410,7 @@
                 margin-bottom: 12px;
             }
             .dropdown-btn {
-                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                background: linear-gradient(45deg, #FF7A1A, #ff9a4d);
                 color: #fff;
                 border: none;
                 border-radius: 22px;
@@ -359,27 +425,27 @@
                 transition: background 0.2s, transform 0.2s;
             }
             .dropdown-btn:hover {
-                background: linear-gradient(45deg, #f7931e, #ff6b35);
+                background: linear-gradient(45deg, #ff9a4d, #FF7A1A);
                 transform: translateY(-2px) scale(1.03);
             }
             .dropdown-content {
-                background: #fff3e6;
+                background: rgba(255,122,26,0.08);
+                border: 1px solid rgba(255,122,26,0.15);
                 border-radius: 10px;
                 padding: 16px 24px;
                 margin-top: 2px;
-                box-shadow: 0 2px 8px rgba(255,107,53,0.07);
                 animation: fadeInUp 0.5s;
             }
             .dropdown-content ul li {
                 margin-bottom: 7px;
                 font-size: 1.07rem;
-                color: #764ba2;
+                color: #FF7A1A;
                 font-weight: 500;
             }
             
             /* District Link Styles */
             .district-link {
-                color: #764ba2;
+                color: #FF7A1A;
                 text-decoration: none;
                 padding: 4px 8px;
                 border-radius: 6px;
@@ -389,7 +455,7 @@
             }
             
             .district-link:hover {
-                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                background: linear-gradient(45deg, #FF7A1A, #ff9a4d);
                 color: white;
                 transform: translateY(-1px);
                 box-shadow: 0 2px 8px rgba(255,107,53,0.3);
@@ -410,19 +476,21 @@
             }
             
             .modal-content {
-                background-color: #fff;
+                background-color: #141A2B;
+                border: 1px solid rgba(255,255,255,0.1);
+                color: #F2F4F7;
                 margin: 5% auto;
                 padding: 0;
                 border-radius: 16px;
                 width: 90%;
                 max-width: 500px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                box-shadow: 0 20px 55px rgba(0,0,0,0.5);
                 animation: slideIn 0.3s ease;
                 overflow: hidden;
             }
-            
+
             .modal-close {
-                color: #aaa;
+                color: #8B93A7;
                 float: right;
                 font-size: 28px;
                 font-weight: bold;
@@ -434,11 +502,11 @@
             }
             
             .modal-close:hover {
-                color: #ff6b35;
+                color: #FF7A1A;
             }
             
             #modalDistrictName {
-                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                background: linear-gradient(45deg, #FF7A1A, #ff9a4d);
                 color: white;
                 margin: 0;
                 padding: 20px 30px;
@@ -457,7 +525,7 @@
             }
             
             .contact-info strong {
-                color: #764ba2;
+                color: #FF7A1A;
                 font-weight: 600;
             }
             
@@ -665,4 +733,6 @@
             &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
         </div>
     </footer>
+    <script src="js/header.js"></script>
+    <script src="js/animations.js"></script>
 </body></html>

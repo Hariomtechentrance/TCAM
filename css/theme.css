@@ -1,0 +1,443 @@
+/* ============================================================
+   TCAM — "Floodlit" Theme
+   Deep navy base, one electric-lime accent, soft floodlight glow,
+   generously rounded pill UI and bold condensed display type.
+   Shared across every public page. This file only adds
+   polish/tokens — it never redefines page-specific layout
+   classes, so it is safe to include everywhere without fighting
+   each page's own <style>.
+   ============================================================ */
+
+:root {
+    --tcam-night: #0B0F1A;         /* page background */
+    --tcam-pitch: #141A2B;         /* cards, panels */
+    --tcam-pitch-2: #1B2338;       /* hover / nested surface */
+    --tcam-yellow: #D7FA4C;        /* primary accent — floodlight lime */
+    --tcam-yellow-dim: #b8d93a;    /* lime hover/darker */
+    --tcam-saffron: #FF7A1A;       /* secondary accent — badges, live tags */
+    --tcam-saffron-light: #ff9a4d;
+    --tcam-lime: #D7FA4C;          /* alias kept for older markup */
+    --tcam-lime-ink: #10140A;      /* dark text that sits on lime */
+    --tcam-chalk: #F2F4F7;         /* headline/body text on dark */
+    --tcam-mist: #8B93A7;          /* muted text/captions on dark */
+    --tcam-line: rgba(255, 255, 255, 0.09); /* hairline borders on dark */
+    --tcam-cream: #F3F1E9;         /* light alt-section (Leadership, forms) */
+    --tcam-cream-ink: #12141C;     /* dark text on cream */
+    --tcam-light-surface: #F7F8FA;
+
+    --tcam-radius-sm: 10px;
+    --tcam-radius-md: 16px;
+    --tcam-radius-lg: 26px;
+    --tcam-radius-pill: 999px;
+    --tcam-shadow-sm: 0 2px 14px rgba(0, 0, 0, 0.3);
+    --tcam-shadow-md: 0 16px 40px rgba(0, 0, 0, 0.38);
+    --tcam-shadow-lg: 0 26px 64px rgba(0, 0, 0, 0.45);
+    --tcam-glow-lime: 0 0 0 1px rgba(215, 250, 76, 0.18), 0 16px 40px rgba(215, 250, 76, 0.22);
+    --tcam-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+::selection {
+    background: var(--tcam-yellow);
+    color: var(--tcam-lime-ink);
+}
+
+/* ── Scroll-reveal utility — opt-in via class="reveal" ────────── */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s var(--tcam-ease), transform 0.6s var(--tcam-ease);
+    will-change: opacity, transform;
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── Header: subtle elevation once the page scrolls ───────────── */
+.site-header.is-scrolled {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.site-header, header.header {
+    position: fixed;
+    background: #0B0F1A !important;
+    border-bottom: 1px solid var(--tcam-line);
+}
+
+/* ── Page-title treatment — opt-in via class="tcam-title" ─────── */
+.tcam-title {
+    color: var(--tcam-chalk);
+    letter-spacing: 0.5px;
+}
+
+/* ── Instant on-load entrance — opt-in via class="tcam-enter" ─── */
+@keyframes tcamEnter {
+    from { opacity: 0; transform: translateY(34px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tcam-enter {
+    animation: tcamEnter 0.7s var(--tcam-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+    .tcam-enter { animation: none; }
+}
+
+/* ── Eyebrow label — small bold lime caption above a headline ─── */
+.tcam-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--tcam-yellow);
+    margin-bottom: 0.9rem;
+}
+.tcam-eyebrow.is-muted { color: var(--tcam-mist); }
+.tcam-eyebrow::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ── Big condensed display headline — opt-in via class="tcam-display" */
+.tcam-display {
+    font-family: 'Anton', 'Poppins', Arial, sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.02;
+    color: var(--tcam-chalk);
+}
+
+/* ── Pill buttons — opt-in via class="tcam-btn" ────────────────
+   Lime needs dark text for contrast — the whole point of "use
+   the accent sparingly": one loud lime element with a soft glow. */
+.tcam-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.9rem 2.1rem;
+    border: none;
+    border-radius: var(--tcam-radius-pill);
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    color: var(--tcam-lime-ink);
+    background: var(--tcam-yellow);
+    box-shadow: var(--tcam-glow-lime);
+    transition: transform 0.25s var(--tcam-ease), box-shadow 0.25s var(--tcam-ease), background 0.25s var(--tcam-ease);
+}
+.tcam-btn:hover {
+    transform: translateY(-3px);
+    background: #e4ff7a;
+}
+.tcam-btn:active {
+    transform: translateY(-1px);
+}
+.tcam-btn.tcam-btn-outline {
+    background: transparent;
+    color: var(--tcam-chalk);
+    border: 1.5px solid rgba(242, 244, 247, 0.3);
+    box-shadow: none;
+}
+.tcam-btn.tcam-btn-outline:hover {
+    border-color: var(--tcam-yellow);
+    color: var(--tcam-yellow);
+    background: rgba(215, 250, 76, 0.06);
+}
+.tcam-btn.tcam-btn-saffron {
+    background: var(--tcam-saffron);
+    color: #fff;
+    box-shadow: 0 16px 40px rgba(255, 122, 26, 0.28);
+}
+.tcam-btn.tcam-btn-saffron:hover {
+    background: var(--tcam-saffron-light);
+}
+
+/* ── Badge pill — small outline capsule (affiliation tags) ─────── */
+.tcam-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 1rem;
+    border-radius: var(--tcam-radius-pill);
+    border: 1px solid var(--tcam-line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--tcam-mist);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+/* ── Status pills — fixtures / registration state ──────────────── */
+.tcam-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.95rem;
+    border-radius: var(--tcam-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.tcam-status.is-open {
+    background: rgba(215, 250, 76, 0.14);
+    color: var(--tcam-yellow);
+}
+.tcam-status.is-pending {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--tcam-mist);
+}
+
+/* ── Card — rounded dark panel, used for pathway/feature/fixture rows */
+.tcam-card {
+    background: var(--tcam-pitch);
+    border: 1px solid var(--tcam-line);
+    border-radius: var(--tcam-radius-md);
+    transition: transform 0.3s var(--tcam-ease), border-color 0.3s var(--tcam-ease), background 0.3s var(--tcam-ease);
+}
+.tcam-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(215, 250, 76, 0.3);
+    background: var(--tcam-pitch-2);
+}
+.tcam-card.is-accent {
+    background: var(--tcam-yellow);
+    border-color: var(--tcam-yellow);
+    color: var(--tcam-lime-ink);
+}
+.tcam-card.is-accent:hover {
+    transform: translateY(-6px);
+    background: #e4ff7a;
+}
+
+/* ── Nav links: animated underline sweep on hover ──────────────── */
+.nav-menu a {
+    position: relative;
+}
+.nav-menu a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: var(--tcam-yellow);
+    transition: width 0.28s var(--tcam-ease);
+}
+.nav-menu a:hover::after,
+.nav-menu a:focus-visible::after {
+    width: 100%;
+}
+@media (max-width: 768px) {
+    .nav-menu a::after { display: none; }
+}
+
+/* ── Header CTA buttons: lift + glow on hover ──────────────────── */
+.header-register-btn {
+    transition: transform 0.25s var(--tcam-ease), box-shadow 0.25s var(--tcam-ease), filter 0.25s var(--tcam-ease);
+}
+.header-register-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+/* ── Logo: gentle hover response ───────────────────────────────── */
+.logo {
+    transition: transform 0.25s var(--tcam-ease);
+    display: inline-flex;
+    align-items: center;
+}
+.logo:hover {
+    transform: scale(1.03);
+}
+
+/* ── Footer link + social icon micro-interactions ─────────────── */
+.social-link img {
+    transition: transform 0.25s var(--tcam-ease);
+}
+.social-link:hover img {
+    transform: translateY(-2px) scale(1.08);
+}
+
+/* ============================================================
+   TCAM — Page Hero Banner
+   Night-stadium stage with a soft floodlight glow behind the
+   title — solid bold type on a dark stage, not gradient text.
+   ============================================================ */
+body.tcam-light-bg {
+    background: var(--tcam-cream) !important;
+}
+body.tcam-dark-bg {
+    background: var(--tcam-night) !important;
+    color: var(--tcam-chalk);
+}
+
+.tcam-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 148px 24px 64px;
+    text-align: center;
+    color: var(--tcam-chalk);
+    background:
+        radial-gradient(ellipse 70% 55% at 50% -10%, rgba(215, 250, 76, 0.1), transparent),
+        var(--tcam-night);
+    isolation: isolate;
+}
+.tcam-hero::before,
+.tcam-hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: -1;
+}
+.tcam-hero::before {
+    width: 380px;
+    height: 380px;
+    background: rgba(215, 250, 76, 0.14);
+    top: -170px;
+    right: -60px;
+}
+.tcam-hero::after {
+    width: 340px;
+    height: 340px;
+    background: rgba(255, 122, 26, 0.14);
+    bottom: -180px;
+    left: -80px;
+}
+.tcam-hero-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto 1.1rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--tcam-yellow);
+    position: relative;
+}
+.tcam-hero-eyebrow::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--tcam-yellow);
+    box-shadow: 0 0 10px 2px rgba(215, 250, 76, 0.6);
+}
+.tcam-hero h1,
+.tcam-hero h2 {
+    font-family: 'Anton', 'Poppins', Arial, sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: clamp(2.1rem, 4.4vw, 3.2rem);
+    line-height: 1.08;
+    margin-bottom: 0.8rem;
+    position: relative;
+    color: var(--tcam-chalk);
+    background: none;
+    -webkit-text-fill-color: var(--tcam-chalk);
+}
+.tcam-hero p {
+    font-size: 1.08rem;
+    max-width: 640px;
+    margin: 0 auto;
+    color: var(--tcam-mist);
+    position: relative;
+}
+.tcam-hero-back {
+    position: relative;
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 6px;
+    margin: 0 auto 1.4rem;
+    color: var(--tcam-mist);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 6px 16px;
+    border-radius: var(--tcam-radius-pill);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--tcam-line);
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.tcam-hero-back:hover {
+    background: rgba(215, 250, 76, 0.1);
+    color: var(--tcam-yellow);
+    transform: translateX(-3px);
+}
+@media (max-width: 600px) {
+    .tcam-hero { padding: 128px 20px 48px; }
+}
+
+/* ============================================================
+   TCAM — Tennis-ball motif (CSS, no 3D pipeline needed)
+   The ball is the hero object — a floodlit lime sphere with a
+   soft glow halo, built in pure CSS so it stays fast on rural
+   4G/low-end phones.
+   ============================================================ */
+.tcam-ball {
+    --ball-size: 120px;
+    width: var(--ball-size);
+    height: var(--ball-size);
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle at 32% 28%, #f4ff9e 0%, var(--tcam-yellow) 45%, var(--tcam-yellow-dim) 100%);
+    box-shadow:
+        inset -14px -14px 28px rgba(0,0,0,0.25),
+        inset 10px 10px 20px rgba(255,255,255,0.35),
+        0 0 60px 10px rgba(215, 250, 76, 0.45);
+    animation: tcamBallSpin 9s linear infinite, tcamBallFloat 3.2s var(--tcam-ease) infinite alternate;
+}
+.tcam-ball::before,
+.tcam-ball::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 3px solid rgba(11, 15, 26, 0.35);
+    border-radius: 50%;
+    clip-path: polygon(0 35%, 100% 15%, 100% 55%, 0 75%);
+}
+.tcam-ball::after {
+    transform: rotate(180deg);
+}
+@keyframes tcamBallSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes tcamBallFloat {
+    from { margin-top: 0; }
+    to { margin-top: -14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tcam-ball { animation: none; }
+}
+
+/* ============================================================
+   TCAM — Stat counters (count up on scroll)
+   Opt in with: <span class="tcam-counter" data-count-to="500">0</span>
+   Driven by js/animations.js via IntersectionObserver.
+   ============================================================ */
+.tcam-counter {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;
+}

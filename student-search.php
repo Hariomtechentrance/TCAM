@@ -302,144 +302,150 @@ function generatePDFReceipt($registration) {
     <meta charset="UTF-8">
     <title>Student Search Portal - TCAM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0B0F14;
             min-height: 100vh;
-            color: #333;
+            color: #F2F4F7;
         }
-        
+
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: -40px auto 0 auto;
+            position: relative;
+            z-index: 2;
             padding: 20px;
         }
-        
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-            text-align: center;
+
+        @keyframes tcamContainerIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .header h1 {
-            color: #764ba2;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        
+
         .search-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: #141A22;
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            transition: box-shadow 0.35s ease;
+            animation: tcamContainerIn 0.7s 0.1s cubic-bezier(.4,0,.2,1) both;
         }
-        
+        .search-container:hover {
+            box-shadow: 0 26px 60px rgba(0,0,0,0.5);
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #555;
+            color: #F2F4F7;
         }
-        
+
         .form-group select,
         .form-group input {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
+            background: #0B0F14;
+            color: #F2F4F7;
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            font-family: inherit;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .form-group select:focus,
         .form-group input:focus {
             outline: none;
-            border-color: #764ba2;
+            border-color: #FF7A1A;
+            box-shadow: 0 0 0 4px rgba(255,122,26,0.16);
         }
-        
+
         .btn {
-            padding: 12px 24px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s ease, background 0.25s ease;
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .btn-primary {
-            background: #764ba2;
+            background: linear-gradient(45deg, #FF7A1A, #ff9a4d);
             color: white;
         }
-        
+
         .btn-primary:hover {
-            background: #5a3785;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+            background: linear-gradient(45deg, #e2551f, #FF7A1A);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(255, 122, 26, 0.4);
         }
-        
+
         .btn-secondary {
-            background: #95a5a6;
-            color: white;
+            background: #2a333f;
+            color: #F2F4F7;
         }
-        
+
         .btn-secondary:hover {
-            background: #7f8c8d;
+            background: #39424f;
             transform: translateY(-2px);
         }
-        
+
         .results-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
+            background: #141A22;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             margin-bottom: 30px;
         }
-        
+
         .result-card {
             padding: 20px;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            transition: background 0.25s ease;
         }
-        
+
+        .result-card:hover {
+            background: #1a222c;
+        }
+
         .result-card:last-child {
             border-bottom: none;
         }
-        
+
         .result-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        
+
         .result-title {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
             font-size: 1.2rem;
-            font-weight: bold;
-            color: #764ba2;
+            font-weight: 700;
+            color: #FF7A1A;
         }
         
         .result-info {
@@ -457,15 +463,19 @@ function generatePDFReceipt($registration) {
         
         .info-label {
             font-weight: 600;
-            color: #555;
+            color: #8A94A6;
         }
-        
+
         .photo {
             width: 60px;
             height: 60px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.14);
+            transition: transform 0.25s ease;
+        }
+        .result-card:hover .photo {
+            transform: scale(1.06);
         }
         
         .result-actions {
@@ -501,15 +511,15 @@ function generatePDFReceipt($registration) {
         }
         
         .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(39,174,96,0.14);
+            color: #4ade80;
+            border: 1px solid rgba(39,174,96,0.3);
         }
-        
+
         .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(239,68,68,0.14);
+            color: #ff8a8a;
+            border: 1px solid rgba(239,68,68,0.3);
         }
         
         .back-link {
@@ -548,18 +558,60 @@ function generatePDFReceipt($registration) {
         }
     </style>
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/theme.css">
 </head>
-<body>
+<body class="tcam-dark-bg">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+        <div class="nav-container">
+            <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="TCAM Logo" style="height:40px;vertical-align:middle;margin-right:10px;">
+                TCAM
+            </a>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html"                   onclick="closeMenu()">Home</a></li>
+                    <li><a href="about.html"                   onclick="closeMenu()">About Us</a></li>
+                    <li><a href="managment.html"               onclick="closeMenu()">Management</a></li>
+                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
+                    <li><a href="tournament.php"               onclick="closeMenu()">Tournament</a></li>
+                    <li><a href="gallery.php"                  onclick="closeMenu()">Gallery</a></li>
+                    <li><a href="student-search.php"           onclick="closeMenu()">🔍 Search Data</a></li>
+                    <li><a href="single-registration-enhanced.html" onclick="closeMenu()">Update Registration</a></li>
+                    <!-- Mobile-only buttons inside drawer -->
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.5rem;">
+                        <a href="index.html#booking" style="display:block;text-align:center;width:100%;border-radius:8px;background:#D8F84A;color:#0B0F14;text-decoration:none;padding:0.7rem 1.5rem;font-weight:800;text-transform:uppercase;" onclick="closeMenu()">Register Now</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="index.html" style="display:block;text-align:center;width:100%;border-radius:8px;background:#FF7A1A;color:#fff;text-decoration:none;padding:0.7rem 1.5rem;font-weight:bold;" onclick="closeMenu()">🏏 Register as Coach</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu()">🔑 Coach Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
+                <a href="index.html#booking" class="register-btn header-register-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Register Now</a>
+                <a href="index.html" class="register-btn header-register-btn" style="background:#FF7A1A;text-decoration:none;display:inline-flex;align-items:center;">Register as Coach</a>
+                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="tcam-hero">
+        <a href="index.html" class="tcam-hero-back">← Back to Website</a>
+        <span class="tcam-hero-eyebrow">Find Your Record</span>
+        <h1>🔍 Student Search Portal</h1>
+        <p>Find your previous registrations and download your data instantly!</p>
+    </div>
+
     <div class="container">
-        <div class="back-link">
-            <a href="index.html">← Back to Website</a>
-        </div>
-
-        <div class="header">
-            <h1>🔍 Student Search Portal</h1>
-            <p>Find your previous registrations and download your data instantly!</p>
-        </div>
-
         <?php if (isset($success) && $success !== ''): ?>
             <div class="message success">
                 <?php echo htmlspecialchars($success); ?>
@@ -599,10 +651,10 @@ function generatePDFReceipt($registration) {
 
         <?php if (!empty($searchResults)): ?>
             <div class="results-container">
-                <h2 style="color: #764ba2; margin-bottom: 20px;">Found <?php echo count($searchResults); ?> Registration(s)</h2>
+                <h2 style="color: #FF7A1A; margin-bottom: 20px;">Found <?php echo count($searchResults); ?> Registration(s)</h2>
                 
                 <?php foreach ($searchResults as $result): ?>
-                    <div class="result-card">
+                    <div class="result-card reveal">
                         <div class="result-header">
                             <div class="result-title">
                                 TCAM ID: <?php echo htmlspecialchars($result['reg_id']); ?>
@@ -712,5 +764,7 @@ function generatePDFReceipt($registration) {
             &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
         </div>
     </footer>
+    <script src="js/header.js"></script>
+    <script src="js/animations.js"></script>
 </body>
 </html>

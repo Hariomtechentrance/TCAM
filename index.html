@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TCAM - The Ultimate Fast Format</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
     <style>
         /* Reset body margin and padding */
         html, body {
@@ -14,12 +18,14 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', 'Arial', sans-serif;
             line-height: 1.6;
             overflow-x: hidden;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: #0B0F1A;
+            padding-top: var(--header-h, 70px);
         }
 
         * {
@@ -33,7 +39,7 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: #0B0F1A;
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 0.65rem 0;
@@ -50,14 +56,15 @@
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff6b35;
+            font-family: 'Anton', Arial, sans-serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: #D7FA4C;
             text-decoration: none;
             flex-shrink: 0;
             white-space: nowrap;
         }
-
         nav {
             flex-grow: 1;
             flex-shrink: 1;
@@ -83,7 +90,7 @@
 
         .nav-menu a {
             text-decoration: none;
-            color: white;
+            color: #F2F4F7;
             font-weight: 500;
             font-size: 0.87rem;
             white-space: nowrap;
@@ -92,7 +99,28 @@
         }
 
         .nav-menu a:hover {
-            color: #ff6b35;
+            color: #D7FA4C;
+        }
+
+        /* Search pill in the header nav row */
+        .nav-search-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.55rem 1.1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #F2F4F7;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+        .nav-search-pill:hover {
+            border-color: #D7FA4C;
+            color: #D7FA4C;
+            background: rgba(215,250,76,0.07);
         }
 
         /* Header CTA buttons — compact size for header context */
@@ -102,62 +130,110 @@
             white-space: nowrap;
         }
 
-        /* Hero Section */
+        /* ============================================================
+           Hero — full-bleed photo carousel with a centered overlay card
+           ============================================================ */
         .hero {
             position: relative;
-            height: 100vh;
-            min-height: 850px;
+            height: calc(100vh - var(--header-h, 70px));
+            min-height: 600px;
+            max-height: 830px;
             width: 100%;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             text-align: center;
-            padding: 0;
-            margin: 0;
+            background: #0B0F1A;
         }
-        
-        .hero-content {
-            position: absolute;
-            z-index: 3;
-            max-width: 1200px;
-            padding: 2.5rem;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-            margin: 0 20px;
-        }
-        
-        /* Hero Slideshow */
         .hero-slideshow {
             position: absolute;
-            top: 80px;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
-            min-height: 1000px;
             z-index: 1;
         }
-        
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(11,15,26,0.35) 0%, rgba(11,15,26,0.55) 100%);
+            z-index: 2;
+        }
+        .hero-ball-float {
+            position: absolute;
+            z-index: 3;
+            top: 12%;
+            right: 10%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 4;
+            max-width: 760px;
+            width: calc(100% - 40px);
+            padding: 2.4rem 2.6rem;
+            background: rgba(11,15,26,0.74);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--tcam-radius-lg, 26px);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+        }
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-bottom: 1.3rem;
+        }
+        .hero-headline {
+            font-family: 'Anton', 'Poppins', Arial, sans-serif;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            line-height: 1.05;
+            font-size: clamp(2rem, 4.6vw, 3.1rem);
+            color: #F2F4F7;
+            margin-bottom: 1.1rem;
+        }
+        .hero-headline .accent { color: #D7FA4C; }
+        .hero-sub {
+            color: #D7DCE4;
+            font-size: 1.08rem;
+            line-height: 1.6;
+            margin: 0 auto 1.8rem;
+        }
+        .hero-sub b { color: #F2F4F7; }
+        .hero-ctas {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        @media (max-width: 600px) {
+            .hero { height: auto; min-height: calc(100vh - var(--header-h, 64px)); padding: 30px 0 40px; }
+            .hero-content { padding: 1.6rem 1.4rem; }
+            .hero-ball-float { width: 70px; height: 70px; top: 8%; right: 6%; }
+            .hero-ball-float.tcam-ball { --ball-size: 70px; }
+        }
+        @media (min-width: 900px) {
+            #heroBall { display: block !important; }
+        }
+
         .hero-slide {
             width: 100%;
-            height: 100vh;
-            min-height: 800px;
+            height: 100%;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
-        
-        .owl-carousel, 
-        .owl-stage-outer, 
-        .owl-stage, 
+
+        .owl-carousel,
+        .owl-stage-outer,
+        .owl-stage,
         .owl-item {
             height: 100%;
         }
-        
+
         .owl-nav {
             position: absolute;
             top: 50%;
@@ -168,48 +244,43 @@
             pointer-events: none;
             z-index: 2;
         }
-        
+
         .owl-prev,
         .owl-next {
             background: rgba(0, 0, 0, 0.5) !important;
             color: white !important;
             font-size: 24px !important;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 50% !important;
             display: flex !important;
             align-items: center;
             justify-content: center;
-            margin: 0 20px;
+            margin: 0 14px;
             pointer-events: auto;
             z-index: 10;
         }
-        
+
         .owl-dots {
             position: absolute;
-            bottom: 20px;
+            bottom: 16px;
             width: 100%;
             display: flex;
             justify-content: center;
             gap: 10px;
+            z-index: 6;
         }
-        
+
         .owl-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.5) !important;
             margin: 0 5px;
         }
-        
-        .owl-dot.active {
-            background: #ff6b35 !important;
-        }
 
-        /* Features Section */
-        .features {
-            padding: 5rem 2rem;
-            background: #f8f9fa;
+        .owl-dot.active {
+            background: #D7FA4C !important;
         }
 
         .container {
@@ -217,106 +288,353 @@
             margin: 0 auto;
         }
 
+        .section-head {
+            margin-bottom: 2.6rem;
+        }
+        .section-head .tcam-eyebrow { margin-bottom: 0.7rem; }
         .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: #333;
+            font-family: 'Anton', 'Poppins', 'Arial', sans-serif;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+            line-height: 1.06;
+            color: #F2F4F7;
+            margin: 0;
+        }
+        .section-head-split {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1.5rem;
+        }
+        .section-head-split p {
+            max-width: 420px;
+            color: #8B93A7;
+            font-size: 1.02rem;
+            line-height: 1.6;
+        }
+        .section-link {
+            color: #D7FA4C;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.92rem;
+            white-space: nowrap;
         }
 
+        /* ============================================================
+           Player Pathway — 4-step row
+           ============================================================ */
+        .pathway-section { padding: 5rem 2rem 1rem; background: #0B0F1A; }
+        .pathway-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.4rem;
+        }
+        .pathway-step {
+            padding: 1.8rem 1.6rem;
+        }
+        .pathway-step .num {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8B93A7;
+            margin-bottom: 1.4rem;
+            display: block;
+        }
+        .pathway-step.is-accent .num { color: rgba(16,20,10,0.5); }
+        .pathway-step h3 {
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #F2F4F7;
+        }
+        .pathway-step.is-accent h3 { color: #10140A; }
+        .pathway-step p {
+            color: #8B93A7;
+            font-size: 0.94rem;
+            line-height: 1.6;
+        }
+        .pathway-step.is-accent p { color: rgba(16,20,10,0.75); }
+        @media (max-width: 900px) {
+            .pathway-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+            .pathway-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ============================================================
+           Why Tennis Cricket / Features — icon card grids
+           ============================================================ */
+        .features, .why-cricket-section {
+            padding: 4.5rem 2rem;
+            background: #0B0F1A;
+        }
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 1.4rem;
         }
-
         .feature-card {
-            background: white;
             padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
         }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-
         .feature-icon {
-            font-size: 3rem;
+            font-size: 2.2rem;
             margin-bottom: 1rem;
         }
-
         .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #333;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #F2F4F7;
         }
-
         .feature-card p {
-            color: #666;
-            line-height: 1.7;
+            color: #8B93A7;
+            line-height: 1.65;
+            font-size: 0.95rem;
         }
 
-        /* Stats Section */
-        .stats {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 3rem 2rem;
-        }
-
-        .stats-grid {
+        .why-tennis-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.4rem;
+        }
+        .why-tennis-card {
+            padding: 2rem;
+        }
+        .why-tennis-card .why-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        .why-tennis-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.2px;
+            color: #F2F4F7;
+        }
+        .why-tennis-card p {
+            color: #8B93A7;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .why-tennis-card .why-badge {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(255,122,26,0.14);
+            color: #ff9a4d;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        @media (max-width: 900px) {
+            .why-tennis-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+            .why-tennis-row { grid-template-columns: 1fr; }
         }
 
-        .stat-item h3 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+        /* ============================================================
+           Fixtures teaser
+           ============================================================ */
+        .fixtures-section { padding: 4.5rem 2rem; background: #0B0F1A; }
+        .fixtures-card {
+            padding: 2.2rem 2.4rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.6rem;
+        }
+        .fixtures-card .fx-copy h3 {
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #F2F4F7;
+            margin-bottom: 0.4rem;
+        }
+        .fixtures-card .fx-copy p {
+            color: #8B93A7;
+            font-size: 0.96rem;
+            max-width: 480px;
         }
 
-        .stat-item p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        /* Booking Section */
-        .booking {
+        /* ============================================================
+           Leadership — cream alt-section
+           ============================================================ */
+        .leadership-section {
             padding: 5rem 2rem;
-            background: #fff;
+            background: #F3F1E9;
+            color: #12141C;
+        }
+        .leadership-section .tcam-eyebrow.is-muted { color: #6b6a63; }
+        .leadership-section .section-title { color: #12141C; }
+        .leadership-intro {
+            max-width: 760px;
+            color: #3f3e38;
+            font-size: 1.08rem;
+            line-height: 1.65;
+            margin-bottom: 1.6rem;
+        }
+        .leadership-intro b { color: #12141C; }
+        .leadership-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 3rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.6rem 2rem;
+            color: #2b2a25;
+            font-size: 0.98rem;
+        }
+        .leadership-bullets li::before {
+            content: '✔';
+            color: #c9a900;
+            margin-right: 8px;
+            font-weight: 700;
+        }
+        .leaders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.6rem;
+        }
+        .leader-card {
+            background: #FFFFFF;
+            border-radius: var(--tcam-radius-lg, 26px);
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(18,20,28,0.08);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .leader-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 22px 50px rgba(18,20,28,0.14);
+        }
+        .leader-card:hover .leader-link { text-decoration-color: currentColor; }
+        .leader-card img {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            height: auto;
+            object-fit: cover;
+            object-position: center 15%;
+            display: block;
+        }
+        .leader-card .leader-body { padding: 1.6rem 1.7rem 1.9rem; }
+        .leader-card .leader-role {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: #8a7f00;
+            margin-bottom: 0.4rem;
+        }
+        .leader-card h3 {
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #12141C;
+            margin-bottom: 0.6rem;
+        }
+        .leader-card p {
+            color: #4a4940;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .leader-card .leader-link {
+            color: #8a7f00;
+            font-weight: 700;
+            text-decoration: underline;
+            font-size: 0.92rem;
+        }
+
+        /* ============================================================
+           CTA split — lime block + overlapping dark form card
+           ============================================================ */
+        .booking {
+            padding: 5rem 2rem 6rem;
+            background: #0B0F1A;
+        }
+        .cta-split {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            background: #D7FA4C;
+            border-radius: var(--tcam-radius-lg, 26px);
+            padding: 3.5rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        .cta-copy h2 {
+            font-family: 'Anton', 'Poppins', Arial, sans-serif;
+            font-weight: 400;
+            text-transform: uppercase;
+            font-size: clamp(2rem, 3.6vw, 2.9rem);
+            line-height: 1.05;
+            color: #10140A;
+            margin-bottom: 1rem;
+        }
+        .cta-copy p {
+            color: rgba(16,20,10,0.78);
+            font-size: 1.02rem;
+            max-width: 420px;
+            line-height: 1.6;
         }
 
         .booking-form {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #f8f9fa;
-            padding: 2rem;
-            border-radius: 15px;
+            background: #141A2B;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2.2rem;
+            border-radius: var(--tcam-radius-md, 16px);
+            box-shadow: 0 26px 60px rgba(0,0,0,0.45);
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.3rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: #333;
+            margin-bottom: 0.45rem;
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #F2F4F7;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 0.75rem 0.9rem;
+            background: #0B0F1A;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #F2F4F7;
+            border-radius: 10px;
+            font-size: 0.96rem;
+            font-family: inherit;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #6b7284;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #D7FA4C;
+            box-shadow: 0 0 0 4px rgba(215,250,76,0.14);
         }
 
         .form-group textarea {
@@ -326,34 +644,34 @@
 
         .submit-btn {
             width: 100%;
-            background: linear-gradient(45deg, #ff6b35, #f7931e);
-            color: white;
+            background: #D7FA4C;
+            color: #10140A;
             padding: 1rem;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 999px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: 0 0 0 1px rgba(215,250,76,0.18), 0 14px 34px rgba(215,250,76,0.26);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
 
         .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+            transform: translateY(-3px);
+            background: #e4ff7a;
+        }
+        @media (max-width: 900px) {
+            .cta-split { grid-template-columns: 1fr; padding: 2.4rem 1.6rem; }
+            .cta-copy { text-align: center; }
+            .cta-copy p { margin: 0 auto; }
         }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .nav-menu {
                 display: none;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
             }
 
             .features-grid {
@@ -374,79 +692,79 @@
         }
 
         .register-btn {
-            background: orange;
-            color: white;
+            background: #D7FA4C;
+            color: #10140A;
             padding: 0.7rem 1.5rem;
             border: none;
-            border-radius: 25px;
+            border-radius: 999px;
             cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.3s ease;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-size: 0.92rem;
+            transition: transform 0.25s ease, background 0.25s ease;
         }
 
         .register-btn:hover {
-            background: #ff9800;
+            background: #e4ff7a;
             transform: translateY(-2px);
         }
 
-        /* Gallery Section Styles */
+        /* ============================================================
+           Gallery — masonry columns of real photos
+           ============================================================ */
         .gallery-section {
-            background: #f8f9fa;
-            padding: 60px 0 80px 0;
+            background: #0B0F1A;
+            padding: 60px 0 90px 0;
         }
         .gallery-grid {
-            display: grid;
-            /* 4 columns on desktop → 12 images = 3 full rows, zero orphans */
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            column-count: 4;
+            column-gap: 16px;
             margin-top: 2.5rem;
         }
         .gallery-item {
             position: relative;
             overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
             cursor: pointer;
-            background: #e9ecef;
-            transform: scale(0.97);
+            background: #141A2B;
+            margin-bottom: 16px;
+            break-inside: avoid;
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(.4,2,.6,1), box-shadow 0.3s, opacity 0.6s;
+            transform: scale(0.97);
+            transition: transform 0.4s cubic-bezier(.4,2,.6,1), box-shadow 0.3s, opacity 0.6s, border-color 0.3s;
         }
         .gallery-item.visible {
             opacity: 1;
             transform: scale(1);
         }
+        .gallery-item:nth-child(3n+1) img { aspect-ratio: 3 / 4; }
+        .gallery-item:nth-child(3n+2) img { aspect-ratio: 1 / 1; }
+        .gallery-item:nth-child(3n) img   { aspect-ratio: 4 / 5; }
         .gallery-item img {
             width: 100%;
-            height: 220px;
             object-fit: cover;
             display: block;
             transition: transform 0.4s cubic-bezier(.4,2,.6,1);
         }
         .gallery-item:hover {
-            box-shadow: 0 8px 32px rgba(0,0,0,0.20);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border-color: rgba(215,250,76,0.3);
         }
         .gallery-item:hover img {
-            transform: scale(1.07);
+            transform: scale(1.06);
         }
-        .gallery-item::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(0,0,0,0.08) 100%);
-            pointer-events: none;
-            transition: background 0.3s;
-        }
-        .gallery-item:hover::after {
-            background: linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(0,0,0,0.18) 100%);
-        }
+        @media (max-width: 1024px) { .gallery-grid { column-count: 3; } }
+        @media (max-width: 700px)  { .gallery-grid { column-count: 2; column-gap: 10px; } .gallery-item { margin-bottom: 10px; } }
         /* Lightbox Styles */
         .gallery-lightbox {
             display: none;
             position: fixed;
             z-index: 2000;
             left: 0; top: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.88);
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -463,7 +781,7 @@
             max-width: 90vw;
             max-height: 80vh;
             border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             animation: popIn 0.5s cubic-bezier(.4,2,.6,1);
         }
         @keyframes popIn {
@@ -481,179 +799,19 @@
             transition: color 0.2s;
         }
         .close-lightbox:hover {
-            color: #ff6b35;
+            color: #D7FA4C;
         }
         /* gallery responsive rules live in responsive.css */
-
-        /* Folded corner effect for the top-right */
-        .corner-fold {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 80px;
-            height: 80px;
-            z-index: 2001;
-            pointer-events: none;
-        }
-        .corner-fold svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .corner-fold-anim {
-            animation: foldWave 2s cubic-bezier(.4,2,.6,1) infinite alternate;
-        }
-        @keyframes foldWave {
-            0% { filter: drop-shadow(0 0 0 #fff); }
-            100% { filter: drop-shadow(0 0 12px #b3a7ff); }
-        }
-
-        /* Why Tennis Cricket Section Animations */
-        .why-tennis-card {
-            flex: 1 1 320px;
-            min-width: 260px;
-            max-width: 370px;
-            background: linear-gradient(135deg,#fff 80%,#e0e7ff 100%);
-            border-radius: 22px;
-            box-shadow: 0 8px 32px rgba(120,120,180,0.10);
-            padding: 38px 28px 32px 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: 
-                transform 0.35s cubic-bezier(.4,2,.6,1),
-                box-shadow 0.35s cubic-bezier(.4,2,.6,1),
-                background 0.35s;
-            position: relative;
-            opacity: 0;
-            transform: translateY(40px) scale(0.97);
-            will-change: transform, box-shadow, background;
-        }
-        .why-tennis-card.visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            animation: whyFadeIn 0.7s cubic-bezier(.4,2,.6,1) forwards;
-        }
-        @keyframes whyFadeIn {
-            from { opacity: 0; transform: translateY(40px) scale(0.97);}
-            to { opacity: 1; transform: translateY(0) scale(1);}
-        }
-        .why-tennis-card:hover {
-            transform: translateY(-12px) scale(1.04) rotate(-1deg);
-            box-shadow: 0 16px 48px 0 rgba(120,120,180,0.18), 0 2px 8px 0 rgba(255,107,53,0.08);
-            background: linear-gradient(120deg,#f8f9fa 60%,#e0e7ff 100%);
-            z-index: 2;
-        }
-        .why-tennis-card .why-icon {
-            font-size: 3.2rem;
-            margin-bottom: 18px;
-            transition: transform 0.4s cubic-bezier(.4,2,.6,1), filter 0.3s;
-            filter: drop-shadow(0 2px 8px rgba(120,120,180,0.10));
-        }
-        .why-tennis-card:hover .why-icon {
-            transform: scale(1.18) rotate(-6deg);
-            filter: drop-shadow(0 6px 18px rgba(120,120,180,0.18));
-        }
-        .why-tennis-card .why-badge {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            font-size: 0.95rem;
-            padding: 2px 14px;
-            border-radius: 12px 0 12px 0;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: #fff;
-            background: linear-gradient(90deg, #ff6b35 60%, #764ba2 100%);
-            box-shadow: 0 2px 8px rgba(120,120,180,0.10);
-            opacity: 0.92;
-            transition: background 0.3s;
-            animation: whyBadgePulse 2s infinite alternate;
-        }
-        @keyframes whyBadgePulse {
-            0% { opacity: 0.92; }
-            100% { opacity: 1; box-shadow: 0 0 16px #ffb34744; }
-        }
-        .why-tennis-card:hover .why-badge {
-            background: linear-gradient(90deg, #764ba2 40%, #ff6b35 100%);
-        }
-        /* Responsive for Why Tennis Cricket */
-        @media (max-width: 900px) {
-            .why-tennis-row {
-                flex-direction: column;
-                gap: 28px !important;
-            }
-        }
     </style>
     <!-- Owl Carousel CSS -->
     <link rel="stylesheet" href="css/owl.carousel.min.css">
     <link rel="stylesheet" href="css/owl.theme.default.min.css">
     <style>
-        /* Hero Slideshow */
-        .hero-slideshow {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 40px;
-        }
-        
-        .hero-slide {
-            height: 500px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        
-        .owl-nav {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-        
-        .owl-prev,
-        .owl-next {
-            background: rgba(0, 0, 0, 0.5) !important;
-            color: white !important;
-            font-size: 24px !important;
-            width: 50px;
-            height: 50px;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            margin: 0 20px;
-            pointer-events: auto;
-        }
-        
-        .owl-dots {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .owl-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5) !important;
-            margin: 0 5px;
-        }
-        
-        .owl-dot.active {
-            background: #ff6b35 !important;
-        }
-
         /* ── Mobile nav fixes (must come last to win cascade) ── */
         @media (max-width: 768px) {
             .hamburger           { display: flex !important; }
             .header-register-btn { display: none  !important; }
+            .nav-search-pill     { display: none  !important; }
             .nav-menu:not(.open) { display: none  !important; left: -100% !important; }
             .nav-menu.open       { display: flex  !important; left: 0      !important; }
         }
@@ -663,15 +821,6 @@
     <script src="js/config.js"></script>
 </head>
 <body>
-
-    <!-- Folded corner SVG effect -->
-    <div class="corner-fold">
-        <svg viewBox="0 0 80 80">
-            <polygon class="corner-fold-anim" points="0,0 80,0 80,80" fill="#7c6ee6"/>
-            <polygon points="0,0 80,0 60,20 0,20" fill="#fff" opacity="0.15"/>
-            <polygon points="80,0 80,80 60,20" fill="#fff" opacity="0.10"/>
-        </svg>
-    </div>
 
     <!-- Header -->
     <header class="header">
@@ -686,7 +835,7 @@
             </button>
 
             <a href="#" class="logo">
-                <img src="./images/logo.png" alt="TCAM Logo" style="height:40px;vertical-align:middle;margin-right:10px;">
+                <img src="./images/logo.png" alt="TCAM Logo" style="height:40px;margin-right:10px;">
                 TCAM
             </a>
             <nav>
@@ -694,49 +843,56 @@
                     <li><a href="#home"                        onclick="closeMenu()">Home</a></li>
                     <li><a href="about.html"                   onclick="closeMenu()">About Us</a></li>
                     <li><a href="managment.html"               onclick="closeMenu()">Management</a></li>
-                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
-                    <li><a href="tournament.php"               onclick="closeMenu()">Tournament</a></li>
+                    <li><a href="tournament.php"               onclick="closeMenu()">Tournaments</a></li>
                     <li><a href="gallery.php"                  onclick="closeMenu()">Gallery</a></li>
-                    <li><a href="student-search.php"           onclick="closeMenu()">🔍 Search Data</a></li>
+                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
                     <li><a href="single-registration-enhanced.html" onclick="closeMenu()">Update Registration</a></li>
+                    <li><a href="#" onclick="closeMenu();openCoachModal();return false;">🏏 Register as Coach</a></li>
                     <!-- Mobile-only buttons inside drawer -->
                     <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.5rem;">
+                        <a href="student-search.php" class="register-btn" style="display:block;text-align:center;width:100%;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.3);color:#F2F4F7;box-shadow:none;" onclick="closeMenu();">🔍 Find Registration</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
                         <button class="register-btn" style="width:100%;border-radius:8px;" onclick="closeMenu();scrollToBooking();">Register Now</button>
                     </li>
                     <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
-                        <button class="register-btn" style="width:100%;border-radius:8px;background:#764ba2;" onclick="closeMenu();openCoachModal();">🏏 Register as Coach</button>
+                        <button class="register-btn" style="width:100%;border-radius:8px;background:#FF7A1A;color:#fff;box-shadow:none;" onclick="closeMenu();openCoachModal();">🏏 Register as Coach</button>
                     </li>
                     <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
-                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu();">🔑 Coach Login</a>
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu();">🔑 Coach Login</a>
                     </li>
                 </ul>
             </nav>
-            <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
-                <button class="register-btn header-register-btn" onclick="scrollToBooking()">Register Now</button>
-                <button class="register-btn header-register-btn" style="background:#764ba2;" onclick="openCoachModal()">  Register as Coach</button>
-                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
+            <div style="display:flex;gap:0.9rem;align-items:center;flex-shrink:0;">
+                <a href="student-search.php" class="nav-search-pill hide-mobile">🔍 Find registration</a>
+                <a href="coach-login.php" class="hide-mobile" style="color:#F2F4F7;text-decoration:none;font-size:0.87rem;font-weight:600;white-space:nowrap;">Coach login</a>
+                <button class="register-btn header-register-btn" onclick="scrollToBooking()">Register now</button>
             </div>
         </div>
     </header>
-
-    <!-- Floating Marquee Section -->
-    <div style="width:100vw;overflow:hidden;background:#000;padding:8px 0;position:relative;z-index:900;">
-        <marquee behavior="scroll" direction="left" scrollamount="7" style="color:#fff;font-size:1.15rem;font-weight:bold;letter-spacing:0.5px;">
-            <span style="margin-right:32px;">
-                <span style="color:#ffb347;">●</span> TCAM
-            </span>
-            <span style="margin-right:32px;">
-                <span style="color:#fff;">●</span> Tennis Cricket Association  India (TCAI)
-            </span>
-            <span style="margin-right:32px;">
-                <span style="color:#fff;">●</span> Affiliated by International Tennis Cricket Federation (ITCF)
-            </span>
-        </marquee>
-    </div>
+    <script>
+        // Measure the real (fixed) header height and expose it as --header-h so
+        // body padding / hero height always clear it exactly, at any viewport
+        // width or nav-wrap state — no hardcoded px guess to drift out of sync.
+        (function () {
+            var header = document.querySelector('.header');
+            if (!header) return;
+            function syncHeaderHeight() {
+                var h = header.offsetHeight;
+                if (h > 0) document.documentElement.style.setProperty('--header-h', h + 'px');
+            }
+            syncHeaderHeight();
+            window.addEventListener('resize', syncHeaderHeight);
+            window.addEventListener('load', syncHeaderHeight);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(syncHeaderHeight);
+            }
+        })();
+    </script>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <!-- Hero Slideshow -->
+        <!-- Hero Slideshow (full-bleed background) -->
         <div class="hero-slideshow" id="home-section">
             <div class="owl-carousel hero-carousel">
                 <!-- Images from TCAI directory -->
@@ -753,107 +909,294 @@
             </div>
         </div>
 
-        <!-- Hero Content -->
+        <!-- Floodlit ball, decorative -->
+        <div class="tcam-ball hero-ball-float" style="display:none;" id="heroBall"></div>
+
+        <!-- Centered overlay card -->
         <div class="hero-content">
-            <div style="margin-bottom: 1.5rem;">
-                <h1 style="color: #ffb347; font-size: 2.5rem; margin-bottom: 1rem; font-weight: bold; letter-spacing: 1px;">
-                    Welcome to TCAM
-                </h1>
-                <p style="color: #fff; font-size: 1.2rem; margin-bottom: 0; line-height: 1.6;">
-                    Join Maharashtra's premier platform for nurturing cricket talent.<br>
-                    <span style="color:#ffe0b2;">Our programs focus on <b>technical excellence</b>, <b>physical fitness</b>, and <b>mental toughness</b> to develop well-rounded cricketers.</span>
-                </p>
+            <div class="hero-badges">
+                <span class="tcam-badge">Affiliated to TCAI</span>
+                <span class="tcam-badge">Recognised by ITCF</span>
             </div>
-            <div class="cta-buttons" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="#booking" class="btn-primary" style="display: inline-block; padding: 0.8rem 2rem; background: #ff6b35; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; transition: all 0.3s ease; border: 2px solid #ff6b35;">Book Your Game</a>
-                <a href="#features" class="btn-secondary" style="display: inline-block; padding: 0.8rem 2rem; background: transparent; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; transition: all 0.3s ease; border: 2px solid white;">Learn More</a>
-                <a href="student-search.php" class="btn-search" style="display: inline-block; padding: 0.8rem 2rem; background: #764ba2; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; transition: all 0.3s ease; border: 2px solid #764ba2;">🔍 Search Registration</a>
+            <h1 class="hero-headline">Maharashtra's <span class="accent">fastest</span> format of cricket.</h1>
+            <p class="hero-sub">
+                Join Maharashtra's premier platform for nurturing cricket talent.<br>
+                Our programs focus on <b>technical excellence</b>, <b>physical fitness</b> and <b>mental toughness</b>.
+            </p>
+            <div class="hero-ctas cta-buttons">
+                <a href="#booking" class="tcam-btn">Register as a player →</a>
+                <a href="tournament.php" class="tcam-btn tcam-btn-outline">View tournaments</a>
+                <a href="student-search.php" class="tcam-btn tcam-btn-saffron">🔍 Search registration</a>
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" style="padding: 80px 0 40px 0; background: #fff;">
+    <!-- Stats Section -->
+    <section class="stats" style="padding: 3.5rem 2rem; background:#0B0F1A; border-top:1px solid rgba(255,255,255,0.09); border-bottom:1px solid rgba(255,255,255,0.09);">
         <div class="container">
-            <div style="text-align:center;">
-                <div style="font-size: 1.2rem; color: #888; margin-bottom: 10px;">About Us</div>
-                <h1 style="font-size:2.8rem; font-weight: bold; margin-bottom: 20px;">Tennis Cricket Association Maharashtra</h1>
-                <p style="max-width: 800px; margin: 0 auto 40px auto; color: #888; font-size: 1.25rem; line-height: 1.6; text-align: justify; text-align-last: center; text-wrap: balance; hyphens: auto; word-spacing: 0.1em;">
-                    The Tennis Cricket Association Maharashtra (TCAM) is affiliated to Tennis Cricket Association of India (TCAI) the official governing body for tennis cricket in Maharashtra. Established with a vision to promote and develop tennis cricket across the state, we provide a structured platform for players of all ages to showcase their talent and represent Maharashtra at national levels.
-                </p>
-            </div>
-            <div style="max-width: 900px; margin: 0 auto;">
-                <h2 style="font-size:2rem; margin-bottom: 18px;">Our Mission</h2>
-                <p style="color: #666; font-size: 1.1rem; margin-bottom: 24px;">
-                    To nurture and promote tennis cricket at the grassroots level in Maharashtra, identify and develop young talent across all districts, and provide them with opportunities to excel at state and national levels.
-                </p>
-                <ul style="list-style: none; padding-left: 0; color: #222; font-size: 1.08rem;">
-                    <li style="margin-bottom: 10px;">✔ Promote tennis cricket across all 36 districts of Maharashtra</li>
-                    <li style="margin-bottom: 10px;">✔ Organize structured district and state-level tournaments</li>
-                    <li style="margin-bottom: 10px;">✔ Develop coaching programs in partnership with local academies</li>
-                    <li style="margin-bottom: 10px;">✔ Establish strong district-level associations</li>
-                    <li style="margin-bottom: 10px;">✔ Identify and nurture talent for national representation</li>
-                </ul>
-                <!-- Added content below Our Mission -->
-                <div style="margin-top:40px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 40px;">
-                    <!-- Image left, text right -->
-                    <div class="person-photo-col" style="flex: 0 0 220px; max-width:220px; min-width:180px;">
-                        <img src="./Meenakshi_Maam.jpg" alt="Meenakshi Ghadigaonkar" style="width: 100%; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); object-fit:cover;">
-                        <div style="text-align:center; margin-top:10px; color:#444; font-weight:bold;">Minakshi Giri</div>
-                    </div>
-                    <div style="flex: 1 1 340px; min-width:260px;">
-                        <h2 style="font-size:2rem; margin-bottom: 18px;">About Minakshi Giri</h2>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            Minakshi Giri was born into a humble farming family in the Latur district of Maharashtra. Her parents, Uttam Shankar Puri and Laxmibai Uttam Puri, instilled good values and discipline in her from an early age. Despite being physically challenged with one leg and one hand, her father had a deep interest in sports, especially kabaddi. His struggle and love for sports had a profound impact on Minakshi's life and laid the foundation for her sporting spirit.
-                        </p>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            After marriage, Minakshi's life took a new turn. She married Vilas Giri and began a new life in Nashik, Maharashtra. Her husband and in-laws always encouraged her to pursue education and sports.
-                        </p>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            Minakshi Giri began her career as a sports teacher in schools and colleges, where she inspired and guided many young students. Her dedication to sports connected her with the Tennis Cricket Association of India. She initially served as the Secretary of the Nashik district, where her working style and leadership quickly gained recognition.
-                        </p>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            Through consistent hard work and contribution, she became the State Secretary of Maharashtra, and today, she proudly serves as the National Secretary of the Tennis Cricket Association of India. Her journey from a small-town girl to a national-level leader is a living story of determination, confidence, and relentless effort.
-                        </p>
-                        <div style="border-left: 4px solid #f44336; padding-left: 18px; margin: 32px 0;">
-                            <span style="color:#f44336; font-size:1.2rem; font-weight:600;">Message to Future Players:</span>
-                            <blockquote style="margin: 10px 0 0 0; color:#888; font-style:italic;">
-                                "Believe in yourself, stay disciplined, and play with all your heart. Your dedication will surely be recognized. Tennis Cricket is progressing rapidly, and the next shining star could be you. Keep growing continuously and never stop dreaming."
-                            </blockquote>
-                        </div>
-                    </div>
+            <div class="stats-grid">
+                <div class="stat-item fade-in">
+                    <h3 style="color:#D7FA4C;">36</h3>
+                    <p>Districts Covered</p>
                 </div>
-                <hr style="margin:40px 0;">
-                <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 40px;">
-                    <div style="flex: 1 1 340px; min-width:260px;">
-                        <h2 style="font-size:2rem; margin-bottom: 18px;">About Mayuri Ghadigaonkar</h2>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            Mayuri Ghadigaonkar, daughter of Minakshi Giri and Vilas Giri, has been interested in sports since childhood. Inspired by her parents, she has grown up with a passion for cricket and kabaddi. Her educational background includes an M.B.A., which she combines with her love for sports in her leadership role.
-                        </p>
-                        <p style="color: #666; font-size: 1.1rem;">
-                            As the President of the Tennis Cricket Association Maharashtra, Mayuri is committed to taking the game of Tennis Cricket to rural areas, discovering emerging talents, and elevating them to the national level. Her vision extends beyond sports, aiming to create positive social transformation through athletic development.
-                        </p>
-                        <div style="border-left: 4px solid #f44336; padding-left: 18px; margin: 32px 0;">
-                            <span style="color:#f44336; font-size:1.2rem; font-weight:600;">Message to the Youth:</span>
-                            <blockquote style="margin: 10px 0 0 0; color:#888; font-style:italic;">
-                                "Dream big, but never shy away from working hard to achieve them. Discipline, perseverance, and confidence are the true strengths of success. Play with honesty on the field, and opportunities will surely knock at your door."
-                            </blockquote>
-                        </div>
-                        <h3 style="font-size:1.3rem; margin-top:30px;">Vision for Maharashtra Tennis Cricket:</h3>
-                        <ul style="list-style: none; padding-left: 0; color: #222; font-size: 1.08rem;">
-                            <li style="margin-bottom: 10px; color:#f44336;">&#10004; <span style="color:#444;">Promote Tennis Cricket in rural areas</span></li>
-                            <li style="margin-bottom: 10px; color:#f44336;">&#10004; <span style="color:#444;">Identify and nurture young talent</span></li>
-                            <li style="margin-bottom: 10px; color:#f44336;">&#10004; <span style="color:#444;">Provide quality training and facilities</span></li>
-                            <li style="margin-bottom: 10px; color:#f44336;">&#10004; <span style="color:#444;">Create pathways to national representation</span></li>
-                            <li style="margin-bottom: 10px; color:#f44336;">&#10004; <span style="color:#444;">Foster sportsmanship and discipline</span></li>
-                        </ul>
-                    </div>
-                    <div class="person-photo-col" style="flex: 0 0 220px; max-width:220px; min-width:180px;">
-                        <img src="./mayuri-giri.jpg" alt="Mayuri Ghadigaonkar" style="width: 100%; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); object-fit:cover;">
-                        <div style="text-align:center; margin-top:10px; color:#444; font-weight:bold;">Mayuri Ghadigaonkar</div>
-                    </div>
+                <div class="stat-item fade-in">
+                    <h3><span class="tcam-counter" data-count-to="100" data-suffix="+">0</span></h3>
+                    <p>Tournaments Hosted</p>
+                </div>
+                <div class="stat-item fade-in">
+                    <h3><span class="tcam-counter" data-count-to="500" data-suffix="+">0</span></h3>
+                    <p>Games Played</p>
+                </div>
+                <div class="stat-item fade-in">
+                    <h3><span class="tcam-counter" data-count-to="1000" data-suffix="+">0</span></h3>
+                    <p>Registered Players</p>
+                </div>
+                <div class="stat-item fade-in">
+                    <h3><span class="tcam-counter" data-count-to="15">0</span></h3>
+                    <p>Venues Available</p>
                 </div>
             </div>
+        </div>
+    </section>
+    <style>
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:2rem; text-align:left; }
+        .stat-item h3 { font-family:'JetBrains Mono','Courier New',monospace; font-size:2.6rem; font-weight:700; color:#F2F4F7; margin-bottom:0.4rem; }
+        .stat-item p { font-size:0.92rem; text-transform:uppercase; letter-spacing:0.5px; color:#8B93A7; }
+    </style>
+
+    <!-- Player Pathway Section -->
+    <section id="pathway" class="pathway-section">
+        <div class="container">
+            <div class="section-head section-head-split">
+                <div>
+                    <div class="tcam-eyebrow">The Player Pathway</div>
+                    <h2 class="section-title">From gully to national squad.</h2>
+                </div>
+                <p>TCAM runs structured district and state tournaments so talent from every corner of Maharashtra has a clear route to represent the state.</p>
+            </div>
+            <div class="pathway-grid">
+                <div class="tcam-card pathway-step fade-in">
+                    <span class="num">01</span>
+                    <h3>Register</h3>
+                    <p>Sign up online with your Aadhar card and a passport photo to get your TCAM player ID.</p>
+                </div>
+                <div class="tcam-card pathway-step fade-in">
+                    <span class="num">02</span>
+                    <h3>District association</h3>
+                    <p>Play for your district association, one of the structured associations TCAM is building across all 36 districts.</p>
+                </div>
+                <div class="tcam-card pathway-step fade-in">
+                    <span class="num">03</span>
+                    <h3>State tournaments</h3>
+                    <p>Compete in district and state-level tournaments for a place in the Maharashtra squad.</p>
+                </div>
+                <div class="tcam-card is-accent pathway-step fade-in">
+                    <span class="num">04</span>
+                    <h3>National stage</h3>
+                    <p>Top performers are identified and nurtured for national representation with TCAI.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-head">
+                <div class="tcam-eyebrow">What makes it different</div>
+                <h2 class="section-title">Why choose TCAM?</h2>
+            </div>
+            <div class="features-grid">
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Games completed in under 30 minutes with non-stop action that keeps players and spectators engaged throughout.</p>
+                </div>
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Competitive Play</h3>
+                    <p>Professional tournaments and leagues with structured formats that challenge players at every skill level.</p>
+                </div>
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Skill Development</h3>
+                    <p>Perfect for improving hand-eye coordination, reflexes, and cricket fundamentals in a condensed format.</p>
+                </div>
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Building</h3>
+                    <p>Ideal for corporate events, school programs, and community gatherings that bring people together.</p>
+                </div>
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">🏟</div>
+                    <h3>Compact Venues</h3>
+                    <p>Requires minimal space compared to traditional cricket, making it accessible in urban environments.</p>
+                </div>
+                <div class="tcam-card feature-card fade-in">
+                    <div class="feature-icon">📱</div>
+                    <h3>Easy Booking</h3>
+                    <p>Simple online booking system with flexible scheduling and instant confirmation for your convenience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Why Tennis Cricket Section -->
+    <section id="why-tennis-cricket" class="why-cricket-section">
+        <div class="container">
+            <div class="section-head">
+                <div class="tcam-eyebrow">Why Tennis Cricket</div>
+                <h2 class="section-title">Thirty minutes. Full intensity.</h2>
+            </div>
+            <div class="why-tennis-row">
+                <!-- Card 1 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#FF7A1A;">🏏</div>
+                    <h3>Live Matches</h3>
+                    <p>
+                        Experience the thrill of live tennis cricket matches with TCAM. Our platform offers real-time gameplay with professional standards.
+                    </p>
+                    <span class="why-badge">Excitement</span>
+                </div>
+                <!-- Card 2 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#6fb8ff;">📅</div>
+                    <h3>Flexible Scheduling</h3>
+                    <p>
+                        Enjoy the convenience of flexible scheduling with TCAM. We offer various time slots to accommodate your busy lifestyle.
+                    </p>
+                    <span class="why-badge">Convenience</span>
+                </div>
+                <!-- Card 3 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#ff8a7a;">🌟</div>
+                    <h3>Star Players</h3>
+                    <p>
+                        Play alongside and learn from the best in the game. Our star players are here to guide you in your cricketing journey.
+                    </p>
+                    <span class="why-badge">Inspiration</span>
+                </div>
+                <!-- Card 4 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#b8a8ff;">📲</div>
+                    <h3>Online Presence</h3>
+                    <p>
+                        TCAM players gain exposure through live matches and events, enhancing their visibility and opportunities in the cricketing world.
+                    </p>
+                    <span class="why-badge">Visibility</span>
+                </div>
+                <!-- Card 5 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#7bd88f;">🤝</div>
+                    <h3>Community Support</h3>
+                    <p>
+                        Join a thriving community of cricket enthusiasts and receive support, guidance, and encouragement at every step of your journey.
+                    </p>
+                    <span class="why-badge">Support</span>
+                </div>
+                <!-- Card 6 -->
+                <div class="tcam-card why-tennis-card">
+                    <div class="why-icon" style="color:#ffc46b;">🏅</div>
+                    <h3>Achievement Recognition</h3>
+                    <p>
+                        We celebrate your achievements, big or small. TCAM ensures that your hard work and dedication never go unnoticed.
+                    </p>
+                    <span class="why-badge">Recognition</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fixtures Teaser -->
+    <section id="fixtures" class="fixtures-section">
+        <div class="container">
+            <div class="section-head section-head-split">
+                <div>
+                    <div class="tcam-eyebrow">Fixtures</div>
+                    <h2 class="section-title">Upcoming tournaments</h2>
+                </div>
+                <a href="tournament.php" class="section-link">All tournaments →</a>
+            </div>
+            <div class="tcam-card fixtures-card">
+                <div class="fx-copy">
+                    <h3>District &amp; state-level tournaments run throughout the year</h3>
+                    <p>Dates, venues and registration status for every upcoming fixture are published on the Tournament page as soon as they're confirmed.</p>
+                </div>
+                <a href="tournament.php" class="tcam-btn">See full schedule →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leadership Section -->
+    <section id="leadership" class="leadership-section">
+        <div class="container">
+            <div class="section-head">
+                <div class="tcam-eyebrow is-muted">Leadership</div>
+                <h2 class="section-title">Built by people who played.</h2>
+            </div>
+            <p class="leadership-intro">
+                The <b>Tennis Cricket Association Maharashtra (TCAM)</b> is affiliated to the Tennis Cricket Association of India (TCAI), the official governing body for tennis cricket in Maharashtra.
+                Our mission: nurture and promote tennis cricket at the grassroots level, identify and develop young talent across all districts, and provide a pathway to state and national representation.
+            </p>
+            <ul class="leadership-bullets">
+                <li>Promote tennis cricket across all 36 districts of Maharashtra</li>
+                <li>Organize structured district and state-level tournaments</li>
+                <li>Develop coaching programs in partnership with local academies</li>
+                <li>Establish strong district-level associations</li>
+                <li>Identify and nurture talent for national representation</li>
+            </ul>
+            <div class="leaders-grid">
+                <a class="leader-card" href="about.html?leader=mayuri#mayuri">
+                    <img src="./mayuri-giri.jpg" alt="Mayuri Ghadigaonkar">
+                    <div class="leader-body">
+                        <div class="leader-role">President, TCAM</div>
+                        <h3>Mayuri Ghadigaonkar</h3>
+                        <p>An M.B.A. taking tennis cricket into rural Maharashtra — finding new talent and lifting it to the national level.</p>
+                        <span class="leader-link">Read her story →</span>
+                    </div>
+                </a>
+                <a class="leader-card" href="about.html?leader=minakshi#minakshi">
+                    <img src="./Meenakshi_Maam.jpg" alt="Minakshi Giri">
+                    <div class="leader-body">
+                        <div class="leader-role">National Secretary, TCAI</div>
+                        <h3>Minakshi Giri</h3>
+                        <p>From a farming family in Latur to Nashik district secretary, state secretary and now national secretary of TCAI.</p>
+                        <span class="leader-link">Read her story →</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Preview Section (Landing Page, 8 images only) -->
+    <section id="gallery-preview" class="gallery-section">
+        <div class="container">
+            <div class="section-head section-head-split">
+                <div>
+                    <div class="tcam-eyebrow">On the ground</div>
+                    <h2 class="section-title">Gallery</h2>
+                </div>
+                <a href="gallery.php" class="section-link">View full gallery →</a>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item"><img src="IMG-20250628-WA0145.jpg" alt="Gallery 1"></div>
+                <div class="gallery-item"><img src="09july01.jpg" alt="Gallery 1"></div>
+                <div class="gallery-item"><img src="09july02.jpg" alt="Gallery 1"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0146.jpg" alt="Gallery 2"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0147.jpg" alt="Gallery 3"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0148.jpg" alt="Gallery 4"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0149.jpg" alt="Gallery 5"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0150.jpg" alt="Gallery 6"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0141.jpg" alt="Gallery 7"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0140.jpg" alt="Gallery 8"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0135.jpg" alt="Gallery 9"></div>
+                <div class="gallery-item"><img src="IMG-20250628-WA0132.jpg" alt="Gallery 10"></div>
+            </div>
+        </div>
+        <!-- Lightbox Modal for preview -->
+        <div id="gallery-lightbox" class="gallery-lightbox">
+            <span class="close-lightbox">&times;</span>
+            <img class="lightbox-img" src="" alt="Gallery Large">
         </div>
     </section>
 
@@ -861,8 +1204,11 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <section id="booking" class="booking">
-        <div class="container">
-            <h2 class="section-title fade-in">Book Your TCAM Experience</h2>
+        <div class="cta-split">
+            <div class="cta-copy">
+                <h2>Your district is waiting.</h2>
+                <p>Registration takes 3 minutes. Keep your Aadhar card and a passport-size photo ready before you start.</p>
+            </div>
             <form class="booking-form fade-in" id="bookingForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="name">Full Name</label>
@@ -906,14 +1252,14 @@
                     <label for="district">District</label>
                     <select id="district" name="district" required>
                         <option value="">Select District</option>
-                        <option value="Ahmednagar">Ahmednagar</option>
+                        <option value="Ahilyanagar">Ahilyanagar</option>
                         <option value="Akola">Akola</option>
                         <option value="Amravati">Amravati</option>
                         <option value="Beed">Beed</option>
                         <option value="Bhandara">Bhandara</option>
                         <option value="Buldhana">Buldhana</option>
                         <option value="Chandrapur">Chandrapur</option>
-                        <option value="Dharashive">Dharashive</option>
+                        <option value="Dharashiv">Dharashiv</option>
                         <option value="Dhule">Dhule</option>
                         <option value="Gadchiroli">Gadchiroli</option>
                         <option value="Gondia">Gondia</option>
@@ -948,9 +1294,10 @@
                     <label for="message">Special Requirements</label>
                     <textarea id="message" name="message" placeholder="Any special requirements or additional information..."></textarea>
                 </div>
-                <button type="submit" class="submit-btn">Book Now</button>
+                <button type="submit" class="submit-btn">Register Now</button>
             </form>
-            <script>
+        </div>
+        <script>
 // ── Aadhar OCR (Tesseract.js v5) ────────────────────────────────
 
 // Full image: grayscale + contrast for name/DOB
@@ -1066,7 +1413,7 @@ function extractAadharName(text) {
 document.getElementById('proof_file').addEventListener('change', async function() {
     const file = this.files[0]; if (!file) return;
     const statusEl = document.getElementById('ocrStatus');
-    statusEl.style.cssText = 'display:block;padding:8px 12px;border-radius:6px;font-size:0.92rem;background:#f0e6ff;color:#764ba2;margin-top:8px;';
+    statusEl.style.cssText = 'display:block;padding:8px 12px;border-radius:6px;font-size:0.92rem;background:rgba(255,122,26,0.14);color:#ff9a4d;margin-top:8px;';
     statusEl.innerHTML = '🔄 Processing image… please wait';
     try {
         const blob = await preprocessForOcr(file);
@@ -1144,9 +1491,9 @@ document.getElementById('aadhar_number').addEventListener('blur', async function
         const data = await res.json();
         if (data.duplicate) {
             msgEl.style.display = 'block';
-            msgEl.style.cssText = 'display:block;padding:10px 14px;background:#f8d7da;color:#721c24;border-radius:8px;margin-top:6px;font-size:0.92rem;';
+            msgEl.style.cssText = 'display:block;padding:10px 14px;background:rgba(239,68,68,0.14);color:#ff8a8a;border-radius:8px;margin-top:6px;font-size:0.92rem;';
             msgEl.innerHTML = `⚠️ This Aadhar card is already registered.<br>
-                If you want to update your details, <a href="single-registration-enhanced.html" style="color:#721c24;font-weight:bold;">click here → Enhanced Player Registration</a>`;
+                If you want to update your details, <a href="single-registration-enhanced.html" style="color:#ff8a8a;font-weight:bold;">click here → Enhanced Player Registration</a>`;
         } else {
             msgEl.style.display = 'none';
         }
@@ -1210,8 +1557,8 @@ document.getElementById('bookingForm').addEventListener('submit', async function
                 window.location.href = 'registration-success.html?' + params;
             } else if (result.status === 'duplicate') {
                 const msgEl = document.getElementById('duplicateMsg');
-                msgEl.style.cssText = 'display:block;padding:10px 14px;background:#f8d7da;color:#721c24;border-radius:8px;margin-top:6px;font-size:0.92rem;';
-                msgEl.innerHTML = `⚠️ ${result.message}<br><a href="${result.update_url}" style="color:#721c24;font-weight:bold;text-decoration:underline;">→ Go to Enhanced Player Registration to update</a>`;
+                msgEl.style.cssText = 'display:block;padding:10px 14px;background:rgba(239,68,68,0.14);color:#ff8a8a;border-radius:8px;margin-top:6px;font-size:0.92rem;';
+                msgEl.innerHTML = `⚠️ ${result.message}<br><a href="${result.update_url}" style="color:#ff8a8a;font-weight:bold;text-decoration:underline;">→ Go to Enhanced Player Registration to update</a>`;
                 document.getElementById('aadhar_number').scrollIntoView({behavior:'smooth',block:'center'});
             } else {
                 alert('Registration failed: ' + (result.message || 'Unknown error'));
@@ -1237,173 +1584,10 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     }
 });
             </script>
-        </div>
     </section>
 
 
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <h2 class="section-title fade-in">Why Choose TCAM?</h2>
-            <div class="features-grid">
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Lightning Fast</h3>
-                    <p>Games completed in under 30 minutes with non-stop action that keeps players and spectators engaged throughout.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🏆</div>
-                    <h3>Competitive Play</h3>
-                    <p>Professional tournaments and leagues with structured formats that challenge players at every skill level.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Skill Development</h3>
-                    <p>Perfect for improving hand-eye coordination, reflexes, and cricket fundamentals in a condensed format.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">👥</div>
-                    <h3>Team Building</h3>
-                    <p>Ideal for corporate events, school programs, and community gatherings that bring people together.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🏟</div>
-                    <h3>Compact Venues</h3>
-                    <p>Requires minimal space compared to traditional cricket, making it accessible in urban environments.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">📱</div>
-                    <h3>Easy Booking</h3>
-                    <p>Simple online booking system with flexible scheduling and instant confirmation for your convenience.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item fade-in">
-                    <h3>500+</h3>
-                    <p>Games Played</p>
-                </div>
-                <div class="stat-item fade-in">
-                    <h3>100+</h3>
-                    <p>Tournaments Hosted</p>
-                </div>
-                <div class="stat-item fade-in">
-                    <h3>1000+</h3>
-                    <p>Happy Players</p>
-                </div>
-                <div class="stat-item fade-in">
-                    <h3>15</h3>
-                    <p>Venues Available</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Custom Why Tennis Cricket Section -->
-    <section id="why-tennis-cricket" style="background: linear-gradient(120deg, #f8f9fa 60%, #e0e7ff 100%); padding: 70px 0 90px 0;">
-        <div style="max-width:1200px;margin:0 auto;">
-            <h2 style="text-align:center; font-size:2.8rem; color:#234; font-weight:800; margin-bottom:10px; letter-spacing:1px;">
-                <span style="background: linear-gradient(90deg, #ff6b35 30%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    Why Tennis Cricket?
-                </span>
-            </h2>
-            <div style="text-align:center; font-size:1.25rem; color:#234; margin-bottom:36px;">
-                <span style="border-bottom:3px solid #2e8b57; padding-bottom:4px;">Cricket Live</span>
-            </div>
-            <div class="why-tennis-row" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:stretch; gap:40px;">
-                <!-- Card 1 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#ff6b35;">🏏</div>
-                    <h3 style="font-size:1.45rem; color:#764ba2; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Live Matches</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        Experience the thrill of live tennis cricket matches with TCAM. Our platform offers real-time gameplay with professional standards.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#ff6b35 60%,#764ba2 100%);">Excitement</span>
-                </div>
-                <!-- Card 2 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#2196f3;">📅</div>
-                    <h3 style="font-size:1.45rem; color:#2196f3; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Flexible Scheduling</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        Enjoy the convenience of flexible scheduling with TCAM. We offer various time slots to accommodate your busy lifestyle.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#2196f3 60%,#7c6ee6 100%);">Convenience</span>
-                </div>
-                <!-- Card 3 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#f44336;">🌟</div>
-                    <h3 style="font-size:1.45rem; color:#f44336; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Star Players</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        Play alongside and learn from the best in the game. Our star players are here to guide you in your cricketing journey.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#f44336 60%,#ff9800 100%);">Inspiration</span>
-                </div>
-            </div>
-            <div class="why-tennis-row" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:stretch; gap:40px; margin-top:40px;">
-                <!-- Card 4 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#7c6ee6;">📲</div>
-                    <h3 style="font-size:1.45rem; color:#7c6ee6; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Online Presence</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        TCAM players gain exposure through live matches and events, enhancing their visibility and opportunities in the cricketing world.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#7c6ee6 60%,#2196f3 100%);">Visibility</span>
-                </div>
-                <!-- Card 5 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#43a047;">🤝</div>
-                    <h3 style="font-size:1.45rem; color:#43a047; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Community Support</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        Join a thriving community of cricket enthusiasts and receive support, guidance, and encouragement at every step of your journey.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#43a047 60%,#b2ff59 100%);">Support</span>
-                </div>
-                <!-- Card 6 -->
-                <div class="why-tennis-card">
-                    <div class="why-icon" style="color:#ff9800;">🏅</div>
-                    <h3 style="font-size:1.45rem; color:#ff9800; font-weight:700; margin-bottom:12px; letter-spacing:0.5px;">Achievement Recognition</h3>
-                    <p style="color:#444; font-size:1.08rem; text-align:center; margin-bottom:0;">
-                        We celebrate your achievements, big or small. TCAM ensures that your hard work and dedication never go unnoticed.
-                    </p>
-                    <span class="why-badge" style="background:linear-gradient(90deg,#ff9800 60%,#f44336 100%);">Recognition</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Gallery Preview Section (Landing Page, 8 images only) -->
-    <section id="gallery-preview" class="gallery-section">
-        <div class="container">
-            <h2 class="section-title fade-in">Gallery</h2>
-            <div class="gallery-grid">
-                <div class="gallery-item"><img src="IMG-20250628-WA0145.jpg" alt="Gallery 1"></div>
-                <div class="gallery-item"><img src="09july01.jpg" alt="Gallery 1"></div>
-                <div class="gallery-item"><img src="09july02.jpg" alt="Gallery 1"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0146.jpg" alt="Gallery 2"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0147.jpg" alt="Gallery 3"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0148.jpg" alt="Gallery 4"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0149.jpg" alt="Gallery 5"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0150.jpg" alt="Gallery 6"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0141.jpg" alt="Gallery 7"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0140.jpg" alt="Gallery 8"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0135.jpg" alt="Gallery 9"></div>
-                <div class="gallery-item"><img src="IMG-20250628-WA0132.jpg" alt="Gallery 10"></div>
-            </div>
-            <div style="text-align:center;margin-top:2rem;">
-                <a href="gallery.html" class="btn-primary" style="padding:0.7rem 2rem;font-size:1.1rem;">View Full Gallery</a>
-            </div>
-        </div>
-        <!-- Lightbox Modal for preview -->
-        <div id="gallery-lightbox" class="gallery-lightbox">
-            <span class="close-lightbox">&times;</span>
-            <img class="lightbox-img" src="" alt="Gallery Large">
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer class="site-footer">
@@ -1456,17 +1640,17 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
     <!-- Coach Registration Modal -->
     <div id="coachRegisterModal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:2001;justify-content:center;align-items:center;">
-        <div style="background:#fff;padding:24px;border-radius:12px;max-width:520px;width:94%;margin:20px;position:relative;">
-            <button id="closeCoachModal" style="position:absolute;right:12px;top:12px;border:none;background:transparent;font-size:20px;">&times;</button>
-            <h2 style="margin-bottom:8px;color:#222">Coach Registration</h2>
-            <p style="color:#666;margin-bottom:12px">Submit your details. Admin will review and approve your account.</p>
+        <div style="background:#141A2B;border:1px solid rgba(255,255,255,0.1);padding:24px;border-radius:20px;max-width:520px;width:94%;margin:20px;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+            <button id="closeCoachModal" style="position:absolute;right:12px;top:12px;border:none;background:transparent;color:#F2F4F7;font-size:20px;">&times;</button>
+            <h2 style="font-family:'Poppins',Arial,sans-serif;margin-bottom:8px;color:#F2F4F7">Coach Registration</h2>
+            <p style="color:#8B93A7;margin-bottom:12px">Submit your details. Admin will review and approve your account.</p>
             <form id="coachRegisterForm" enctype="multipart/form-data">
                 <div class="form-group"><label>Name</label><input type="text" name="name" id="coachNameInput" required></div>
                 <div class="form-group"><label>Mobile</label><input type="text" name="mobile" id="coachMobileInput" required></div>
                 <div class="form-group"><label>Email</label><input type="email" name="email" id="coachEmailInput"></div>
                 <div class="form-group"><label>District</label><select name="district" id="coachDistrictSelect" required><option>Loading districts...</option></select></div>
                 <div class="form-group"><label>Photo (optional)</label><input type="file" name="photo" id="coachPhotoInput" accept="image/*"></div>
-                <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;"><button type="button" id="coachCancel" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;">Cancel</button><button type="submit" style="padding:8px 12px;border-radius:8px;border:none;background:#ff6b35;color:#fff;">Submit Application</button></div>
+                <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;"><button type="button" id="coachCancel" style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:transparent;color:#F2F4F7;">Cancel</button><button type="submit" style="padding:8px 16px;border-radius:999px;border:none;background:#D7FA4C;color:#10140A;font-weight:700;">Submit Application</button></div>
             </form>
         </div>
     </div>
@@ -1649,5 +1833,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         if (!menu.contains(e.target) && !ham.contains(e.target)) closeMenu();
     });
     </script>
+    <script src="js/animations.js"></script>
 </body>
 </html>

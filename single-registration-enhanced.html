@@ -4,24 +4,30 @@
     <meta charset="UTF-8">
     <title>Update Player Registration - TCAM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/theme.css">
     <style>
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);}
-        h2 { color: #764ba2; text-align: center; margin-bottom: 2rem; }
+        body { font-family: 'Inter', Arial, sans-serif; background: #0B0F1A; color: #F2F4F7; min-height: 100vh; }
+        .container { max-width: 800px; margin: -40px auto 40px; position: relative; z-index: 2; background: #141A2B; border: 1px solid rgba(255,255,255,0.07); padding: 2rem; border-radius: 20px; box-shadow: 0 20px 55px rgba(0,0,0,0.4); animation: tcamContainerIn 0.7s cubic-bezier(.4,0,.2,1) both; }
+        @keyframes tcamContainerIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { font-family: 'Poppins', Arial, sans-serif; font-weight: 800; color: #FF7A1A; text-align: center; margin-bottom: 2rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group.full-width { grid-column: 1 / -1; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #333; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #F2F4F7; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; background: #0B0F1A; color: #F2F4F7; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; font-size: 1rem; font-family: inherit; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #FF7A1A; box-shadow: 0 0 0 4px rgba(255,122,26,0.16); }
         .form-group textarea { height: 100px; resize: vertical; }
-        .submit-btn { width: 100%; background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; }
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);}
-        .search-existing { background: #e8f4fd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; }
-        .search-existing a { color: #764ba2; text-decoration: none; font-weight: bold; }
+        .submit-btn { width: 100%; background: linear-gradient(90deg, #FF7A1A, #ff9a4d); color: white; padding: 1rem; border: none; border-radius: 999px; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 10px 26px rgba(255, 122, 26, 0.3); transition: transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s ease; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(255, 122, 26, 0.42); }
+        .search-existing { background: rgba(255,122,26,0.08); border: 1px solid rgba(255,122,26,0.18); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; text-align: center; }
+        .search-existing a { color: #FF7A1A; text-decoration: none; font-weight: bold; }
         .search-existing a:hover { text-decoration: underline; }
-        .required { color: #e74c3c; }
-        .photo-preview { max-width: 150px; max-height: 150px; margin-top: 10px; border-radius: 8px; border: 2px solid #ddd; }
+        .required { color: #ff6b6b; }
+        .photo-preview { max-width: 150px; max-height: 150px; margin-top: 10px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.14); }
         @media (max-width: 768px) {
             .form-row { grid-template-columns: 1fr; }
             .container { margin: 20px; padding: 1rem; }
@@ -29,27 +35,73 @@
     </style>
     <script src="js/config.js"></script>
 </head>
-<body>
-    <div class="container">
-        <a href="index.html" style="display:inline-block;margin-bottom:1.2rem;color:#ff6b35;text-decoration:none;font-weight:bold;font-size:1rem;">← Back to Home</a>
+<body class="tcam-dark-bg">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+        <div class="nav-container">
+            <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="TCAM Logo" style="height:40px;vertical-align:middle;margin-right:10px;">
+                TCAM
+            </a>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html"                   onclick="closeMenu()">Home</a></li>
+                    <li><a href="about.html"                   onclick="closeMenu()">About Us</a></li>
+                    <li><a href="managment.html"               onclick="closeMenu()">Management</a></li>
+                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
+                    <li><a href="tournament.php"               onclick="closeMenu()">Tournament</a></li>
+                    <li><a href="gallery.php"                  onclick="closeMenu()">Gallery</a></li>
+                    <li><a href="student-search.php"           onclick="closeMenu()">🔍 Search Data</a></li>
+                    <li><a href="single-registration-enhanced.html" onclick="closeMenu()">Update Registration</a></li>
+                    <!-- Mobile-only buttons inside drawer -->
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.5rem;">
+                        <a href="index.html#booking" style="display:block;text-align:center;width:100%;border-radius:8px;background:#D7FA4C;color:#10140A;text-decoration:none;padding:0.7rem 1.5rem;font-weight:800;text-transform:uppercase;" onclick="closeMenu()">Register Now</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="index.html" style="display:block;text-align:center;width:100%;border-radius:8px;background:#FF7A1A;color:#fff;text-decoration:none;padding:0.7rem 1.5rem;font-weight:bold;" onclick="closeMenu()">🏏 Register as Coach</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu()">🔑 Coach Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
+                <a href="index.html#booking" class="register-btn header-register-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Register Now</a>
+                <a href="index.html" class="register-btn header-register-btn" style="background:#FF7A1A;text-decoration:none;display:inline-flex;align-items:center;">Register as Coach</a>
+                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="tcam-hero">
+        <a href="index.html" class="tcam-hero-back">← Back to Home</a>
+        <span class="tcam-hero-eyebrow">Keep Your Details Current</span>
         <h2>🏏 Update Player Registration</h2>
-        
+    </div>
+
+    <div class="container">
+
         <!-- Quick Lookup for Returning Students -->
-        <div class="search-existing" style="background:linear-gradient(135deg,#e8f4fd,#f0e6ff);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;border:2px solid #764ba2;">
-            <h3 style="color:#764ba2;margin-bottom:0.8rem;font-size:1.1rem;text-align:center;">🔍 Already Registered? Find Your Profile</h3>
-            <p style="text-align:center;color:#555;font-size:0.9rem;margin-bottom:1rem;">Enter your TCAM ID, Mobile Number, or Document Number to auto-fill your details. You'll only need to select the new tournament!</p>
+        <div class="search-existing" style="background:rgba(255,122,26,0.08);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;border:2px solid rgba(255,122,26,0.3);">
+            <h3 style="color:#FF7A1A;margin-bottom:0.8rem;font-size:1.1rem;text-align:center;">🔍 Already Registered? Find Your Profile</h3>
+            <p style="text-align:center;color:#8B93A7;font-size:0.9rem;margin-bottom:1rem;">Enter your TCAM ID, Mobile Number, or Document Number to auto-fill your details. You'll only need to select the new tournament!</p>
             <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;align-items:flex-end;">
                 <div style="flex:1;min-width:150px;">
-                    <select id="quickSearchType" style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;">
+                    <select id="quickSearchType" style="width:100%;padding:0.7rem;background:#0B0F1A;color:#F2F4F7;border:1px solid rgba(255,255,255,0.14);border-radius:8px;font-size:0.9rem;">
                         <option value="reg_id">TCAM ID</option>
                         <option value="mobile">Mobile Number</option>
                         <option value="document">Document Number</option>
                     </select>
                 </div>
                 <div style="flex:2;min-width:200px;">
-                    <input type="text" id="quickSearchTerm" placeholder="Enter your ID, mobile, or document number..." style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;">
+                    <input type="text" id="quickSearchTerm" placeholder="Enter your ID, mobile, or document number..." style="width:100%;padding:0.7rem;background:#0B0F1A;color:#F2F4F7;border:1px solid rgba(255,255,255,0.14);border-radius:8px;font-size:0.9rem;">
                 </div>
-                <button type="button" id="quickSearchBtn" onclick="quickLookup()" style="padding:0.7rem 1.5rem;background:linear-gradient(45deg,#764ba2,#667eea);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:bold;cursor:pointer;transition:all 0.3s;">
+                <button type="button" id="quickSearchBtn" onclick="quickLookup()" style="padding:0.7rem 1.8rem;background:linear-gradient(90deg,#FF7A1A,#ff9a4d);color:#fff;border:none;border-radius:999px;font-size:0.9rem;font-weight:bold;cursor:pointer;box-shadow:0 8px 20px rgba(118,75,162,0.28);transition:transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s ease;">
                     🔍 Find Me
                 </button>
             </div>
@@ -60,7 +112,7 @@
             <input type="hidden" name="csrf_token" id="csrfToken">
             
             <!-- Personal Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Personal Information</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Personal Information</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label for="name">Full Name <span class="required">*</span></label>
@@ -84,13 +136,13 @@
             </div>
             
             <!-- Document Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Aadhar Card</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Aadhar Card</h3>
             <input type="hidden" name="document_type" value="aadhar">
             <div class="form-row">
                 <div class="form-group full-width">
                     <label for="aadhar_upload">Upload Aadhar Card Image <span class="required">*</span></label>
                     <input type="file" id="aadhar_upload" name="aadhar_upload" accept="image/jpeg,image/png,image/jpg">
-                    <small style="color:#666;">JPG / PNG. Your 12-digit number will be auto-scanned.</small>
+                    <small style="color:#8B93A7;">JPG / PNG. Your 12-digit number will be auto-scanned.</small>
                     <div id="enh_ocrStatus" style="display:none;margin-top:8px;padding:8px 12px;border-radius:6px;font-size:0.92rem;"></div>
                 </div>
                 <div class="form-group full-width">
@@ -103,7 +155,7 @@
             </div>
             
             <!-- Address Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Address Information</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Address Information</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label for="city">City <span class="required">*</span></label>
@@ -134,7 +186,7 @@
             </div>
             
             <!-- Family Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Family Information</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Family Information</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label for="parent_name">Parent/Guardian Name</label>
@@ -147,7 +199,7 @@
             </div>
             
             <!-- Medical Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Medical Information</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Medical Information</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label for="blood_group">Blood Group</label>
@@ -170,7 +222,7 @@
             </div>
             
             <!-- Tournament Information -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Tournament Information</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Tournament Information</h3>
             <div class="form-group full-width">
                 <label for="event_name">Tournament / event you are registering for <span class="required">*</span></label>
                 <input type="text" id="event_name" name="event_name" required placeholder="e.g. Mumbai District Cup 2026">
@@ -182,9 +234,9 @@
             </div>
             
             <!-- Photo Upload -->
-            <h3 style="color: #764ba2; margin-bottom: 1rem;">Photo Upload</h3>
+            <h3 style="color: #FF7A1A; margin-bottom: 1rem;">Photo Upload</h3>
             <div class="form-group full-width">
-                <label for="photo">Upload Photo <span class="required">*</span> <span style="color:#666;font-weight:normal;">(required for first-time registration; optional when adding only a new event with the same ID)</span></label>
+                <label for="photo">Upload Photo <span class="required">*</span> <span style="color:#8B93A7;font-weight:normal;">(required for first-time registration; optional when adding only a new event with the same ID)</span></label>
                 <input type="file" id="photo" name="photo" accept="image/*">
                 <div id="photoPreview"></div>
                 <small style="color: #666;">Allowed formats: JPG, PNG, JPEG. Max size: 2MB</small>
@@ -316,7 +368,7 @@
     document.getElementById('aadhar_upload').addEventListener('change', async function() {
         const file = this.files[0]; if (!file) return;
         const st = document.getElementById('enh_ocrStatus');
-        st.style.cssText = 'display:block;padding:8px 12px;border-radius:6px;font-size:0.92rem;background:#f0e6ff;color:#764ba2;margin-top:8px;';
+        st.style.cssText = 'display:block;padding:8px 12px;border-radius:6px;font-size:0.92rem;background:rgba(255,122,26,0.12);color:#FF7A1A;margin-top:8px;';
         st.innerHTML = '🔄 Processing image… please wait';
         try {
             const blob = await preprocessAadharImage(file);
@@ -409,7 +461,7 @@
             }
             
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<span style="color:#764ba2;">🔄 Searching...</span>';
+            resultDiv.innerHTML = '<span style="color:#FF7A1A;">🔄 Searching...</span>';
             
             fetch(tcamApi(`student-search.php?format=json&search_type=${encodeURIComponent(searchType)}&search_term=${encodeURIComponent(searchTerm)}`))
             .then(r => r.json())
@@ -431,7 +483,7 @@
                     if (reg.date_of_birth) document.getElementById('dob').value = reg.date_of_birth;
                     if (reg.previous_tournaments) document.getElementById('previous_tournaments').value = reg.previous_tournaments;
                     
-                    resultDiv.innerHTML = '<span style="color:#27ae60;font-weight:bold;">✅ Found! TCAM ID: ' + reg.reg_id + ' — ' + reg.name + '</span><br><span style="color:#555;font-size:0.85rem;">Your details have been filled. Just select the tournament and submit!</span>';
+                    resultDiv.innerHTML = '<span style="color:#27ae60;font-weight:bold;">✅ Found! TCAM ID: ' + reg.reg_id + ' — ' + reg.name + '</span><br><span style="color:#8B93A7;font-size:0.85rem;">Your details have been filled. Just select the tournament and submit!</span>';
                     
                     // Scroll to tournament field
                     setTimeout(() => document.getElementById('event_name').scrollIntoView({behavior:'smooth',block:'center'}), 500);
@@ -646,5 +698,7 @@
             &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
         </div>
     </footer>
+    <script src="js/header.js"></script>
+    <script src="js/animations.js"></script>
 </body>
 </html>

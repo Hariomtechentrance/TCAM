@@ -153,9 +153,9 @@ class SecureDatabase {
             $cnt = $this->pdo->query("SELECT COUNT(*) as c FROM districts")->fetchColumn();
             if ((int)$cnt === 0) {
                 $districts = [
-                    'Ahmednagar','Akola','Amravati','Sambhaji Nagar','Beed','Bhandara','Buldhana','Chandrapur',
+                    'Ahilyanagar','Akola','Amravati','Sambhaji Nagar','Beed','Bhandara','Buldhana','Chandrapur',
                     'Dhule','Gadchiroli','Gondia','Hingoli','Jalgaon','Jalna','Kolhapur','Latur',
-                    'Mumbai City','Mumbai Suburban','Nagpur','Nanded','Nandurbar','Nashik','Dharashive','Palghar',
+                    'Mumbai City','Mumbai Suburban','Nagpur','Nanded','Nandurbar','Nashik','Dharashiv','Palghar',
                     'Parbhani','Pune','Raigad','Ratnagiri','Sangli','Satara','Sindhudurg','Solapur',
                     'Thane','Wardha','Washim','Yavatmal'
                 ];

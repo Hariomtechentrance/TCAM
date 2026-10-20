@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['run'])) {
         echo "Skipped/failed: $fail\n\n";
         echo "Table counts:\n";
         foreach ($counts as $t => $c) { echo "  $t: $c\n"; }
-        echo "\n✅ Done! Go to admin panel: /admin-panel-v2.php\n";
+        echo "\n✅ Done! Go to admin panel: /admin-dashboard.php\n";
         echo "⚠️  DELETE db-migrate.php and full_db_export.sql from server now!\n";
 
     } catch (Throwable $e) {

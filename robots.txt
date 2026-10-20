@@ -1,7 +1,11 @@
 User-agent: *
 Allow: /
 
-Disallow: /admin-login.php
-Disallow: /admin-panel.php
 Disallow: /admin-dashboard.php
-Disallow: /admin-panel-v2.php
+Disallow: /admin-search.php
+Disallow: /admin-team-report.php
+Disallow: /admin-api.php
+Disallow: /registration-reports.php
+Disallow: /login-production.php
+Disallow: /coach-panel.php
+Disallow: /coach-login.php

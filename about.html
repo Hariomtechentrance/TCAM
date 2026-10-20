@@ -4,32 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - Tennis Cricket Association of Maharashtra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/theme.css">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', 'Arial', sans-serif;
             margin: 0;
-            /* Use the provided purple color as background */
-            background: #7b51a1;
-            color: #222;
+            background: #0B0F1A;
+            color: #F2F4F7;
         }
         .about-container {
             max-width: 900px;
-            margin: 60px auto 0 auto;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+            margin: -40px auto 0 auto;
+            position: relative;
+            z-index: 2;
+            background: #141A2B;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             padding: 40px 24px 32px 24px;
             animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
         }
         .about-title {
             text-align: center;
-            font-size: 2.8rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #ff6b35;
-            letter-spacing: 2px;
-            animation: popIn 1s .2s both;
+            font-family: 'Poppins', 'Arial', sans-serif;
+            font-size: clamp(1.9rem, 4vw, 2.8rem);
+            font-weight: 800;
+            margin-bottom: 0;
+            color: #fff;
+            letter-spacing: 1px;
+            position: relative;
         }
         @keyframes popIn {
             0% { opacity: 0; transform: scale(0.8);}
@@ -40,7 +47,7 @@
             text-align: center;
             text-wrap: balance; /* Modern browsers */
             font-size: 1.2rem;
-            color: #888;
+            color: #8B93A7;
             margin-bottom: 32px;
             animation: fadeIn 1.2s .4s both;
             width: 100%;
@@ -62,13 +69,15 @@
             animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
         }
         .about-section h2 {
-            color: #ff6b35;
+            color: #FF7A1A;
+            font-family: 'Poppins', 'Arial', sans-serif;
+            font-weight: 700;
             font-size: 2rem;
             margin-bottom: 14px;
             letter-spacing: 1px;
             position: relative;
             display: inline-block;
-            background: linear-gradient(90deg,#ffb347 60%,#ff6b35 100%);
+            background: linear-gradient(90deg,#ff9a4d 60%,#FF7A1A 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: popIn 1s .2s both;
@@ -78,11 +87,15 @@
             display: block;
             width: 40px;
             height: 3px;
-            background: #ffb347;
+            background: #ff9a4d;
             border-radius: 2px;
             margin-top: 6px;
             margin-left: 2px;
             opacity: 0.7;
+            transition: width 0.35s ease;
+        }
+        .about-section:hover h2::after {
+            width: 70px;
         }
         .about-section ul {
             list-style: none;
@@ -90,7 +103,7 @@
         }
         .about-section ul li {
             margin-bottom: 10px;
-            color: #222;
+            color: #F2F4F7;
             font-size: 1.08rem;
             position: relative;
             padding-left: 28px;
@@ -98,7 +111,7 @@
         }
         .about-section ul li:before {
             content: "✔️";
-            color: #f44336;
+            color: #FF7A1A;
             position: absolute;
             left: 0;
             top: 0;
@@ -106,24 +119,23 @@
             transition: transform 0.3s;
         }
         .about-section ul li:hover {
-            background: #fff7e6;
+            background: rgba(215,250,76,0.08);
         }
         .about-section ul li:hover:before {
             transform: scale(1.2) rotate(-10deg);
         }
         .about-message, .about-message2 {
-            border-left: 4px solid #f44336;
+            border-left: 4px solid #FF7A1A;
             padding-left: 18px;
             margin: 32px 0;
-            color: #888;
+            color: #C4CAD4;
             font-style: italic;
-            background: #fff3e0;
+            background: rgba(255,122,26,0.08);
             border-radius: 0 12px 12px 0;
-            box-shadow: 0 2px 12px rgba(255,107,53,0.06);
             animation: fadeIn 1.2s .7s both;
         }
         .about-message-title {
-            color: #f44336;
+            color: #FF7A1A;
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 4px;
@@ -136,11 +148,11 @@
         .about-vision h3 {
             font-size: 1.3rem;
             margin-bottom: 12px;
-            color: #ff6b35;
+            color: #FF7A1A;
             letter-spacing: 1px;
         }
         .about-vision ul li {
-            color: #444;
+            color: #C4CAD4;
             padding-left: 28px;
             position: relative;
         }
@@ -154,7 +166,7 @@
         .back-link {
             display: inline-block;
             margin-bottom: 24px;
-            color: #ff6b35;
+            color: #FF7A1A;
             text-decoration: none;
             font-weight: bold;
             font-size: 1.1rem;
@@ -228,10 +240,57 @@
     </style>
     <script src="js/config.js"></script>
 </head>
-<body>
-    <div class="about-container">
-        <a href="./index.html" class="back-link">&larr; Back to Home</a>
+<body class="tcam-dark-bg">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+        <div class="nav-container">
+            <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="TCAM Logo" style="height:40px;vertical-align:middle;margin-right:10px;">
+                TCAM
+            </a>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html"                   onclick="closeMenu()">Home</a></li>
+                    <li><a href="about.html"                   onclick="closeMenu()">About Us</a></li>
+                    <li><a href="managment.html"               onclick="closeMenu()">Management</a></li>
+                    <li><a href="contact.html"                 onclick="closeMenu()">Contact</a></li>
+                    <li><a href="tournament.php"               onclick="closeMenu()">Tournament</a></li>
+                    <li><a href="gallery.php"                  onclick="closeMenu()">Gallery</a></li>
+                    <li><a href="student-search.php"           onclick="closeMenu()">🔍 Search Data</a></li>
+                    <li><a href="single-registration-enhanced.html" onclick="closeMenu()">Update Registration</a></li>
+                    <!-- Mobile-only buttons inside drawer -->
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.5rem;">
+                        <a href="index.html#booking" style="display:block;text-align:center;width:100%;border-radius:8px;background:#D7FA4C;color:#10140A;text-decoration:none;padding:0.7rem 1.5rem;font-weight:800;text-transform:uppercase;" onclick="closeMenu()">Register Now</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="index.html" style="display:block;text-align:center;width:100%;border-radius:8px;background:#FF7A1A;color:#fff;text-decoration:none;padding:0.7rem 1.5rem;font-weight:bold;" onclick="closeMenu()">🏏 Register as Coach</a>
+                    </li>
+                    <li class="show-mobile-only mobile-register-row" style="border-bottom:none;margin-top:0.6rem;">
+                        <a href="coach-login.php" style="display:block;text-align:center;width:100%;border-radius:8px;background:#312e81;color:#fff;text-decoration:none;padding:0.6rem 1rem;font-weight:600;" onclick="closeMenu()">🔑 Coach Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-shrink:0;">
+                <a href="index.html#booking" class="register-btn header-register-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Register Now</a>
+                <a href="index.html" class="register-btn header-register-btn" style="background:#FF7A1A;text-decoration:none;display:inline-flex;align-items:center;">Register as Coach</a>
+                <a href="coach-login.php" class="register-btn header-register-btn" style="background:#312e81;display:inline-flex;align-items:center;text-decoration:none;">Coach Login</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="tcam-hero">
+        <a href="./index.html" class="tcam-hero-back">&larr; Back to Home</a>
+        <span class="tcam-hero-eyebrow">About TCAM</span>
         <div class="about-title">Tennis Cricket Association of Maharashtra</div>
+    </div>
+
+    <div class="about-container">
+        <div id="leaderFilterNotice" style="display:none;margin-bottom:24px;"></div>
         <div class="about-subtitle" style="text-wrap: balance;">
             The Tennis Cricket Association of Maharashtra (TCAM) is the official governing body for tennis cricket in Maharashtra. Established with a vision to promote and develop tennis cricket across the state, we provide a structured platform for players of all ages to showcase their talent and represent Maharashtra at national levels.
         </div>
@@ -248,8 +307,8 @@
                 <li>Identify and nurture talent for national representation</li>
             </ul>
         </div>
-        <div class="about-section">
-            <h2>About Meenakshi Giri</h2>
+        <div class="about-section" id="section-minakshi">
+            <h2 id="minakshi">About Meenakshi Giri</h2>
             <div class="about-person-layout">
                 <img src="./Meenakshi_Maam.jpg" alt="Meenakshi Giri" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
                 <div>
@@ -272,8 +331,8 @@
                 </div>
             </div>
         </div>
-        <div class="about-section">
-            <h2>About Mayuri Ghadigaonkar</h2>
+        <div class="about-section" id="section-mayuri">
+            <h2 id="mayuri">About Mayuri Ghadigaonkar</h2>
             <div class="about-person-layout">
                 <img src="./mayuri-giri.jpg" alt="Mayuri Ghadigaonkar" class="about-person-photo" style="width:100%;height:auto;aspect-ratio:540/640;object-fit:cover;object-position:center top;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.10);flex-shrink:0;">
                 <div>
@@ -349,5 +408,37 @@
             &copy; 2024 Tennis Cricket Association of Maharashtra (TCAM). All rights reserved.
         </div>
     </footer>
+    <script src="js/header.js"></script>
+    <script src="js/animations.js"></script>
+    <script>
+        // ?leader=minakshi or ?leader=mayuri — show only that person's bio
+        // section (coming from a leadership card on the homepage), with a
+        // link back to the full page. No filter param = show everything.
+        (function () {
+            var LEADERS = {
+                minakshi: { section: 'section-minakshi', name: 'Meenakshi Giri' },
+                mayuri:   { section: 'section-mayuri',   name: 'Mayuri Ghadigaonkar' }
+            };
+            var params = new URLSearchParams(window.location.search);
+            var focus = params.get('leader');
+            if (!focus || !LEADERS[focus]) return;
+
+            Object.keys(LEADERS).forEach(function (key) {
+                if (key === focus) return;
+                var el = document.getElementById(LEADERS[key].section);
+                if (el) el.style.display = 'none';
+            });
+
+            var notice = document.getElementById('leaderFilterNotice');
+            if (notice) {
+                notice.style.display = 'block';
+                notice.innerHTML =
+                    '<a href="about.html" style="display:inline-flex;align-items:center;gap:6px;' +
+                    'color:#8B93A7;text-decoration:none;font-weight:600;font-size:0.9rem;' +
+                    'padding:6px 14px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;">' +
+                    '← View all leadership</a>';
+            }
+        })();
+    </script>
 </body>
 </html>

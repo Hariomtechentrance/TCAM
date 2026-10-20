@@ -92,7 +92,7 @@ try {
     echo "<h2>✅ Database Schema Updated Successfully!</h2>";
     echo "<p>Your admin panel now has full functionality.</p>";
     echo "<p><a href='admin-dashboard.php'>🎯 Go to Admin Dashboard</a></p>";
-    echo "<p><a href='login-secure.php'>🔐 Go to Login</a></p>";
+    echo "<p><a href='login-production.php'>🔐 Go to Login</a></p>";
     
 } catch (Exception $e) {
     echo "<p>❌ Error: " . $e->getMessage() . "</p>";

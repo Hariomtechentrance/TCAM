@@ -5,12 +5,15 @@
  */
 
 require_once 'security-config.php';
-require_once 'secure-auth.php';
+session_start();
 require_once 'secure-database.php';
 
-// Require admin authentication
-$auth = new SecureAuth();
-$auth->requireAdmin();
+// Require admin authentication — same session flag login-production.php sets,
+// so this page actually works for the admin account that's really in use.
+if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: login-production.php');
+    exit;
+}
 
 // Rate limiting
 Security::rateLimit(20, 300); // 20 searches per 5 minutes
@@ -20,14 +23,20 @@ $error = '';
 $success = '';
 $totalResults = 0;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || !Security::validateCSRFToken($_POST['csrf_token'])) {
+// Export links are plain GET requests (so the browser can download the
+// file directly) that re-run the same last search rather than re-posting.
+$isExportRequest = isset($_GET['export']) && isset($_GET['search_type'], $_GET['search_term']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || $isExportRequest) {
+    // GET-based export re-runs a search the admin already performed, from
+    // their own authenticated session — CSRF doesn't apply to a same-session
+    // re-read, so only POST (which can add/delete data) needs the token.
+    if (!$isExportRequest && (!isset($_POST['csrf_token']) || !Security::validateCSRFToken($_POST['csrf_token']))) {
         $error = "Invalid request. Please refresh the page and try again.";
     } else {
-        $searchType = Security::sanitizeInput($_POST['search_type'] ?? '');
-        $searchTerm = Security::sanitizeInput($_POST['search_term'] ?? '');
-        
+        $searchType = Security::sanitizeInput($isExportRequest ? ($_GET['search_type'] ?? '') : ($_POST['search_type'] ?? ''));
+        $searchTerm = Security::sanitizeInput($isExportRequest ? ($_GET['search_term'] ?? '') : ($_POST['search_term'] ?? ''));
+
         if (empty($searchTerm)) {
             $error = "Please enter search criteria.";
         } else {
@@ -43,92 +52,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
                 ]);
                 
-                // Build search query based on type
+                // Both `registrations` (the detailed ID-registration form) and
+                // `bookings` (the main homepage "Register Now" form) hold real
+                // students, so every search here unions both — otherwise this
+                // silently misses everyone who came through the main form,
+                // which is most of them.
+                $regsSelect = "SELECT 'registration' AS source, id AS source_id, reg_id, name, mobile,
+                        city, state, document_number, document_type, date_of_birth, parent_name,
+                        address, emergency_contact, blood_group, photo, joined
+                    FROM registrations WHERE %s";
+                $bookingsSelect = "SELECT 'booking' AS source, id AS source_id, bookingId AS reg_id, name, phone AS mobile,
+                        district AS city, '' AS state, aadhar_number AS document_number, '' AS document_type,
+                        dob AS date_of_birth, '' AS parent_name, '' AS address, '' AS emergency_contact,
+                        '' AS blood_group, photo, created_at AS joined
+                    FROM bookings WHERE %s";
+
                 switch ($searchType) {
                     case 'all':
-                        // Search across all fields
-                        $query = "SELECT * FROM registrations WHERE 
-                                  name LIKE ? OR 
-                                  mobile LIKE ? OR 
-                                  city LIKE ? OR 
-                                  state LIKE ? OR 
-                                  document_number LIKE ? OR 
-                                  parent_name LIKE ? OR
-                                  address LIKE ?
-                                  ORDER BY created_at DESC";
-                        $searchParam = "%$searchTerm%";
-                        $stmt = $db->execute($query, [
-                            $searchParam, $searchParam, $searchParam, $searchParam, 
-                            $searchParam, $searchParam, $searchParam
-                        ]);
-                        $searchResults = $stmt->fetchAll();
+                        $term = "%$searchTerm%";
+                        $regsWhere = "(name LIKE ? OR mobile LIKE ? OR city LIKE ? OR state LIKE ? OR document_number LIKE ? OR parent_name LIKE ? OR address LIKE ?)";
+                        $bookingsWhere = "(name LIKE ? OR phone LIKE ? OR district LIKE ? OR aadhar_number LIKE ?)";
+                        $query = sprintf($regsSelect, $regsWhere) . " UNION ALL " . sprintf($bookingsSelect, $bookingsWhere) . " ORDER BY joined DESC";
+                        $searchResults = $db->execute($query, [
+                            $term, $term, $term, $term, $term, $term, $term,
+                            $term, $term, $term, $term,
+                        ])->fetchAll();
                         break;
-                        
+
                     case 'mobile':
                         if (Security::validatePhone($searchTerm)) {
-                            $searchResults = $db->select('registrations', ['mobile' => $searchTerm]);
+                            $query = sprintf($regsSelect, 'mobile = ?') . " UNION ALL " . sprintf($bookingsSelect, 'phone = ?') . " ORDER BY joined DESC";
+                            $searchResults = $db->execute($query, [$searchTerm, $searchTerm])->fetchAll();
                         } else {
                             $error = "Please enter a valid 10-digit mobile number.";
                         }
                         break;
-                        
+
                     case 'reg_id':
-                        if (is_numeric($searchTerm)) {
-                            $searchResults = $db->select('registrations', ['reg_id' => $searchTerm]);
-                        } else {
-                            $error = "Please enter a valid TCAM ID.";
-                        }
+                        $term = "%$searchTerm%";
+                        $query = sprintf($regsSelect, 'reg_id LIKE ?') . " UNION ALL " . sprintf($bookingsSelect, 'bookingId LIKE ?') . " ORDER BY joined DESC";
+                        $searchResults = $db->execute($query, [$term, $term])->fetchAll();
                         break;
-                        
+
                     case 'document':
-                        // Search by document number
-                        $searchResults = $db->execute(
-                            "SELECT * FROM registrations WHERE document_number LIKE ? ORDER BY created_at DESC",
-                            ["%$searchTerm%"]
-                        )->fetchAll();
+                        $term = "%$searchTerm%";
+                        $query = sprintf($regsSelect, 'document_number LIKE ?') . " UNION ALL " . sprintf($bookingsSelect, 'aadhar_number LIKE ?') . " ORDER BY joined DESC";
+                        $searchResults = $db->execute($query, [$term, $term])->fetchAll();
                         break;
-                        
+
                     case 'name':
-                        $searchResults = $db->execute(
-                            "SELECT * FROM registrations WHERE name LIKE ? ORDER BY created_at DESC",
-                            ["%$searchTerm%"]
-                        )->fetchAll();
+                        $term = "%$searchTerm%";
+                        $query = sprintf($regsSelect, 'name LIKE ?') . " UNION ALL " . sprintf($bookingsSelect, 'name LIKE ?') . " ORDER BY joined DESC";
+                        $searchResults = $db->execute($query, [$term, $term])->fetchAll();
                         break;
-                        
+
                     case 'city':
-                        $searchResults = $db->execute(
-                            "SELECT * FROM registrations WHERE city LIKE ? ORDER BY created_at DESC",
-                            ["%$searchTerm%"]
-                        )->fetchAll();
+                        // Bookings don't have a separate city field, but district is the closest equivalent.
+                        $term = "%$searchTerm%";
+                        $query = sprintf($regsSelect, 'city LIKE ?') . " UNION ALL " . sprintf($bookingsSelect, 'district LIKE ?') . " ORDER BY joined DESC";
+                        $searchResults = $db->execute($query, [$term, $term])->fetchAll();
                         break;
-                        
+
                     case 'state':
+                        // Bookings have no state field at all — registrations only.
                         $searchResults = $db->execute(
-                            "SELECT * FROM registrations WHERE state LIKE ? ORDER BY created_at DESC",
+                            sprintf($regsSelect, 'state LIKE ?') . " ORDER BY joined DESC",
                             ["%$searchTerm%"]
                         )->fetchAll();
                         break;
-                        
+
                     case 'parent':
+                        // Parent/guardian name only exists on the detailed registrations form.
                         $searchResults = $db->execute(
-                            "SELECT * FROM registrations WHERE parent_name LIKE ? ORDER BY created_at DESC",
+                            sprintf($regsSelect, 'parent_name LIKE ?') . " ORDER BY joined DESC",
                             ["%$searchTerm%"]
                         )->fetchAll();
                         break;
-                        
+
                     case 'date_range':
-                        // Search by date range
                         $dateRange = explode(' to ', $searchTerm);
                         if (count($dateRange) === 2) {
-                            $searchResults = $db->execute(
-                                "SELECT * FROM registrations WHERE DATE(created_at) BETWEEN ? AND ? ORDER BY created_at DESC",
-                                [$dateRange[0], $dateRange[1]]
-                            )->fetchAll();
+                            $query = sprintf($regsSelect, 'DATE(joined) BETWEEN ? AND ?') . " UNION ALL " . sprintf($bookingsSelect, 'DATE(created_at) BETWEEN ? AND ?') . " ORDER BY joined DESC";
+                            $searchResults = $db->execute($query, [$dateRange[0], $dateRange[1], $dateRange[0], $dateRange[1]])->fetchAll();
                         } else {
                             $error = "Please enter date range in format: YYYY-MM-DD to YYYY-MM-DD";
                         }
                         break;
-                        
+
                     default:
                         $error = "Invalid search type.";
                 }
@@ -143,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (Exception $e) {
                 $error = "Search failed. Please try again later.";
                 Security::logEvent('ADMIN_SEARCH_ERROR', [
-                    'admin_id' => $_SESSION['user_id'],
+                    'admin_id' => ($_SESSION['admin_id'] ?? 0),
                     'search_type' => $searchType,
                     'search_term' => $searchTerm,
                     'error' => $e->getMessage()
@@ -165,33 +175,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
             $db = SecureDatabase::getInstance();
             $db->beginTransaction();
             
-            foreach ($selectedIds as $id) {
-                $id = (int)$id;
-                
+            foreach ($selectedIds as $rawId) {
+                // Values are "registration:5" or "booking:12" now that results
+                // can come from either table.
+                if (!preg_match('/^(registration|booking):(\d+)$/', (string) $rawId, $m)) {
+                    continue;
+                }
+                $source = $m[1];
+                $id = (int) $m[2];
+                $table = $source === 'booking' ? 'bookings' : 'registrations';
+
                 switch ($action) {
                     case 'delete':
-                        // Get registration info before deletion
-                        $registration = $db->select('registrations', ['id' => $id]);
-                        if (!empty($registration)) {
-                            $reg = $registration[0];
-                            
-                            // Delete photo file if exists
-                            $photoPath = __DIR__ . '/uploads/' . $reg['photo'];
-                            if (file_exists($photoPath)) {
+                        $rows = $db->select($table, ['id' => $id]);
+                        if (!empty($rows)) {
+                            $row = $rows[0];
+                            $photoFile = preg_replace('#^/?uploads/#', '', $row['photo'] ?? '');
+                            $photoPath = __DIR__ . '/uploads/' . $photoFile;
+                            if ($photoFile !== '' && file_exists($photoPath)) {
                                 unlink($photoPath);
                             }
-                            
-                            // Delete from database
-                            $db->delete('registrations', ['id' => $id]);
-                            
+
+                            $db->delete($table, ['id' => $id]);
+                            if ($table === 'registrations') {
+                                $db->execute('DELETE FROM event_registrations WHERE registration_id = ?', [$id]);
+                            }
+
                             Security::logEvent('BULK_DELETE_REGISTRATION', [
-                                'admin_id' => $_SESSION['user_id'],
-                                'reg_id' => $reg['reg_id'],
-                                'deleted_user' => $reg['name']
+                                'admin_id' => ($_SESSION['admin_id'] ?? 0),
+                                'source' => $source,
+                                'display_id' => $row['reg_id'] ?? $row['bookingId'] ?? '',
+                                'deleted_user' => $row['name'],
                             ]);
                         }
                         break;
-                        
+
                     case 'export':
                         // Will be handled separately
                         break;
@@ -268,64 +286,51 @@ function exportToExcel($results) {
 }
 
 function exportToPDF($results) {
-    // Simple PDF generation (you can use TCPDF or FPDF for better results)
+    require_once __DIR__ . '/lib/fpdf/fpdf.php';
+
+    $safe = function ($text) {
+        $converted = @iconv('UTF-8', 'CP1252//TRANSLIT//IGNORE', (string) $text);
+        return $converted !== false ? $converted : (string) $text;
+    };
+
+    $pdf = new FPDF('L', 'mm', 'A4');
+    $pdf->SetAutoPageBreak(true, 15);
+    $pdf->AddPage();
+
+    $pdf->SetFont('Helvetica', 'B', 16);
+    $pdf->Cell(0, 10, $safe('Tennis Cricket Association Maharashtra'), 0, 1, 'C');
+    $pdf->SetFont('Helvetica', '', 11);
+    $pdf->Cell(0, 7, 'Student Registration Report', 0, 1, 'C');
+    $pdf->Cell(0, 6, 'Generated on: ' . date('Y-m-d H:i:s') . '  |  Total Records: ' . count($results), 0, 1, 'C');
+    $pdf->Ln(4);
+
+    $headers = ['TCAM ID', 'Name', 'Mobile', 'City', 'State', 'Document Number', 'Joined'];
+    $widths = [35, 55, 30, 40, 35, 45, 35];
+
+    $pdf->SetFont('Helvetica', 'B', 10);
+    $pdf->SetFillColor(118, 75, 162);
+    $pdf->SetTextColor(255, 255, 255);
+    foreach ($headers as $i => $h) {
+        $pdf->Cell($widths[$i], 8, $h, 1, 0, 'C', true);
+    }
+    $pdf->Ln();
+
+    $pdf->SetFont('Helvetica', '', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    foreach ($results as $row) {
+        $pdf->Cell($widths[0], 7, $safe($row['reg_id']), 1);
+        $pdf->Cell($widths[1], 7, $safe($row['name']), 1);
+        $pdf->Cell($widths[2], 7, $safe($row['mobile']), 1);
+        $pdf->Cell($widths[3], 7, $safe($row['city']), 1);
+        $pdf->Cell($widths[4], 7, $safe($row['state']), 1);
+        $pdf->Cell($widths[5], 7, $safe($row['document_number'] ?? 'N/A'), 1);
+        $pdf->Cell($widths[6], 7, $safe($row['joined']), 1);
+        $pdf->Ln();
+    }
+
     header('Content-Type: application/pdf');
     header('Content-Disposition: attachment; filename="TCAM_Students_' . date('Y-m-d') . '.pdf"');
-    
-    $html = "
-    <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; border-bottom: 2px solid #764ba2; padding-bottom: 20px; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #764ba2; color: white; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
-        </style>
-    </head>
-    <body>
-        <div class='header'>
-            <h1>🏏 Tennis Cricket Association Maharashtra</h1>
-            <h2>Student Registration Report</h2>
-            <p>Generated on: " . date('Y-m-d H:i:s') . "</p>
-            <p>Total Records: " . count($results) . "</p>
-        </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>TCAM ID</th>
-                    <th>Name</th>
-                    <th>Mobile</th>
-                    <th>City</th>
-                    <th>State</th>
-                    <th>Document Number</th>
-                    <th>Joined</th>
-                </tr>
-            </thead>
-            <tbody>";
-    
-    foreach ($results as $row) {
-        $html .= "
-                <tr>
-                    <td>{$row['reg_id']}</td>
-                    <td>{$row['name']}</td>
-                    <td>{$row['mobile']}</td>
-                    <td>{$row['city']}</td>
-                    <td>{$row['state']}</td>
-                    <td>" . ($row['document_number'] ?? 'N/A') . "</td>
-                    <td>{$row['joined']}</td>
-                </tr>";
-    }
-    
-    $html .= "
-            </tbody>
-        </table>
-    </body>
-    </html>";
-    
-    echo $html;
+    echo $pdf->Output('S');
     exit;
 }
 
@@ -601,8 +606,8 @@ $csrfToken = Security::generateCSRFToken();
                     <strong>Admin:</strong> <?php echo htmlspecialchars($_SESSION['username']); ?>
                 </div>
                 <div>
-                    <a href="admin-panel-secure.php" class="btn btn-secondary">← Admin Panel</a>
-                    <a href="logout.php" class="btn btn-danger">Logout</a>
+                    <a href="admin-dashboard.php" class="btn btn-secondary">← Admin Panel</a>
+                    <a href="login-production.php?logout=1" class="btn btn-danger">Logout</a>
                 </div>
             </div>
         </div>
@@ -684,8 +689,8 @@ $csrfToken = Security::generateCSRFToken();
                         <h3>Found <?php echo count($searchResults); ?> Result(s)</h3>
                     </div>
                     <div class="export-buttons">
-                        <a href="?export=csv" class="btn btn-success btn-small">📊 Export CSV</a>
-                        <a href="?export=pdf" class="btn btn-danger btn-small">📄 Export PDF</a>
+                        <a href="?export=csv&search_type=<?php echo urlencode($searchType); ?>&search_term=<?php echo urlencode($searchTerm); ?>" class="btn btn-success btn-small">📊 Export CSV</a>
+                        <a href="?export=pdf&search_type=<?php echo urlencode($searchType); ?>&search_term=<?php echo urlencode($searchTerm); ?>" class="btn btn-danger btn-small">📄 Export PDF</a>
                     </div>
                 </div>
                 
@@ -699,6 +704,7 @@ $csrfToken = Security::generateCSRFToken();
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>Photo</th>
                                 <th>TCAM ID</th>
+                                <th>Source</th>
                                 <th>Name</th>
                                 <th>Mobile</th>
                                 <th>City</th>
@@ -709,18 +715,22 @@ $csrfToken = Security::generateCSRFToken();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($searchResults as $result): ?>
+                            <?php foreach ($searchResults as $result):
+                                $photoFile = preg_replace('#^/?uploads/#', '', $result['photo'] ?? '');
+                                $editPage = $result['source'] === 'booking' ? 'edit-booking.php' : 'edit-registration.php';
+                            ?>
                                 <tr>
-                                    <td><input type="checkbox" name="selected_ids[]" value="<?php echo $result['id']; ?>"></td>
+                                    <td><input type="checkbox" name="selected_ids[]" value="<?php echo htmlspecialchars($result['source']); ?>:<?php echo (int) $result['source_id']; ?>"></td>
                                     <td>
-                                        <?php if ($result['photo']): ?>
-                                            <img src="uploads/<?php echo htmlspecialchars($result['photo']); ?>" 
+                                        <?php if ($photoFile): ?>
+                                            <img src="uploads/<?php echo htmlspecialchars($photoFile); ?>"
                                                  alt="Photo" class="photo">
                                         <?php else: ?>
                                             No Photo
                                         <?php endif; ?>
                                     </td>
                                     <td><strong><?php echo htmlspecialchars($result['reg_id']); ?></strong></td>
+                                    <td><?php echo $result['source'] === 'booking' ? 'Booking' : 'Registration'; ?></td>
                                     <td><?php echo htmlspecialchars($result['name']); ?></td>
                                     <td><?php echo htmlspecialchars($result['mobile']); ?></td>
                                     <td><?php echo htmlspecialchars($result['city']); ?></td>
@@ -729,10 +739,8 @@ $csrfToken = Security::generateCSRFToken();
                                     <td><?php echo htmlspecialchars($result['joined']); ?></td>
                                     <td>
                                         <div class="actions">
-                                            <a href="student-search.php?download=pdf&id=<?php echo $result['id']; ?>" 
-                                               class="btn btn-success btn-small">📄 PDF</a>
-                                            <a href="student-search.php?download=json&id=<?php echo $result['id']; ?>" 
-                                               class="btn btn-primary btn-small">📊 JSON</a>
+                                            <a href="<?php echo $editPage; ?>?id=<?php echo (int) $result['source_id']; ?>" target="_blank"
+                                               class="btn btn-primary btn-small">✏️ Edit</a>
                                         </div>
                                     </td>
                                 </tr>
